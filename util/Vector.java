@@ -1,0 +1,79 @@
+package util;
+
+public class Vector {
+    public double x;
+    public double y;
+
+    public Vector(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public Vector copy(){
+        return new Vector(x, y);
+    }
+
+    public void copyIP(Vector v){
+        x = v.x;
+        y = v.y;
+    }
+
+    public void reverseIP(){
+        x = -x;
+        y = -y;
+    }
+
+    public void addIP(Vector v){
+        x += v.x;
+        y += v.y;
+    }
+
+    public Vector add(Vector v){
+        return new Vector(x + v.x, y + v.y);
+    }
+
+    public void diffIP(Vector v){
+        x -= v.x;
+        y -= v.y;
+    }
+
+    public Vector diff(Vector v){
+        return new Vector(x - v.x, y - v.y);
+    }
+
+    public void multIP(double k){
+        x *= k;
+        y *= k;
+    }
+
+    public Vector mult(double k){
+        return new Vector(x * k, y * k);
+    }
+
+    public double norm(){
+        return Math.hypot(x, y);
+    }
+
+    public void normalizeIP(){
+        multIP(1/norm());
+    }
+
+    public Vector normalized(){
+        return mult(1/norm());
+    }
+
+    public void rotateIP(double alpha){
+        double ca = Math.cos(alpha);
+        double sa = Math.sin(alpha);
+        double x2 = ca * x - sa * y;
+        double y2 = sa * x + ca * y;
+        x = x2;
+        y = y2;
+    }
+
+    public Vector rotate(double alpha){
+        double ca = Math.cos(alpha);
+        double sa = Math.sin(alpha);
+        return new Vector(ca * x - sa * y, sa * x + ca * y);
+    }
+}
