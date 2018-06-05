@@ -17,8 +17,6 @@ public class TransitionArrow extends Group {
     private Line arrowLine1;
     private Line arrowLine2;
 
-    private TransitionArrowStartKeyCircle startKey;
-    private TransitionArrowEndKeyCircle endKey;
     private TransitionArrowControl1KeyCircle control1Key;
     private TransitionArrowControl2KeyCircle control2Key;
     private Line control1Line;
@@ -37,19 +35,13 @@ public class TransitionArrow extends Group {
 
         invisibleLine.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
-        startKey = new TransitionArrowStartKeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
-        endKey = new TransitionArrowEndKeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
         control1Key = new TransitionArrowControl1KeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
         control2Key = new TransitionArrowControl2KeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
         control1Line = new Line();
         control2Line = new Line();
 
-        startKey.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
-        endKey.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
         control1Key.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
         control2Key.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
-        startKey.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
-        endKey.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
         control1Key.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
         control2Key.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
         control1Line.setStroke(TuringMachineDrawer.ARROW_KEY_LINE_COLOR);
@@ -57,8 +49,6 @@ public class TransitionArrow extends Group {
         control1Line.setStrokeWidth(TuringMachineDrawer.ARROW_KEY_LINE_STROKE_WIDTH);
         control2Line.setStrokeWidth(TuringMachineDrawer.ARROW_KEY_LINE_STROKE_WIDTH);
 
-        startKey.setOnMouseDragged(drawer.graphPaneMouseHandler);
-        endKey.setOnMouseDragged(drawer.graphPaneMouseHandler);
         control1Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
         control2Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
 
@@ -87,28 +77,22 @@ public class TransitionArrow extends Group {
         centerLine.startXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
-            startKey.setCenterX(nv);
             control1Line.setStartX(nv);
         });
         centerLine.startYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartY(nv);
-            startKey.setCenterY(nv);
             control1Line.setStartY(nv);
         });
         centerLine.endXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndX(nv);
-            endKey.setCenterX(nv);
             control2Line.setStartX(nv);
-            setArrow();
         });
         centerLine.endYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndY(nv);
-            endKey.setCenterY(nv);
             control2Line.setStartY(nv);
-            setArrow();
         });
         centerLine.controlX1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
@@ -169,19 +153,20 @@ public class TransitionArrow extends Group {
 
         if(visible){
             this.getChildren().addAll(
-                    control1Line, control2Line, startKey, endKey, control1Key, control2Key);
+                    control1Line, control2Line, control1Key, control2Key);
             this.getChildren().removeAll(invisibleLine);
         }
         else{
             this.getChildren().removeAll(
-                    control1Line, control2Line, startKey, endKey, control1Key, control2Key);
+                    control1Line, control2Line, control1Key, control2Key);
             this.getChildren().add(invisibleLine);
         }
-
-
     }
 
-    void setStartPointingAt(double x, double y) {
+    void setControl1(double x, double y) {
+        this.centerLine.setControlX1(x);
+        this.centerLine.setControlY1(y);
+
         Vector v1 = new Vector(input.getCenterX(), input.getCenterY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
@@ -193,7 +178,10 @@ public class TransitionArrow extends Group {
         this.centerLine.setStartY(v2.y);
     }
 
-    void setEndPointingAt(double x, double y) {
+    void setControl2(double x, double y) {
+        this.centerLine.setControlX2(x);
+        this.centerLine.setControlY2(y);
+
         Vector v1 = new Vector(output.getCenterX(), output.getCenterY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
@@ -203,16 +191,6 @@ public class TransitionArrow extends Group {
 
         this.centerLine.setEndX(v2.x);
         this.centerLine.setEndY(v2.y);
-    }
-
-    void setControl1(double x, double y) {
-        this.centerLine.setControlX1(x);
-        this.centerLine.setControlY1(y);
-    }
-
-    void setControl2(double x, double y) {
-        this.centerLine.setControlX2(x);
-        this.centerLine.setControlY2(y);
     }
 
     private void setArrow(){
@@ -246,24 +224,6 @@ class TransitionArrowInvisibleLine extends CubicCurve{
     }
 }
 
-class TransitionArrowStartKeyCircle extends Circle{
-    TransitionArrow transitionArrow;
-
-    public TransitionArrowStartKeyCircle(TransitionArrow transitionArrow, double v) {
-        super(v);
-        this.transitionArrow = transitionArrow;
-    }
-}
-
-class TransitionArrowEndKeyCircle extends Circle{
-
-    TransitionArrow transitionArrow;
-
-    public TransitionArrowEndKeyCircle(TransitionArrow transitionArrow, double v) {
-        super(v);
-        this.transitionArrow = transitionArrow;
-    }
-}
 class TransitionArrowControl1KeyCircle extends Circle{
 
     TransitionArrow transitionArrow;

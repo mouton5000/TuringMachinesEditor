@@ -23,7 +23,6 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
     @Override
     public void handle(Event event) {
-        System.out.println(event.getEventType()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
@@ -84,17 +83,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double x = mouseEvent.getX();
         double y = mouseEvent.getY();
 
-        if(source instanceof TransitionArrowStartKeyCircle){
-            TransitionArrow transitionArrow = ((TransitionArrowStartKeyCircle) source).transitionArrow;
-            transitionArrow.setStartPointingAt(x, y);
-            mouseEvent.consume();
-        }
-        else if(source instanceof TransitionArrowEndKeyCircle){
-            TransitionArrow transitionArrow = ((TransitionArrowEndKeyCircle) source).transitionArrow;
-            transitionArrow.setEndPointingAt(x, y);
-            mouseEvent.consume();
-        }
-        else if(source instanceof TransitionArrowControl1KeyCircle){
+        if(source instanceof TransitionArrowControl1KeyCircle){
             TransitionArrow transitionArrow = ((TransitionArrowControl1KeyCircle) source).transitionArrow;
             transitionArrow.setControl1(x, y);
             mouseEvent.consume();
@@ -117,13 +106,16 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
         if(node instanceof TransitionArrow)
             ((TransitionArrow) node).setKeysVisible(true);
+        else if(node instanceof Circle)
+            ((Circle) node).setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
     }
 
     private void unselect() {
 
         if(selected instanceof TransitionArrow)
             ((TransitionArrow) selected).setKeysVisible(false);
-
+        else if(selected instanceof Circle)
+            ((Circle) selected).setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         selected = null;
     }
 

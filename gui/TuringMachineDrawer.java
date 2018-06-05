@@ -27,6 +27,9 @@ public class TuringMachineDrawer extends Application {
     static final int STATE_RADIUS = 20;
     private static final int GRID_WIDTH = 10;
 
+    static final Color SELECTED_STATE_COLOR = Color.GRAY;
+    static final Color UNSELECTED_STATE_COLOR = Color.BLACK;
+
     static final double ARROW_ANGLE = Math.PI/6;
     static final double ARROW_HITBOX_WIDTH = STATE_RADIUS;
     static final double ARROW_KEY_RADIUS = 8;
@@ -163,7 +166,7 @@ public class TuringMachineDrawer extends Application {
         int yg = gridClosest(y);
 
         Circle circle = new Circle(xg, yg, STATE_RADIUS);
-
+        circle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         int state = machine.addState(name);
         circleToState.put(circle, state);
         circle.setOnMouseClicked(graphPaneMouseHandler);
