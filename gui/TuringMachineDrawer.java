@@ -1,22 +1,19 @@
 package gui;
 
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
-import util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +26,15 @@ public class TuringMachineDrawer extends Application {
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 2.0/3;
     static final int STATE_RADIUS = 20;
     private static final int GRID_WIDTH = 10;
+
     static final double ARROW_ANGLE = Math.PI/6;
     static final double ARROW_HITBOX_WIDTH = STATE_RADIUS;
+    static final double ARROW_KEY_RADIUS = 8;
+    static final Color ARROW_KEY_COLOR = Color.GREENYELLOW;
+    static final Color ARROW_KEY_STROKE_COLOR = Color.BLACK;
+    static final Color ARROW_KEY_LINE_COLOR = Color.GREENYELLOW.darker();
+    static final double ARROW_KEY_LINE_STROKE_WIDTH = 3;
+    static final double ARROW_KEY_DISTANCE_RATIO = 0.25;
 
     private Stage stage;
     private Pane graphPane;
@@ -43,9 +47,10 @@ public class TuringMachineDrawer extends Application {
 
     public TuringMachine machine;
     public Map<Shape, Integer> circleToState;
-    private GraphPaneMouseHandler graphPaneMouseHandler;
-    private TapesPaneMouseHandler tapesPaneMouseHandler;
     private Map<Group, Transition> arrowToTransition;
+
+    GraphPaneMouseHandler graphPaneMouseHandler;
+    private TapesPaneMouseHandler tapesPaneMouseHandler;
 
     @Override
     public void start(Stage stage) throws Exception{
@@ -115,8 +120,6 @@ public class TuringMachineDrawer extends Application {
         tapesPane.setOnMouseClicked(tapesPaneMouseHandler);
         tapesPane.setOnMouseDragged(tapesPaneMouseHandler);
 
-
-
         MenuBar menuBar = new MenuBar();
         menuBar.setMinHeight(MARGIN);
         menuBar.setMaxHeight(MARGIN);
@@ -172,14 +175,13 @@ public class TuringMachineDrawer extends Application {
     public void drawNewTransition(Circle start, Circle end){
         TransitionArrow arrow;
         if(start != end){
-            arrow = new TransitionArrow(start, end);
+            arrow = new TransitionArrow(this, start, end);
         }
         else
             return;
 
         Integer input = circleToState.get(start);
         Integer output = circleToState.get(end);
-        arrow.setOnMouseClicked(graphPaneMouseHandler);
         arrowToTransition.put(arrow, machine.addTransition(input, output));
 
         graphPane.getChildren().add(arrow);

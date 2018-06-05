@@ -50,16 +50,16 @@ public class Vector {
         return new Vector(x * k, y * k);
     }
 
-    public double norm(){
+    public double mag(){
         return Math.hypot(x, y);
     }
 
     public void normalizeIP(){
-        multIP(1/norm());
+        multIP(1/ mag());
     }
 
     public Vector normalized(){
-        return mult(1/norm());
+        return mult(1/ mag());
     }
 
     public void rotateIP(double alpha){
