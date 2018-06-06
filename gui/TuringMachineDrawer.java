@@ -26,20 +26,15 @@ public class TuringMachineDrawer extends Application {
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 2.0/3;
 
     static final int STATE_RADIUS = 20;
-    static final double FINAL_STATE_RADIUS_RATIO = 0.9;
+    static final double FINAL_STATE_RADIUS_RATIO = 0.8;
     static final Color STATE_OUTER_COLOR = Color.BLACK;
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
 
-    static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
-    static final double STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
-    static final double STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
-    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = 100;
-    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH = 200;
-    static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
-    static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
+    static final double OPTION_RECTANGLE_MARGIN = 10;
 
     static final double ARROW_ANGLE = Math.PI/6;
+    static final double ARROW_SIZE = STATE_RADIUS;
     static final double ARROW_HITBOX_WIDTH = STATE_RADIUS * 2.3;
     static final double ARROW_KEY_RADIUS = 8;
     static final Color ARROW_KEY_COLOR = Color.GREENYELLOW;
@@ -49,6 +44,18 @@ public class TuringMachineDrawer extends Application {
     static final double ARROW_KEY_DISTANCE_RATIO = 0.25;
     static final double ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO = 8;
     static final double ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
+
+    static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
+    static final double STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
+    static final double STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
+    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT +
+            4 * STATE_RADIUS + 3 * OPTION_RECTANGLE_MARGIN;
+    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(ARROW_ANGLE)) * STATE_RADIUS +
+            4 * OPTION_RECTANGLE_MARGIN;
+    static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
+    static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
+
+    boolean animating;
 
     private Stage stage;
     private Pane graphPane;
@@ -74,8 +81,8 @@ public class TuringMachineDrawer extends Application {
         HEIGHT = (int) Screen.getPrimary().getVisualBounds().getHeight()* 3 / 4;
 
         this.stage = stage;
-
         this.machine = new TuringMachine();
+        this.animating = false;
 
         reinitDraw();
 
@@ -133,6 +140,7 @@ public class TuringMachineDrawer extends Application {
 
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         graphPane.setOnMouseClicked(graphPaneMouseHandler);
+        graphPane.setOnMouseDragged(graphPaneMouseHandler);
 
         tapesPaneMouseHandler = new TapesPaneMouseHandler(this);
         tapesPane.setOnMouseClicked(tapesPaneMouseHandler);
@@ -199,8 +207,8 @@ public class TuringMachineDrawer extends Application {
     public void moveStateGroup(StateGroup stateGroup, double x, double y){
         int xg = gridClosest(x);
         int yg = gridClosest(y);
-        stateGroup.setCenterX(xg);
-        stateGroup.setCenterY(yg);
+        stateGroup.setLayoutX(xg);
+        stateGroup.setLayoutY(yg);
     }
 
     public void drawNewTransition(StateGroup start, StateGroup end){
@@ -211,6 +219,7 @@ public class TuringMachineDrawer extends Application {
         arrowToTransition.put(arrow, machine.addTransition(input, output));
 
         graphPane.getChildren().add(arrow);
+        arrow.toBack();
     }
 
 

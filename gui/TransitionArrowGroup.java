@@ -69,19 +69,19 @@ public class TransitionArrowGroup extends Group {
         this.getChildren().addAll(centerLine, arrowLine1, arrowLine2, invisibleLine, control1Line, control2Line,
                 control1Key, control2Key, optionRectangle);
 
-        input.centerXProperty().addListener((obs, oldVal, newVal) -> {
+        input.layoutXProperty().addListener((obs, oldVal, newVal) -> {
             centerLine.setStartX(centerLine.getStartX() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlX1(centerLine.getControlX1() + newVal.doubleValue() - oldVal.doubleValue());
         });
-        input.centerYProperty().addListener((obs, oldVal, newVal) -> {
+        input.layoutYProperty().addListener((obs, oldVal, newVal) -> {
             centerLine.setStartY(centerLine.getStartY() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlY1(centerLine.getControlY1() + newVal.doubleValue() - oldVal.doubleValue());
         });
-        output.centerXProperty().addListener((obs, oldVal, newVal) -> {
+        output.layoutXProperty().addListener((obs, oldVal, newVal) -> {
             centerLine.setEndX(centerLine.getEndX() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlX2(centerLine.getControlX2() + newVal.doubleValue() - oldVal.doubleValue());
         });
-        output.centerYProperty().addListener((obs, oldVal, newVal) -> {
+        output.layoutYProperty().addListener((obs, oldVal, newVal) -> {
             centerLine.setEndY(centerLine.getEndY() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlY2(centerLine.getControlY2() + newVal.doubleValue() - oldVal.doubleValue());
         });
@@ -89,46 +89,46 @@ public class TransitionArrowGroup extends Group {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
             control1Line.setStartX(nv);
-            optionRectangle.setCenterX(getCenterX());
+            optionRectangle.setLayoutX(getCenterX());
         });
         centerLine.startYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartY(nv);
             control1Line.setStartY(nv);
-            optionRectangle.setCenterY(getCenterY());
+            optionRectangle.setLayoutY(getCenterY());
         });
         centerLine.endXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndX(nv);
             control2Line.setStartX(nv);
-            optionRectangle.setCenterX(getCenterX());
+            optionRectangle.setLayoutX(getCenterX());
         });
         centerLine.endYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndY(nv);
             control2Line.setStartY(nv);
-            optionRectangle.setCenterY(getCenterY());
+            optionRectangle.setLayoutY(getCenterY());
         });
         centerLine.controlX1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlX1(nv);
             control1Key.setCenterX(nv);
             control1Line.setEndX(nv);
-            optionRectangle.setCenterX(getCenterX());
+            optionRectangle.setLayoutX(getCenterX());
         });
         centerLine.controlY1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlY1(nv);
             control1Key.setCenterY(nv);
             control1Line.setEndY(nv);
-            optionRectangle.setCenterY(getCenterY());
+            optionRectangle.setLayoutY(getCenterY());
         });
         centerLine.controlX2Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlX2(nv);
             control2Key.setCenterX(nv);
             control2Line.setEndX(nv);
-            optionRectangle.setCenterX(getCenterX());
+            optionRectangle.setLayoutX(getCenterX());
             setArrow();
         });
         centerLine.controlY2Property().addListener((obs, oldVal, newVal) -> {
@@ -136,7 +136,7 @@ public class TransitionArrowGroup extends Group {
             invisibleLine.setControlY2(nv);
             control2Key.setCenterY(nv);
             control2Line.setEndY(nv);
-            optionRectangle.setCenterY(getCenterY());
+            optionRectangle.setLayoutY(getCenterY());
             setArrow();
         });
 
@@ -153,8 +153,8 @@ public class TransitionArrowGroup extends Group {
     }
 
     private void computeCoordinatesNotSame(){
-        Vector v1 = new Vector(input.getCenterX(), input.getCenterY());
-        Vector v2 = new Vector(output.getCenterX(), output.getCenterY());
+        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
+        Vector v2 = new Vector(output.getLayoutX(), output.getLayoutY());
         Vector w = v2.diff(v1);
         double dist = w.mag();
 
@@ -177,7 +177,7 @@ public class TransitionArrowGroup extends Group {
     }
 
     private void computeCoordinatesSame(){
-        Vector v1 = new Vector(input.getCenterX(), input.getCenterY());
+        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
 
         Vector w = new Vector(0, TuringMachineDrawer.STATE_RADIUS);
         w.rotateIP(TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE);
@@ -189,7 +189,7 @@ public class TransitionArrowGroup extends Group {
         centerLine.setControlX1(v1.x + w.x);
         centerLine.setControlY1(v1.y + w.y);
 
-        v1.set(input.getCenterX(), input.getCenterY());
+        v1.set(input.getLayoutX(), input.getLayoutY());
         w.set(0, TuringMachineDrawer.STATE_RADIUS);
         w.rotateIP(-TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE);
         v1.addIP(w);
@@ -230,7 +230,7 @@ public class TransitionArrowGroup extends Group {
         this.centerLine.setControlX1(x);
         this.centerLine.setControlY1(y);
 
-        Vector v1 = new Vector(input.getCenterX(), input.getCenterY());
+        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
         v2.normalizeIP();
@@ -245,7 +245,7 @@ public class TransitionArrowGroup extends Group {
         this.centerLine.setControlX2(x);
         this.centerLine.setControlY2(y);
 
-        Vector v1 = new Vector(output.getCenterX(), output.getCenterY());
+        Vector v1 = new Vector(output.getLayoutX(), output.getLayoutY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
         v2.normalizeIP();
@@ -262,7 +262,7 @@ public class TransitionArrowGroup extends Group {
 
         v1.diffIP(v2);
         v1.normalizeIP();
-        v1.multIP(TuringMachineDrawer.STATE_RADIUS);
+        v1.multIP(TuringMachineDrawer.ARROW_SIZE);
 
         v1.rotateIP(TuringMachineDrawer.ARROW_ANGLE);
         arrowLine1.setStartX(v1.x + v2.x);

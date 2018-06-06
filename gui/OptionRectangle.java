@@ -4,7 +4,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
@@ -15,40 +18,48 @@ abstract class OptionRectangle extends Group{
 
     private final TuringMachineDrawer drawer;
 
-    private Rectangle outerRectangle;
-    private WaitingDots waitingDots;
+    private MinimizedOptionRectangle minimizedRectangle;
+    private Rectangle maximizedRectangle;
 
     protected Timeline timeline;
 
     private boolean maximized;
 
-
     OptionRectangle(TuringMachineDrawer drawer){
         this.drawer = drawer;
 
-        outerRectangle = new Rectangle();
-        outerRectangle.setWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH);
-        outerRectangle.setHeight(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-        outerRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
-        outerRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
+        minimizedRectangle = new MinimizedOptionRectangle(this);
+        minimizedRectangle.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
-        waitingDots = new WaitingDots();
+        Rectangle clipRectangle = new Rectangle();
+        this.setClip(clipRectangle);
+
+        maximizedRectangle = new Rectangle();
+
+        maximizedRectangle.xProperty().bindBidirectional(clipRectangle.xProperty());
+        maximizedRectangle.yProperty().bindBidirectional(clipRectangle.yProperty());
+        maximizedRectangle.widthProperty().bindBidirectional(clipRectangle.widthProperty());
+        maximizedRectangle.heightProperty().bindBidirectional(clipRectangle.heightProperty());
+
+        maximizedRectangle.setWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH);
+        maximizedRectangle.setHeight(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        maximizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
+        maximizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
 
         timeline = new Timeline();
+        timeline.setOnFinished(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                drawer.animating = false;
+            }
+        });
 
         maximized = false;
 
-        this.getChildren().addAll(outerRectangle, waitingDots);
-    }
+        this.getChildren().addAll(maximizedRectangle, minimizedRectangle);
 
-    void setCenterX(double centerX){
-        outerRectangle.setX(centerX - outerRectangle.getWidth() / 2);
-        waitingDots.setCenterX(centerX);
-    }
-
-    void setCenterY(double centerY){
-        outerRectangle.setY(centerY - outerRectangle.getHeight() / 2);
-        waitingDots.setCenterY(centerY);
+        maximizedRectangle.setX(- maximizedRectangle.getWidth() / 2);
+        maximizedRectangle.setY(- maximizedRectangle.getHeight() / 2);
     }
 
     boolean isMaximized(){
@@ -57,42 +68,65 @@ abstract class OptionRectangle extends Group{
 
     void maximize(){
         maximized = true;
-        waitingDots.setVisible(false);
         animateSize(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
     }
 
     void minimize(boolean animate){
         maximized = false;
-        waitingDots.setVisible(true);
 
         double width = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH;
         double height = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT;
         if(animate)
             animateSize(width, height);
         else {
-            outerRectangle.setX(outerRectangle.getX() + outerRectangle.getWidth() / 2 - width / 2);
-            outerRectangle.setY(outerRectangle.getY() + outerRectangle.getHeight() / 2 - height / 2);
-            outerRectangle.setWidth(width);
-            outerRectangle.setHeight(height);
+            maximizedRectangle.setX(maximizedRectangle.getX() + maximizedRectangle.getWidth() / 2 - width / 2);
+            maximizedRectangle.setY(maximizedRectangle.getY() + maximizedRectangle.getHeight() - height);
+            maximizedRectangle.setWidth(width);
+            maximizedRectangle.setHeight(height);
         }
     }
 
     private void animateSize(double width, double height){
-
+        if(drawer.animating)
+            return;
+        drawer.animating = true;
         timeline.getKeyFrames().clear();
-        KeyValue kx = new KeyValue(outerRectangle.xProperty(),
-                outerRectangle.getX() + outerRectangle.getWidth() / 2 - width / 2,
+        KeyValue kx = new KeyValue(maximizedRectangle.xProperty(),
+                maximizedRectangle.getX() + maximizedRectangle.getWidth() / 2 - width / 2,
                 Interpolator.EASE_BOTH);
-        KeyValue ky = new KeyValue(outerRectangle.yProperty(),
-                outerRectangle.getY() + outerRectangle.getHeight() / 2 - height / 2,
+        KeyValue ky = new KeyValue(maximizedRectangle.yProperty(),
+                maximizedRectangle.getY() + maximizedRectangle.getHeight() - height,
                 Interpolator.EASE_BOTH);
-        KeyValue kw = new KeyValue(outerRectangle.widthProperty(), width, Interpolator.EASE_BOTH);
-        KeyValue kh = new KeyValue(outerRectangle.heightProperty(), height, Interpolator.EASE_BOTH);
+        KeyValue kw = new KeyValue(maximizedRectangle.widthProperty(), width, Interpolator.EASE_BOTH);
+        KeyValue kh = new KeyValue(maximizedRectangle.heightProperty(), height, Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
                 new KeyFrame(Duration.millis(600), kx, ky, kh, kw)
         );
         timeline.play();
     }
+
+    protected abstract Node associatedNode();
 }
 
+class MinimizedOptionRectangle extends Group{
+    OptionRectangle optionRectangle;
+    private Rectangle minimizedRectangle;
+    private WaitingDots waitingDots;
+
+    MinimizedOptionRectangle(OptionRectangle optionRectangle) {
+        this.optionRectangle = optionRectangle;
+
+        minimizedRectangle = new Rectangle();
+        minimizedRectangle.setWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH);
+        minimizedRectangle.setHeight(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        minimizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
+        minimizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
+
+        waitingDots = new WaitingDots();
+
+        this.getChildren().addAll(minimizedRectangle, waitingDots);
+        minimizedRectangle.setX( - minimizedRectangle.getWidth() / 2);
+        minimizedRectangle.setY( - minimizedRectangle.getHeight() / 2);
+    }
+}

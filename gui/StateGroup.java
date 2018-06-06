@@ -12,22 +12,21 @@ public class StateGroup extends Group {
     private TuringMachineDrawer drawer;
 
     private StateCircle stateCircle;
-    private StateOptionRectangle optionRectangle;
-
-    private CoordinatesProperties coords;
+    StateOptionRectangle optionRectangle;
 
     public StateGroup(TuringMachineDrawer drawer, String name, double x, double y){
         this.drawer = drawer;
-        coords = new CoordinatesProperties();
 
         stateCircle = new StateCircle(this, name);
         stateCircle.setOnMouseClicked(drawer.graphPaneMouseHandler);
         stateCircle.setOnMouseDragged(drawer.graphPaneMouseHandler);
 
         optionRectangle = new StateOptionRectangle(this.drawer, this);
-        optionRectangle.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
         this.getChildren().addAll(stateCircle, optionRectangle);
+
+        optionRectangle.setLayoutY(- TuringMachineDrawer.STATE_RADIUS
+                * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
 
         drawer.moveStateGroup(this, x, y);
         setUnselected();
@@ -43,35 +42,6 @@ public class StateGroup extends Group {
         stateCircle.setUnselected();
         if(!optionRectangle.isMaximized())
             optionRectangle.setVisible(false);
-    }
-
-    DoubleProperty centerXProperty(){
-        return coords.xProperty();
-    }
-
-    DoubleProperty centerYProperty(){
-        return coords.yProperty();
-    }
-
-    double getCenterX() {
-        return coords.getX();
-    }
-
-    void setCenterX(double x) {
-        coords.setX(x);
-        stateCircle.setCenterX(x);
-        optionRectangle.setCenterX(x);
-    }
-
-    double getCenterY() {
-        return coords.getY();
-    }
-
-    void setCenterY(double y) {
-        coords.setY(y);
-        stateCircle.setCenterY(y);
-        optionRectangle.setCenterY(y -
-                TuringMachineDrawer.STATE_RADIUS * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
     }
 }
 
@@ -100,18 +70,8 @@ class StateCircle extends Group{
         label.setAlignment(Pos.CENTER);
 
         this.getChildren().addAll(outerCircle, innerCircle, label);
-    }
-
-    void setCenterX(double x){
-        outerCircle.setCenterX(x);
-        innerCircle.setCenterX(x);
-        label.setLayoutX(x - label.getMinWidth() / 2);
-    }
-
-    void setCenterY(double y){
-        outerCircle.setCenterY(y);
-        innerCircle.setCenterY(y);
-        label.setLayoutY(y - label.getMinHeight() / 2);
+        label.setLayoutX(- label.getMinWidth() / 2);
+        label.setLayoutY(- label.getMinHeight() / 2);
     }
 
     void setSelected(){

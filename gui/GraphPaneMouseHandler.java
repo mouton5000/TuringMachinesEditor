@@ -22,6 +22,8 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
     @Override
     public void handle(Event event) {
+        if(drawer.animating)
+            return;
 
         System.out.println(event.getEventType()+" "+event.getSource().getClass());
 
@@ -36,8 +38,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             return;
 
         Object source = mouseEvent.getSource();
-        int x = (int) mouseEvent.getX();
-        int y = (int) mouseEvent.getY();
+        double x = mouseEvent.getX();
+        double y = mouseEvent.getY();
+
 
         if(source instanceof Pane) {
 
@@ -62,18 +65,16 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
-        else if(source instanceof StateOptionRectangle){
-            StateOptionRectangle stateOptionRectangle = (StateOptionRectangle) source;
-            if(selected == null) {
-                stateOptionRectangle.maximize();
-            }
-            else if(selected == source){
-
+        else if(source instanceof MinimizedOptionRectangle){
+            MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
+            
+            if(selected == source){
+                unselect();
             }
             else {
-                stateOptionRectangle.maximize();
+                minimizedOptionRectangle.optionRectangle.maximize();
                 unselect();
-                select(stateOptionRectangle);
+                select(minimizedOptionRectangle);
             }
 
             mouseEvent.consume();
@@ -89,10 +90,6 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
-        else if(source instanceof TransitionOptionRectangle){
-            ((TransitionOptionRectangle) source).maximize();
-            mouseEvent.consume();
-        }
 
     }
 
@@ -104,21 +101,36 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double x = mouseEvent.getX();
         double y = mouseEvent.getY();
 
-        if(source instanceof TransitionArrowControl1KeyCircle){
+        if(source instanceof Pane){
+            if(selected instanceof StateGroup){
+                StateGroup circle = (StateGroup) selected;
+                if(circle.optionRectangle.isMaximized())
+                    unselect();
+                else
+                    drawer.moveStateGroup(circle, x, y);
+            }
+        }
+       else if(source instanceof TransitionArrowControl1KeyCircle){
+            if(!(selected instanceof TransitionArrowGroup))
+                return;
             TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl1KeyCircle) source).transitionArrowGroup;
             transitionArrowGroup.setControl1(x, y);
             mouseEvent.consume();
         }
         else if(source instanceof TransitionArrowControl2KeyCircle){
+            if(!(selected instanceof TransitionArrowGroup))
+                return;
             TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl2KeyCircle) source).transitionArrowGroup;
             transitionArrowGroup.setControl2(x, y);
             mouseEvent.consume();
         }
         else if(source instanceof StateCircle) {
-            unselect();
-            StateGroup circle = ((StateCircle) source).stateGroup;
-            drawer.moveStateGroup(circle, x, y);
-            mouseEvent.consume();
+            if(selected == source)
+                return;
+            else{
+                unselect();
+                select(((StateCircle) source).stateGroup);
+            }
         }
     }
 
@@ -143,10 +155,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             ((StateGroup) selected).setUnselected();
             selected = null;
         }
-        else if(selected instanceof StateOptionRectangle){
-            StateOptionRectangle stateOptionRectangle = (StateOptionRectangle) selected;
-            stateOptionRectangle.minimize(true);
-            select(stateOptionRectangle.stateGroup);
+        else if(selected instanceof MinimizedOptionRectangle){
+            MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) selected;
+            minimizedOptionRectangle.optionRectangle.minimize(true);
+            select(minimizedOptionRectangle.optionRectangle.associatedNode());
         }
     }
 

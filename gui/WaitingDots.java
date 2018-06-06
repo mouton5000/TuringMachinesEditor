@@ -22,30 +22,10 @@ public class WaitingDots extends Group {
 
         coords = new CoordinatesProperties();
 
-
-        coords.xProperty().addListener((obs, oldVal, newVal) -> {
-            double nv = newVal.doubleValue();
-            left.setCenterX(nv - MARGIN);
-            middle.setCenterX(nv);
-            right.setCenterX(nv + MARGIN);
-        });
-
-        coords.yProperty().addListener((obs, oldVal, newVal) -> {
-            double nv = newVal.doubleValue();
-            left.setCenterY(nv);
-            middle.setCenterY(nv);
-            right.setCenterY(nv);
-        });
-
         this.getChildren().addAll(left, middle, right);
 
-    }
+        left.setCenterX(- MARGIN);
+        right.setCenterX(MARGIN);
 
-    void setCenterX(double centerX){
-        this.coords.setX(centerX);
-    }
-
-    void setCenterY(double centerY){
-        this.coords.setY(centerY);
     }
 }

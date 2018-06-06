@@ -1,5 +1,7 @@
 package gui;
 
+import javafx.scene.Node;
+
 /**
  * Created by dimitri.watel on 06/06/18.
  */
@@ -15,6 +17,8 @@ public class TransitionOptionRectangle extends OptionRectangle {
 
     }
 
-
-
+    @Override
+    protected Node associatedNode() {
+        return transitionArrowGroup;
+    }
 }

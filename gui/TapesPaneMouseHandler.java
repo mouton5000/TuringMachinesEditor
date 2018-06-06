@@ -16,6 +16,9 @@ public class TapesPaneMouseHandler implements EventHandler<MouseEvent> {
 
     @Override
     public void handle(MouseEvent mouseEvent) {
+        if(drawer.animating)
+            return;
+
         int x = (int) mouseEvent.getX();
         int y = (int) mouseEvent.getY();
 
