@@ -1,15 +1,14 @@
 package gui;
 
 import javafx.application.Application;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import turingmachines.Transition;
@@ -23,15 +22,17 @@ public class TuringMachineDrawer extends Application {
     private static final int MARGIN = 30;
     private static int WIDTH;
     private static int HEIGHT;
+    private static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 2.0/3;
+
     static final int STATE_RADIUS = 20;
-    private static final int GRID_WIDTH = 10;
+    public static final double FINAL_STATE_RADIUS_RATIO = 0.9;
 
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
     static final Color UNSELECTED_STATE_COLOR = Color.BLACK;
 
     static final double ARROW_ANGLE = Math.PI/6;
-    static final double ARROW_HITBOX_WIDTH = STATE_RADIUS;
+    static final double ARROW_HITBOX_WIDTH = STATE_RADIUS * 2.3;
     static final double ARROW_KEY_RADIUS = 8;
     static final Color ARROW_KEY_COLOR = Color.GREENYELLOW;
     static final Color ARROW_KEY_STROKE_COLOR = Color.BLACK;
@@ -49,7 +50,7 @@ public class TuringMachineDrawer extends Application {
 
 
     public TuringMachine machine;
-    public Map<Shape, Integer> circleToState;
+    public Map<StateCircle, Integer> circleToState;
     private Map<Group, Transition> arrowToTransition;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
@@ -157,25 +158,39 @@ public class TuringMachineDrawer extends Application {
 
     }
 
-    private int gridClosest(int x){
-        return (x / GRID_WIDTH) * GRID_WIDTH;
+    ReadOnlyDoubleProperty graphWidthProperty(){
+        return graphPane.widthProperty();
     }
 
-    public void drawNewState(int x, int y, String name){
-        int xg = gridClosest(x);
-        int yg = gridClosest(y);
+    ReadOnlyDoubleProperty graphHeightProperty(){
+        return graphPane.heightProperty();
+    }
 
-        Circle circle = new Circle(xg, yg, STATE_RADIUS);
-        circle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+    private int gridClosest(double value){
+        return ((int)value / GRAPH_GRID_WIDTH) * GRAPH_GRID_WIDTH;
+    }
+
+    public void drawNewState(double x, double y, String name){
+
+        StateCircle circle = new StateCircle(this);
+
         int state = machine.addState(name);
         circleToState.put(circle, state);
         circle.setOnMouseClicked(graphPaneMouseHandler);
         circle.setOnMouseDragged(graphPaneMouseHandler);
 
         graphPane.getChildren().add(circle);
+        moveState(circle, x, y);
     }
 
-    public void drawNewTransition(Circle start, Circle end){
+    public void moveState(StateCircle stateCircle, double x, double y){
+        int xg = gridClosest(x);
+        int yg = gridClosest(y);
+        stateCircle.setCenterX(x);
+        stateCircle.setCenterY(y);
+    }
+
+    public void drawNewTransition(StateCircle start, StateCircle end){
         TransitionArrow arrow;
         if(start != end){
             arrow = new TransitionArrow(this, start, end);

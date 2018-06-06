@@ -9,8 +9,8 @@ import util.Vector;
 
 public class TransitionArrow extends Group {
     private final TuringMachineDrawer drawer;
-    private final Circle input;
-    private final Circle output;
+    private final StateCircle input;
+    private final StateCircle output;
 
     private CubicCurve centerLine;
     private TransitionArrowInvisibleLine invisibleLine;
@@ -22,7 +22,7 @@ public class TransitionArrow extends Group {
     private Line control1Line;
     private Line control2Line;
 
-    TransitionArrow(TuringMachineDrawer drawer, Circle input, Circle output) {
+    TransitionArrow(TuringMachineDrawer drawer, StateCircle input, StateCircle output) {
         this.drawer = drawer;
         this.input = input;
         this.output = output;
@@ -30,7 +30,6 @@ public class TransitionArrow extends Group {
         invisibleLine = new TransitionArrowInvisibleLine(this);
         invisibleLine.setStrokeWidth(TuringMachineDrawer.ARROW_HITBOX_WIDTH);
         invisibleLine.setStroke(Color.BLACK);
-        invisibleLine.setStrokeWidth(TuringMachineDrawer.STATE_RADIUS);
         invisibleLine.setOpacity(0);
 
         invisibleLine.setOnMouseClicked(drawer.graphPaneMouseHandler);

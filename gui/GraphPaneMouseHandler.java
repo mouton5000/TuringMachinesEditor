@@ -46,13 +46,13 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 drawer.drawNewState(x, y, "State");
 
         }
-        else if(source instanceof Circle){
+        else if(source instanceof StateCircle){
 
-            Circle circle = (Circle) source;
+            StateCircle circle = (StateCircle) source;
             if(selected == null)
                 select(circle);
-            else if(selected instanceof Circle){
-                drawer.drawNewTransition((Circle) selected, circle);
+            else if(selected instanceof StateCircle){
+                drawer.drawNewTransition((StateCircle) selected, circle);
                 unselect();
             }
             else {
@@ -93,10 +93,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             transitionArrow.setControl2(x, y);
             mouseEvent.consume();
         }
-        else if(source instanceof Circle) {
-            Circle circle = (Circle) source;
-            circle.setCenterX(x);
-            circle.setCenterY(y);
+        else if(source instanceof StateCircle) {
+            StateCircle circle = (StateCircle) source;
+            drawer.moveState(circle, x, y);
             mouseEvent.consume();
         }
     }
