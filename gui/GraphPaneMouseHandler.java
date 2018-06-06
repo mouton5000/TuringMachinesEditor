@@ -5,7 +5,6 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -23,6 +22,8 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
     @Override
     public void handle(Event event) {
+
+        System.out.println(event.getEventType()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
@@ -43,16 +44,16 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             if(selected != null)
                 unselect();
             else
-                drawer.drawNewState(x, y, "State");
+                drawer.drawNewState(x, y);
 
         }
         else if(source instanceof StateCircle){
 
-            StateCircle circle = (StateCircle) source;
+            StateGroup circle = ((StateCircle) source).stateGroup;
             if(selected == null)
                 select(circle);
-            else if(selected instanceof StateCircle){
-                drawer.drawNewTransition((StateCircle) selected, circle);
+            else if(selected instanceof StateGroup){
+                drawer.drawNewTransition((StateGroup) selected, circle);
                 unselect();
             }
             else {
@@ -61,16 +62,36 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
+        else if(source instanceof StateOptionRectangle){
+            StateOptionRectangle stateOptionRectangle = (StateOptionRectangle) source;
+            if(selected == null) {
+                stateOptionRectangle.maximize();
+            }
+            else if(selected == source){
+
+            }
+            else {
+                stateOptionRectangle.maximize();
+                unselect();
+                select(stateOptionRectangle);
+            }
+
+            mouseEvent.consume();
+        }
         else if(source instanceof TransitionArrowInvisibleLine){
-            TransitionArrow transitionArrow = ((TransitionArrowInvisibleLine) source).transitionArrow;
+            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
             if(selected == null){
-                select(transitionArrow);
+                select(transitionArrowGroup);
             }
             else
                 unselect();
 
             mouseEvent.consume();
 
+        }
+        else if(source instanceof TransitionOptionRectangle){
+            ((TransitionOptionRectangle) source).maximize();
+            mouseEvent.consume();
         }
 
     }
@@ -84,18 +105,19 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
         if(source instanceof TransitionArrowControl1KeyCircle){
-            TransitionArrow transitionArrow = ((TransitionArrowControl1KeyCircle) source).transitionArrow;
-            transitionArrow.setControl1(x, y);
+            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl1KeyCircle) source).transitionArrowGroup;
+            transitionArrowGroup.setControl1(x, y);
             mouseEvent.consume();
         }
         else if(source instanceof TransitionArrowControl2KeyCircle){
-            TransitionArrow transitionArrow = ((TransitionArrowControl2KeyCircle) source).transitionArrow;
-            transitionArrow.setControl2(x, y);
+            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl2KeyCircle) source).transitionArrowGroup;
+            transitionArrowGroup.setControl2(x, y);
             mouseEvent.consume();
         }
         else if(source instanceof StateCircle) {
-            StateCircle circle = (StateCircle) source;
-            drawer.moveState(circle, x, y);
+            unselect();
+            StateGroup circle = ((StateCircle) source).stateGroup;
+            drawer.moveStateGroup(circle, x, y);
             mouseEvent.consume();
         }
     }
@@ -103,19 +125,29 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
     private void select(Node node) {
         selected = node;
 
-        if(node instanceof TransitionArrow)
-            ((TransitionArrow) node).setKeysVisible(true);
-        else if(node instanceof Circle)
-            ((Circle) node).setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
+        if(node instanceof TransitionArrowGroup)
+            ((TransitionArrowGroup) node).setSelected(true);
+        else if(node instanceof StateGroup)
+            ((StateGroup) node).setSelected();
     }
 
     private void unselect() {
+        if(selected == null)
+            return;
 
-        if(selected instanceof TransitionArrow)
-            ((TransitionArrow) selected).setKeysVisible(false);
-        else if(selected instanceof Circle)
-            ((Circle) selected).setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
-        selected = null;
+        if(selected instanceof TransitionArrowGroup) {
+            ((TransitionArrowGroup) selected).setSelected(false);
+            selected = null;
+        }
+        else if(selected instanceof StateGroup){
+            ((StateGroup) selected).setUnselected();
+            selected = null;
+        }
+        else if(selected instanceof StateOptionRectangle){
+            StateOptionRectangle stateOptionRectangle = (StateOptionRectangle) selected;
+            stateOptionRectangle.minimize(true);
+            select(stateOptionRectangle.stateGroup);
+        }
     }
 
 

@@ -76,4 +76,9 @@ public class Vector {
         double sa = Math.sin(alpha);
         return new Vector(ca * x - sa * y, sa * x + ca * y);
     }
+
+    public void set(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
 }

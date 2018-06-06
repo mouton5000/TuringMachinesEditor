@@ -26,10 +26,18 @@ public class TuringMachineDrawer extends Application {
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 2.0/3;
 
     static final int STATE_RADIUS = 20;
-    public static final double FINAL_STATE_RADIUS_RATIO = 0.9;
-
+    static final double FINAL_STATE_RADIUS_RATIO = 0.9;
+    static final Color STATE_OUTER_COLOR = Color.BLACK;
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
-    static final Color UNSELECTED_STATE_COLOR = Color.BLACK;
+    static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
+
+    static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
+    static final double STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
+    static final double STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
+    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = 100;
+    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH = 200;
+    static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
+    static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
     static final double ARROW_ANGLE = Math.PI/6;
     static final double ARROW_HITBOX_WIDTH = STATE_RADIUS * 2.3;
@@ -39,6 +47,8 @@ public class TuringMachineDrawer extends Application {
     static final Color ARROW_KEY_LINE_COLOR = Color.GREENYELLOW.darker();
     static final double ARROW_KEY_LINE_STROKE_WIDTH = 3;
     static final double ARROW_KEY_DISTANCE_RATIO = 0.25;
+    static final double ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO = 8;
+    static final double ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
 
     private Stage stage;
     private Pane graphPane;
@@ -50,11 +60,13 @@ public class TuringMachineDrawer extends Application {
 
 
     public TuringMachine machine;
-    public Map<StateCircle, Integer> circleToState;
+    public Map<StateGroup, Integer> circleToState;
     private Map<Group, Transition> arrowToTransition;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     private TapesPaneMouseHandler tapesPaneMouseHandler;
+
+    private char currentDefaultStateChar;
 
     @Override
     public void start(Stage stage) throws Exception{
@@ -80,6 +92,8 @@ public class TuringMachineDrawer extends Application {
 
         circleToState = new HashMap<>();
         arrowToTransition = new HashMap<Group, Transition>();
+
+        currentDefaultStateChar = 'A';
 
         stage.show();
     }
@@ -170,33 +184,27 @@ public class TuringMachineDrawer extends Application {
         return ((int)value / GRAPH_GRID_WIDTH) * GRAPH_GRID_WIDTH;
     }
 
-    public void drawNewState(double x, double y, String name){
+    public void drawNewState(double x, double y){
+        String name = Character.toString(currentDefaultStateChar);
+        currentDefaultStateChar++;
 
-        StateCircle circle = new StateCircle(this);
+        StateGroup circle = new StateGroup(this, name, x, y);
 
         int state = machine.addState(name);
         circleToState.put(circle, state);
-        circle.setOnMouseClicked(graphPaneMouseHandler);
-        circle.setOnMouseDragged(graphPaneMouseHandler);
 
         graphPane.getChildren().add(circle);
-        moveState(circle, x, y);
     }
 
-    public void moveState(StateCircle stateCircle, double x, double y){
+    public void moveStateGroup(StateGroup stateGroup, double x, double y){
         int xg = gridClosest(x);
         int yg = gridClosest(y);
-        stateCircle.setCenterX(x);
-        stateCircle.setCenterY(y);
+        stateGroup.setCenterX(xg);
+        stateGroup.setCenterY(yg);
     }
 
-    public void drawNewTransition(StateCircle start, StateCircle end){
-        TransitionArrow arrow;
-        if(start != end){
-            arrow = new TransitionArrow(this, start, end);
-        }
-        else
-            return;
+    public void drawNewTransition(StateGroup start, StateGroup end){
+        TransitionArrowGroup arrow = new TransitionArrowGroup(this, start, end);
 
         Integer input = circleToState.get(start);
         Integer output = circleToState.get(end);
