@@ -2,11 +2,9 @@ package gui;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import turingmachines.TuringMachine;
 
 /**
  * Created by dimitri.watel on 06/06/18.

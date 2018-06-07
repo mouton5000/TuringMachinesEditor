@@ -1,5 +1,6 @@
 package gui;
 
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -69,22 +70,34 @@ public class TransitionArrowGroup extends Group {
         this.getChildren().addAll(centerLine, arrowLine1, arrowLine2, invisibleLine, control1Line, control2Line,
                 control1Key, control2Key, optionRectangle);
 
-        input.layoutXProperty().addListener((obs, oldVal, newVal) -> {
+        ChangeListener<Number> inputXChangeListener = (obs, oldVal, newVal) -> {
             centerLine.setStartX(centerLine.getStartX() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlX1(centerLine.getControlX1() + newVal.doubleValue() - oldVal.doubleValue());
-        });
-        input.layoutYProperty().addListener((obs, oldVal, newVal) -> {
+        };
+        ChangeListener<Number> inputYChangeListener = (obs, oldVal, newVal) -> {
             centerLine.setStartY(centerLine.getStartY() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlY1(centerLine.getControlY1() + newVal.doubleValue() - oldVal.doubleValue());
-        });
-        output.layoutXProperty().addListener((obs, oldVal, newVal) -> {
+        };
+        ChangeListener<Number> outputXChangeListener = (obs, oldVal, newVal) -> {
             centerLine.setEndX(centerLine.getEndX() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlX2(centerLine.getControlX2() + newVal.doubleValue() - oldVal.doubleValue());
-        });
-        output.layoutYProperty().addListener((obs, oldVal, newVal) -> {
+        };
+        ChangeListener<Number> outputYChangeListener = (obs, oldVal, newVal) -> {
             centerLine.setEndY(centerLine.getEndY() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlY2(centerLine.getControlY2() + newVal.doubleValue() - oldVal.doubleValue());
-        });
+        };
+
+        input.layoutXProperty().addListener(inputXChangeListener);
+        input.translateXProperty().addListener(inputXChangeListener);
+        input.layoutYProperty().addListener(inputYChangeListener);
+        input.translateYProperty().addListener(inputYChangeListener);
+
+        output.layoutXProperty().addListener(outputXChangeListener);
+        output.translateXProperty().addListener(outputXChangeListener);
+        output.layoutYProperty().addListener(outputYChangeListener);
+        output.translateYProperty().addListener(outputYChangeListener);
+
+
         centerLine.startXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
@@ -153,8 +166,10 @@ public class TransitionArrowGroup extends Group {
     }
 
     private void computeCoordinatesNotSame(){
-        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
-        Vector v2 = new Vector(output.getLayoutX(), output.getLayoutY());
+        Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
+                input.getLayoutY() + input.getTranslateY());
+        Vector v2 = new Vector(output.getLayoutX() + output.getTranslateX(),
+                output.getLayoutY() + output.getTranslateY());
         Vector w = v2.diff(v1);
         double dist = w.mag();
 
@@ -177,7 +192,8 @@ public class TransitionArrowGroup extends Group {
     }
 
     private void computeCoordinatesSame(){
-        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
+        Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
+                input.getLayoutY() + input.getTranslateY());
 
         Vector w = new Vector(0, TuringMachineDrawer.STATE_RADIUS);
         w.rotateIP(TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE);
@@ -212,6 +228,7 @@ public class TransitionArrowGroup extends Group {
             optionRectangle.setVisible(true);
             input.toBack();
             output.toBack();
+            this.toFront();
         }
         else{
             invisibleLine.setVisible(true);
@@ -223,6 +240,7 @@ public class TransitionArrowGroup extends Group {
                 optionRectangle.setVisible(false);
             input.toFront();
             output.toFront();
+            this.toBack();
         }
     }
 
@@ -230,7 +248,8 @@ public class TransitionArrowGroup extends Group {
         this.centerLine.setControlX1(x);
         this.centerLine.setControlY1(y);
 
-        Vector v1 = new Vector(input.getLayoutX(), input.getLayoutY());
+        Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
+                input.getLayoutY() + input.getTranslateY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
         v2.normalizeIP();
@@ -245,7 +264,8 @@ public class TransitionArrowGroup extends Group {
         this.centerLine.setControlX2(x);
         this.centerLine.setControlY2(y);
 
-        Vector v1 = new Vector(output.getLayoutX(), output.getLayoutY());
+        Vector v1 = new Vector(output.getLayoutX() + output.getTranslateX(),
+                output.getLayoutY() + output.getTranslateY());
         Vector v2 = new Vector(x, y);
         v2.diffIP(v1);
         v2.normalizeIP();

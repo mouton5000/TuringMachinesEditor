@@ -75,6 +75,9 @@ public class TuringMachineDrawer extends Application {
 
     private char currentDefaultStateChar;
 
+    private double graphOffsetX;
+    private double graphOffsetY;
+
     @Override
     public void start(Stage stage) throws Exception{
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
@@ -101,6 +104,9 @@ public class TuringMachineDrawer extends Application {
         arrowGroupToTransition = new HashMap<Group, Transition>();
 
         currentDefaultStateChar = 'A';
+
+        graphOffsetX = 0;
+        graphOffsetY = 0;
 
         stage.show();
     }
@@ -207,12 +213,23 @@ public class TuringMachineDrawer extends Application {
     void moveStateGroup(StateGroup stateGroup, double x, double y){
         int xg = gridClosest(x);
         int yg = gridClosest(y);
-        stateGroup.setLayoutX(xg);
-        stateGroup.setLayoutY(yg);
+        stateGroup.setLayoutX(xg + graphOffsetX);
+        stateGroup.setLayoutY(yg + graphOffsetY);
+    }
+
+    void translate(Pane pane, double dx, double dy) {
+        if(pane == graphPane){
+            for(StateGroup stateGroup : stateGroupToState.keySet()) {
+                stateGroup.setTranslateX(stateGroup.getTranslateX() + dx);
+                stateGroup.setTranslateY(stateGroup.getTranslateY() + dy);
+            }
+            graphOffsetX = (graphOffsetX + dx) % GRAPH_GRID_WIDTH;
+            graphOffsetY = (graphOffsetY + dy) % GRAPH_GRID_WIDTH;
+        }
     }
 
     void toggleFinal(StateGroup stateGroup){
-//        stateGroup.toggleFinal();
+        stateGroup.toggleFinal();
         Integer state = stateGroupToState.get(stateGroup);
         if(machine.isFinal(state)){
             if(machine.isAccepting(state)){
@@ -228,7 +245,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     public void toggleAccepting(StateGroup stateGroup){
-//        stateGroup.toggleAccepting();
+        stateGroup.toggleAccepting();
         Integer state = stateGroupToState.get(stateGroup);
         if(machine.isAccepting(state))
             machine.unsetFinalState(state);
@@ -237,7 +254,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     public void toggleInitial(StateGroup stateGroup){
-//        stateGroup.toggleInitial();
+        stateGroup.toggleInitial();
         Integer state = stateGroupToState.get(stateGroup);
         if(machine.isInitial(state))
             machine.unsetInitialState(state);
@@ -260,4 +277,5 @@ public class TuringMachineDrawer extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }
