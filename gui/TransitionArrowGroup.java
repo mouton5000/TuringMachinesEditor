@@ -219,8 +219,8 @@ public class TransitionArrowGroup extends Group {
             control1Key.setVisible(false);
             control2Line.setVisible(false);
             control2Key.setVisible(false);
-            optionRectangle.setVisible(false);
-            optionRectangle.minimize(false);
+            if(!optionRectangle.isMaximized())
+                optionRectangle.setVisible(false);
             input.toFront();
             output.toFront();
         }

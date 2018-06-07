@@ -67,8 +67,8 @@ public class TuringMachineDrawer extends Application {
 
 
     public TuringMachine machine;
-    public Map<StateGroup, Integer> circleToState;
-    private Map<Group, Transition> arrowToTransition;
+    public Map<StateGroup, Integer> stateGroupToState;
+    private Map<Group, Transition> arrowGroupToTransition;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     private TapesPaneMouseHandler tapesPaneMouseHandler;
@@ -97,8 +97,8 @@ public class TuringMachineDrawer extends Application {
             resizePanes();
         });
 
-        circleToState = new HashMap<>();
-        arrowToTransition = new HashMap<Group, Transition>();
+        stateGroupToState = new HashMap<>();
+        arrowGroupToTransition = new HashMap<Group, Transition>();
 
         currentDefaultStateChar = 'A';
 
@@ -192,31 +192,65 @@ public class TuringMachineDrawer extends Application {
         return ((int)value / GRAPH_GRID_WIDTH) * GRAPH_GRID_WIDTH;
     }
 
-    public void drawNewState(double x, double y){
+    void drawNewState(double x, double y){
         String name = Character.toString(currentDefaultStateChar);
         currentDefaultStateChar++;
 
         StateGroup circle = new StateGroup(this, name, x, y);
 
         int state = machine.addState(name);
-        circleToState.put(circle, state);
+        stateGroupToState.put(circle, state);
 
         graphPane.getChildren().add(circle);
     }
 
-    public void moveStateGroup(StateGroup stateGroup, double x, double y){
+    void moveStateGroup(StateGroup stateGroup, double x, double y){
         int xg = gridClosest(x);
         int yg = gridClosest(y);
         stateGroup.setLayoutX(xg);
         stateGroup.setLayoutY(yg);
     }
 
-    public void drawNewTransition(StateGroup start, StateGroup end){
+    void toggleFinal(StateGroup stateGroup){
+//        stateGroup.toggleFinal();
+        Integer state = stateGroupToState.get(stateGroup);
+        if(machine.isFinal(state)){
+            if(machine.isAccepting(state)){
+                machine.unsetAcceptingState(state);
+            }
+            else{
+                machine.unsetFinalState(state);
+            }
+        }
+        else{
+            machine.setFinalState(state);
+        }
+    }
+
+    public void toggleAccepting(StateGroup stateGroup){
+//        stateGroup.toggleAccepting();
+        Integer state = stateGroupToState.get(stateGroup);
+        if(machine.isAccepting(state))
+            machine.unsetFinalState(state);
+        else
+            machine.setAcceptingState(state);
+    }
+
+    public void toggleInitial(StateGroup stateGroup){
+//        stateGroup.toggleInitial();
+        Integer state = stateGroupToState.get(stateGroup);
+        if(machine.isInitial(state))
+            machine.unsetInitialState(state);
+        else
+            machine.setInitialState(state);
+    }
+
+    void drawNewTransition(StateGroup start, StateGroup end){
         TransitionArrowGroup arrow = new TransitionArrowGroup(this, start, end);
 
-        Integer input = circleToState.get(start);
-        Integer output = circleToState.get(end);
-        arrowToTransition.put(arrow, machine.addTransition(input, output));
+        Integer input = stateGroupToState.get(start);
+        Integer output = stateGroupToState.get(end);
+        arrowGroupToTransition.put(arrow, machine.addTransition(input, output));
 
         graphPane.getChildren().add(arrow);
         arrow.toBack();

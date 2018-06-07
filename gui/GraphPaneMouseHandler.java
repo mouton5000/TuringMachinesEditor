@@ -65,19 +65,27 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
-        else if(source instanceof MinimizedOptionRectangle){
+        else if(source instanceof MinimizedOptionRectangle ){
             MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
-            
-            if(selected == source){
+
+            if (selected == source) {
                 unselect();
-            }
-            else {
+            } else {
                 minimizedOptionRectangle.optionRectangle.maximize();
                 unselect();
                 select(minimizedOptionRectangle);
             }
 
             mouseEvent.consume();
+        }
+        else if(source instanceof FinalStateOption){
+            drawer.toggleFinal((StateGroup) ((FinalStateOption) source).optionRectangle.associatedNode());
+        }
+        else if(source instanceof AcceptingStateOption){
+            drawer.toggleAccepting((StateGroup) ((AcceptingStateOption) source).optionRectangle.associatedNode());
+        }
+        else if(source instanceof InitialStateOption){
+            drawer.toggleInitial((StateGroup) ((InitialStateOption) source).optionRectangle.associatedNode());
         }
         else if(source instanceof TransitionArrowInvisibleLine){
             TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
@@ -125,11 +133,14 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof StateCircle) {
-            if(selected == source)
+            StateGroup stateGroup = ((StateCircle) source).stateGroup;
+            if(selected == stateGroup)
                 return;
+            else if(selected == null){
+                select(((StateCircle) source).stateGroup);
+            }
             else{
                 unselect();
-                select(((StateCircle) source).stateGroup);
             }
         }
     }
