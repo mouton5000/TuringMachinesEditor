@@ -1,8 +1,10 @@
 package turingmachines;
 
+import util.Pair;
 import util.Subscriber;
 
 import java.util.*;
+import java.util.concurrent.locks.Condition;
 
 public class TuringMachine {
 
@@ -29,7 +31,7 @@ public class TuringMachine {
     private List<Tape> tapes;
 
     // State Register
-    private Integer initialState;
+    private Set<Integer> initialStates;
     private Integer currentState;
 
     // Alphabet
@@ -42,6 +44,7 @@ public class TuringMachine {
         outputTransitions = new ArrayList<>();
         statesNames = new ArrayList<>();
 
+        initialStates = new HashSet<>();
         finalStates = new ArrayList<>();
         acceptingStates = new ArrayList<>();
 
@@ -90,9 +93,15 @@ public class TuringMachine {
         acceptingStates.remove(state);
     }
 
-    public void setInitialState(Integer initialState) {
-        this.initialState = initialState;
+    public void setInitialState(Integer state) {
+        initialStates.add(state);
     }
+
+    public void unsetInitialState(Integer state) {
+        initialStates.remove(state);
+    }
+
+    public boolean isInitial(Integer state){ return initialStates.contains(state);}
 
     public Integer getCurrentState() {
         return currentState;
@@ -104,8 +113,13 @@ public class TuringMachine {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED, this, currentState);
     }
 
-    public void reinit(){
-        setCurrentState(initialState, false);
+    public void reinitDeterministic(){
+        setCurrentState(initialStates.iterator().next(), false);
+        for(Tape tape: tapes)
+            tape.reinit();
+    }
+
+    public void reinitNonDeterministic(){
         for(Tape tape: tapes)
             tape.reinit();
     }
@@ -181,7 +195,7 @@ public class TuringMachine {
 
     private void executeDeterministic(){
         Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
-        reinit();
+        reinitDeterministic();
         while(!isTerminated()) {
             tickDeterministic();
         }
@@ -235,12 +249,12 @@ public class TuringMachine {
         return children;
     }
 
-    private Iterator<Transition> exploreNonDeterministic(Configuration initialConfiguration){
+    private Pair<Configuration, Iterator<Transition>> exploreNonDeterministic(Set<Configuration> initialConfigurations){
         LinkedList<Configuration> toExplore = new LinkedList<>();
         Map<Configuration, Configuration> fathers = new HashMap<>();
         Map<Configuration, Transition> arcFathers = new HashMap<>();
 
-        toExplore.add(initialConfiguration);
+        toExplore.addAll(initialConfigurations);
         Configuration configuration = null;
 
         Configuration firstFinalConfiguration = null;
@@ -277,28 +291,36 @@ public class TuringMachine {
                 configuration = firstFinalConfiguration;
         }
         LinkedList<Transition> toReturn = new LinkedList<>();
-        while(configuration != initialConfiguration){
+        while(!initialConfigurations.contains(configuration)){
             toReturn.addFirst(arcFathers.get(configuration));
             configuration = fathers.get(configuration);
         }
-        return toReturn.iterator();
+        return new Pair<>(configuration, toReturn.iterator());
 
     }
 
     private void executeNonDeterministic(){
         Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
-        reinit();
+        reinitNonDeterministic();
 
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START, this);
 
-        Configuration initialConfiguration = saveConfiguration();
-        Iterator<Transition> it = this.exploreNonDeterministic(initialConfiguration);
+        HashSet<Configuration> initialConfigurations = new HashSet<>();
+
+        for(Integer state : initialStates) {
+            this.setCurrentState(state, false);
+            initialConfigurations.add(saveConfiguration());
+        }
+        Pair<Configuration, Iterator<Transition>> pair = this.exploreNonDeterministic(initialConfigurations);
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END, this);
 
-        if(it == null)
+        if(pair == null)
             return;
+
+        Configuration initialConfiguration = pair.first;
+        Iterator<Transition> it = pair.second;
 
         this.loadConfiguration(initialConfiguration);
         while(it.hasNext()){
@@ -311,6 +333,8 @@ public class TuringMachine {
     }
 
     public void execute(){
+        if(!isValid())
+            return;
         if(isDeterministic())
             executeDeterministic();
         else
@@ -375,11 +399,23 @@ public class TuringMachine {
     }
 
     public boolean isDeterministic(){
+        if(initialStates.size() > 1)
+            return false;
         for(int state = 0; state < nbStates; state++){
             if(!isDeterministic(state))
                 return false;
         }
         return true;
+    }
+
+    public boolean isValid(){
+        if(initialStates.size() == 0)
+            return false;
+        for(int state = 0; state < nbStates; state++){
+            if(isFinal(state))
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -472,7 +508,7 @@ public class TuringMachine {
 
         t.setAcceptingState(y);
         t.setFinalState(n);
-        t.reinit();
+        t.reinitDeterministic();
         Subscriber s = new Subscriber() {
             @Override
             public void read(String msg, Object... parameters) {
@@ -552,6 +588,7 @@ public class TuringMachine {
         t4.addReadSymbol(new ReadSymbol(tape1, 0, "0"));
 
         t.setInitialState(a);
+        t.setInitialState(y);
         t.setAcceptingState(y);
         t.setFinalState(n);
 
