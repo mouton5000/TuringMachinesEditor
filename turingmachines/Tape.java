@@ -2,10 +2,7 @@ package turingmachines;
 
 import util.Subscriber;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Tape{
 
@@ -101,6 +98,14 @@ public class Tape{
             if (tapeLeftBound != null && tapeLeftBound > x)
                 initialHeadsX.set(i, tapeLeftBound);
         }
+
+        Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<Integer, Map<Integer, String>> entry = it.next();
+            Integer x = entry.getKey();
+            if(left != null && x < left)
+                it.remove();
+        }
     }
 
     public void setRightBound(Integer right){
@@ -114,6 +119,14 @@ public class Tape{
             if (tapeRightBound != null && tapeRightBound < x)
                 initialHeadsX.set(i, tapeRightBound);
         }
+
+        Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<Integer, Map<Integer, String>> entry = it.next();
+            Integer x = entry.getKey();
+            if(right != null && x > right)
+                it.remove();
+        }
     }
 
     public void setBottomBound(Integer bottom){
@@ -123,9 +136,23 @@ public class Tape{
             tapeBottomBound = bottom;
 
         for(int i = 0; i < nbHeads; i++) {
-            int x = initialHeadsY.get(i);
-            if (tapeBottomBound != null && tapeBottomBound > x)
+            int y = initialHeadsY.get(i);
+            if (tapeBottomBound != null && tapeBottomBound > y)
                 initialHeadsY.set(i, tapeBottomBound);
+        }
+
+        Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
+        while(it1.hasNext()){
+            Map.Entry<Integer, Map<Integer, String>> entry1 = it1.next();
+            Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
+            while (it2.hasNext()) {
+                Map.Entry<Integer, String> entry2 = it2.next();
+                Integer y = entry2.getKey();
+                if (bottom != null && y < bottom)
+                    it2.remove();
+            }
+            if(entry1.getValue().isEmpty())
+                it1.remove();
         }
     }
 
@@ -139,6 +166,20 @@ public class Tape{
             int x = initialHeadsY.get(i);
             if (tapeTopBound != null && tapeTopBound < x)
                 initialHeadsY.set(i, tapeTopBound);
+        }
+
+        Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
+        while(it1.hasNext()){
+            Map.Entry<Integer, Map<Integer, String>> entry1 = it1.next();
+            Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
+            while (it2.hasNext()) {
+                Map.Entry<Integer, String> entry2 = it2.next();
+                Integer y = entry2.getKey();
+                if (top != null && y > top)
+                    it2.remove();
+            }
+            if(entry1.getValue().isEmpty())
+                it1.remove();
         }
     }
 
