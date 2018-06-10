@@ -2,11 +2,11 @@ package gui;
 
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
@@ -19,6 +19,7 @@ import java.util.Map;
 
 public class TuringMachineDrawer extends Application {
 
+    private static final int SEPARATOR_WIDTH = 2;
     private static final int MARGIN = 30;
     private static int WIDTH;
     private static int HEIGHT;
@@ -55,11 +56,14 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
+    static final double TAPE_CELL_WIDTH = 50;
+
+
     boolean animating;
 
     private Stage stage;
     private Pane graphPane;
-    private Pane tapesPane;
+    private HBox tapesPane;
 
     public MenuItem newButton;
     public MenuItem saveButton;
@@ -71,7 +75,7 @@ public class TuringMachineDrawer extends Application {
     private Map<Group, Transition> arrowGroupToTransition;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
-    private TapesPaneMouseHandler tapesPaneMouseHandler;
+    TapesMouseHandler tapesMouseHandler;
 
     private char currentDefaultStateChar;
 
@@ -89,13 +93,12 @@ public class TuringMachineDrawer extends Application {
 
         reinitDraw();
 
-
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
+        this.stage.getScene().widthProperty().addListener((obs, oldVal, newVal) -> {
             WIDTH = newVal.intValue();
             resizePanes();
         });
 
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
+        this.stage.getScene().heightProperty().addListener((obs, oldVal, newVal) -> {
             HEIGHT = newVal.intValue();
             resizePanes();
         });
@@ -114,18 +117,18 @@ public class TuringMachineDrawer extends Application {
     private void resizePanes(){
         graphPane.setMinWidth(WIDTH);
         graphPane.setMaxWidth(WIDTH);
-        graphPane.setMinHeight((HEIGHT - MARGIN) * RATIO_HEIGHT_GRAPH_TAPES);
-        graphPane.setMaxHeight((HEIGHT - MARGIN) * RATIO_HEIGHT_GRAPH_TAPES);
+        graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
+        graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
 
         tapesPane.setMinWidth(WIDTH);
         tapesPane.setMaxWidth(WIDTH);
-        tapesPane.setMinHeight((HEIGHT - MARGIN) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-        tapesPane.setMaxHeight((HEIGHT - MARGIN) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
     }
 
     public void reinitDraw(){
         graphPane = new Pane();
-        tapesPane = new Pane();
+        tapesPane = new HBox();
 
         Rectangle graphClip = new Rectangle();
         Rectangle tapesClip = new Rectangle();
@@ -148,9 +151,22 @@ public class TuringMachineDrawer extends Application {
         graphPane.setOnMouseClicked(graphPaneMouseHandler);
         graphPane.setOnMouseDragged(graphPaneMouseHandler);
 
-        tapesPaneMouseHandler = new TapesPaneMouseHandler(this);
-        tapesPane.setOnMouseClicked(tapesPaneMouseHandler);
-        tapesPane.setOnMouseDragged(tapesPaneMouseHandler);
+        tapesMouseHandler = new TapesMouseHandler(this);
+        tapesPane.setOnMouseClicked(tapesMouseHandler);
+        tapesPane.setOnMouseDragged(tapesMouseHandler);
+        tapesPane.setAlignment(Pos.CENTER);
+
+        TapePane tapePane = new TapePane(this, tapesPane);
+        tapesPane.getChildren().add(tapePane);
+        tapesPane.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
+            double width = newVal.getWidth();
+            double height = newVal.getHeight();
+            tapePane.setMinHeight(height);
+            tapePane.setMaxHeight(height);
+            tapePane.setMinWidth(width);
+            tapePane.setMaxWidth(width);
+        });
+
 
         MenuBar menuBar = new MenuBar();
         menuBar.setMinHeight(MARGIN);
@@ -174,6 +190,8 @@ public class TuringMachineDrawer extends Application {
                 saveButton, loadButton);
 
         Separator separator = new Separator();
+        separator.setMaxHeight(SEPARATOR_WIDTH);
+        separator.setMinHeight(SEPARATOR_WIDTH);
 
         VBox box = new VBox();
         box.getChildren().addAll(menuBar, graphPane, separator, tapesPane);
@@ -181,17 +199,15 @@ public class TuringMachineDrawer extends Application {
         Scene scene = new Scene(box, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
-        stage.setWidth(WIDTH);
-        stage.setHeight(HEIGHT);
 
     }
 
-    ReadOnlyDoubleProperty graphWidthProperty(){
-        return graphPane.widthProperty();
+    ReadOnlyDoubleProperty screenWidthProperty(){
+        return this.stage.widthProperty();
     }
 
-    ReadOnlyDoubleProperty graphHeightProperty(){
-        return graphPane.heightProperty();
+    ReadOnlyDoubleProperty screenHeightProperty(){
+        return this.stage.heightProperty();
     }
 
     private int gridClosest(double value){

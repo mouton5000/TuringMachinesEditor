@@ -28,7 +28,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         if(drawer.animating)
             return;
 
-        System.out.println(event.getEventType()+" "+event.getSource().getClass()+" "+selected+" "+dragX+" "+dragY);
+        System.out.println(event.getEventType()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
