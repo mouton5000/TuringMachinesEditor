@@ -41,22 +41,6 @@ class TapePane extends Pane {
             tapeLinesGroup.setLayoutY(height / 2);
             tapeLinesGroup.checkLinesAndColumns(width, height);
         });
-
-//        this.maxWidthProperty().addListener((obs, oldVal, newVal) -> {
-//            double width = this.getMaxWidth();
-//            double height = this.getMaxHeight();
-//            tapeLinesGroup.setLayoutX(width / 2);
-//            tapeLinesGroup.setLayoutY(height / 2);
-//            tapeLinesGroup.checkLinesAndColumns(width, height);
-//        });
-//
-//        this.maxHeightProperty().addListener((obs, oldVal, newVal) -> {
-//            double width = this.getMaxWidth();
-//            double height = this.getMaxHeight();
-//            tapeLinesGroup.setLayoutX(width / 2);
-//            tapeLinesGroup.setLayoutY(height / 2);
-//            tapeLinesGroup.checkLinesAndColumns(width, height);
-//        });
     }
 
     void translate(double dx, double dy){
@@ -67,10 +51,8 @@ class TapePane extends Pane {
         tapeLinesGroup.setTranslateX(tapeLinesGroup.getTranslateX() + dx);
         tapeLinesGroup.setTranslateY(tapeLinesGroup.getTranslateY() + dy);
 
-        double width = Math.abs(offsetX) + this.getMaxWidth() / 2;
-        double height = Math.abs(offsetY) + this.getMaxHeight() / 2;
-
-        System.out.println(width + " " + height);
+        double width = Math.max(Math.abs(2 * offsetX - this.getMaxWidth()), 2 * offsetX + this.getMaxWidth());
+        double height = Math.max(Math.abs(2 * offsetX - this.getMaxHeight()), 2 * offsetY + this.getMaxHeight());
 
         tapeLinesGroup.checkLinesAndColumns(width, height);
     }
@@ -135,6 +117,7 @@ class TapeLinesGroup extends Group{
     }
 
     void checkLinesAndColumns(double width, double height) {
+        System.out.println(width + " " + height+" // "+maxWidth+" "+maxHeight);
         ObservableList<Node> children = this.getChildren();
 
         int nbLines = 2 * (int)((height / (TuringMachineDrawer.TAPE_CELL_WIDTH * 2) - 0.5) + 2);
