@@ -32,16 +32,15 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
+        else if(event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+            this.handlePressEvent((MouseEvent) event);
+        }
         else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED)
             this.handleDragEvent((MouseEvent) event);
     }
 
     public void handleClickedEvent(MouseEvent mouseEvent) {
         if(!mouseEvent.isStillSincePress()) {
-            if(dragX != null){
-                dragX = null;
-                dragY = null;
-            }
             return;
         }
 
@@ -113,6 +112,12 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
         }
 
+    }
+
+    private void handlePressEvent(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        dragY = mouseEvent.getY();
+        mouseEvent.consume();
     }
 
     public void handleDragEvent(MouseEvent mouseEvent) {

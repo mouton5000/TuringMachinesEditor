@@ -7,7 +7,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Screen;
 
 import java.util.ArrayList;
 
@@ -24,10 +23,13 @@ class TapePane extends Pane {
     private double offsetX;
     private double offsetY;
 
+    CellOptionRectangle cellOptionRectangle;
+
     TapePane(TuringMachineDrawer drawer, HBox tapeHBox){
         this.drawer = drawer;
         this.tapeHBox = tapeHBox;
 
+        this.setOnMousePressed(drawer.tapesMouseHandler);
         this.setOnMouseClicked(drawer.tapesMouseHandler);
         this.setOnMouseDragged(drawer.tapesMouseHandler);
 
@@ -41,6 +43,8 @@ class TapePane extends Pane {
             tapeLinesGroup.setLayoutY(height / 2);
             tapeLinesGroup.checkLinesAndColumns(width, height);
         });
+
+        cellOptionRectangle = new CellOptionRectangle(drawer);
     }
 
     void translate(double dx, double dy){
@@ -55,6 +59,40 @@ class TapePane extends Pane {
         double height = Math.max(Math.abs(2 * offsetX - this.getMaxHeight()), 2 * offsetY + this.getMaxHeight());
 
         tapeLinesGroup.checkLinesAndColumns(width, height);
+    }
+
+    Integer getColumn(double x){
+        x += offsetX;
+        x -= this.getMaxWidth() / 2;
+        x += TuringMachineDrawer.TAPE_CELL_WIDTH / 2;
+        if(x < 0)
+            x -= TuringMachineDrawer.TAPE_CELL_WIDTH;
+        int column = (int) (x / TuringMachineDrawer.TAPE_CELL_WIDTH);
+        return (tapeLinesGroup.checkColumn(column))?column:null;
+    }
+
+    Integer getLine(double y){
+        y += offsetY;
+        y -= this.getMaxHeight() / 2;
+        y += TuringMachineDrawer.TAPE_CELL_WIDTH / 2;
+        if(y < 0)
+            y -= TuringMachineDrawer.TAPE_CELL_WIDTH;
+        int line = (int) (y / TuringMachineDrawer.TAPE_CELL_WIDTH);
+        return (tapeLinesGroup.checkLine(line))?line:null;
+    }
+
+    double getX(int column){
+        return column * TuringMachineDrawer.TAPE_CELL_WIDTH;
+    }
+
+    double getY(int line){
+        return line * TuringMachineDrawer.TAPE_CELL_WIDTH;
+    }
+
+    public void openCellOptionRectangle(int line, int column) {
+        cellOptionRectangle.setLayoutX(this.getX(column));
+        cellOptionRectangle.setLayoutX(this.getY(line));
+        cellOptionRectangle.maximize();
     }
 }
 
@@ -92,32 +130,59 @@ class TapeLinesGroup extends Group{
         this.bottom = bottom;
         int zeroIndex = lines.size() / 2;
         for (int i = 0; i <= zeroIndex - 1; i++)
-            lines.get(i).setVisible(bottom == null || zeroIndex - 1 - i <= bottom);
+            lines.get(i).setVisible(checkBottom(zeroIndex - 1 - i));
     }
 
     void setTop(Integer top){
         this.top = top;
         int zeroIndex = lines.size() / 2;
         for (int i = zeroIndex; i < lines.size(); i++)
-            lines.get(i).setVisible(top == null || i - zeroIndex <= top);
+            lines.get(i).setVisible(checkTop(i - zeroIndex));
     }
 
     void setLeft(Integer left){
         this.left = left;
         int zeroIndex = columns.size() / 2;
         for (int i = 0; i <= zeroIndex - 1; i++)
-            columns.get(i).setVisible(left == null || zeroIndex - 1 - i <= left);
+            columns.get(i).setVisible(checkLeft(zeroIndex - 1 - i));
     }
 
     void setRight(Integer right){
         this.right = right;
         int zeroIndex = columns.size() / 2;
         for (int i = zeroIndex; i < columns.size(); i++)
-            columns.get(i).setVisible(right == null || i - zeroIndex <= right);
+            columns.get(i).setVisible(checkRight(i - zeroIndex));
+    }
+
+    boolean checkColumn(int i){
+        return checkLeft(-i) && checkRight(i);
+    }
+
+    boolean checkLine(int i){
+        return checkBottom(-i) && checkTop(i);
+    }
+
+    private boolean checkBottom(int i){
+        return checkDirection(i, bottom);
+    }
+
+    private boolean checkTop(int i){
+        return checkDirection(i, top);
+    }
+
+    private boolean checkLeft(int i){
+        return checkDirection(i, left);
+    }
+
+    private boolean checkRight(int i){
+        return checkDirection(i, right);
+    }
+
+    private boolean checkDirection(int i, Integer directionBound){
+        return directionBound == null || i <= directionBound;
     }
 
     void checkLinesAndColumns(double width, double height) {
-        System.out.println(width + " " + height+" // "+maxWidth+" "+maxHeight);
         ObservableList<Node> children = this.getChildren();
 
         int nbLines = 2 * (int)((height / (TuringMachineDrawer.TAPE_CELL_WIDTH * 2) - 0.5) + 2);
@@ -143,6 +208,9 @@ class TapeLinesGroup extends Group{
                 Line lineNeg = new Line(-TuringMachineDrawer.TAPE_CELL_WIDTH - width / 2, -h,
                         width / 2 + TuringMachineDrawer.TAPE_CELL_WIDTH, -h);
 
+                linePos.setVisible(checkTop(i));
+                lineNeg.setVisible(checkBottom(i));
+
                 lines.add(linePos);
                 lines.add(0, lineNeg);
                 children.add(lineNeg);
@@ -164,6 +232,9 @@ class TapeLinesGroup extends Group{
                 w = TuringMachineDrawer.TAPE_CELL_WIDTH * (0.5 + i);
                 Line columnPos = new Line(w, -h, w, h);
                 Line columnNeg = new Line(-w, -h, -w, h);
+
+                columnPos.setVisible(checkRight(i));
+                columnNeg.setVisible(checkLeft(i));
 
                 columns.add(columnPos);
                 columns.add(0, columnNeg);

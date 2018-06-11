@@ -149,6 +149,7 @@ public class TuringMachineDrawer extends Application {
 
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         graphPane.setOnMouseClicked(graphPaneMouseHandler);
+        graphPane.setOnMousePressed(graphPaneMouseHandler);
         graphPane.setOnMouseDragged(graphPaneMouseHandler);
 
         tapesMouseHandler = new TapesMouseHandler(this);
