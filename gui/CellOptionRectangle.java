@@ -7,12 +7,15 @@ import javafx.scene.Node;
  */
 public class CellOptionRectangle extends OptionRectangle{
 
-    CellOptionRectangle(TuringMachineDrawer drawer) {
-        super(drawer);
+    final TapePane tapePane;
+
+    CellOptionRectangle(TuringMachineDrawer drawer, TapePane tapePane) {
+        super(drawer, drawer.tapesMouseHandler);
+        this.tapePane = tapePane;
     }
 
     @Override
     protected Node associatedNode() {
-        return null;
+        return tapePane;
     }
 }

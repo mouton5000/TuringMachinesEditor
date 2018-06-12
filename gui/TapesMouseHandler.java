@@ -36,16 +36,31 @@ public class TapesMouseHandler implements EventHandler<Event> {
     }
 
     private void handleClickedEvent(MouseEvent mouseEvent){
+        if(!mouseEvent.isStillSincePress()) {
+            return;
+        }
+
         double x = mouseEvent.getX();
         double y = mouseEvent.getY();
 
         Object source = mouseEvent.getSource();
         if(source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
-            Integer line = tapePane.getLine(y);
-            Integer column = tapePane.getColumn(x);
-            if(line != null && column != null)
-                tapePane.openCellOptionRectangle(line, column);
+
+            if(tapePane.cellOptionRectangle.isMaximized())
+                tapePane.closeCellOptionRectangle();
+            else {
+                Integer line = tapePane.getLine(y);
+                Integer column = tapePane.getColumn(x);
+                if (line != null && column != null)
+                    tapePane.openCellOptionRectangle(line, column);
+            }
+
+            mouseEvent.consume();
+        }
+        else if(source instanceof MinimizedOptionRectangle){
+            TapePane tapePane = (TapePane)((MinimizedOptionRectangle) source).optionRectangle.associatedNode();
+            tapePane.closeCellOptionRectangle();
             mouseEvent.consume();
         }
     }

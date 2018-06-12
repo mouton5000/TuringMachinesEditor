@@ -57,6 +57,10 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
     static final double TAPE_CELL_WIDTH = 50;
+    static final Integer TAPE_DEFAULT_TOP = 0;
+    static final Integer TAPE_DEFAULT_BOTTOM = 0;
+    static final Integer TAPE_DEFAULT_LEFT = null;
+    static final Integer TAPE_DEFAULT_RIGHT = null;
 
 
     boolean animating;

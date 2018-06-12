@@ -14,7 +14,7 @@ class StateOptionRectangle extends OptionRectangle{
     private StateGroup stateGroup;
 
     StateOptionRectangle(TuringMachineDrawer drawer, StateGroup stateGroup) {
-        super(drawer);
+        super(drawer, drawer.graphPaneMouseHandler);
         this.stateGroup = stateGroup;
 
         FinalStateOption finalStateOption = new FinalStateOption(this);
@@ -24,6 +24,7 @@ class StateOptionRectangle extends OptionRectangle{
         ImageView editStateNameOptionIcon = new EditStateNameOptionIcon(this,"./images/cursor_icon.png");
         editStateNameOptionIcon.setPreserveRatio(true);
         editStateNameOptionIcon.setFitHeight(TuringMachineDrawer.STATE_RADIUS * 2);
+
 
         finalStateOption.setOnMouseClicked(drawer.graphPaneMouseHandler);
         acceptingStateOption.setOnMouseClicked(drawer.graphPaneMouseHandler);

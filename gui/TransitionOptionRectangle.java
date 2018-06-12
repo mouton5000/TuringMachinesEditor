@@ -10,7 +10,7 @@ public class TransitionOptionRectangle extends OptionRectangle {
     TransitionArrowGroup transitionArrowGroup;
 
     public TransitionOptionRectangle(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
-        super(drawer);
+        super(drawer, drawer.graphPaneMouseHandler);
         this.transitionArrowGroup = transitionArrowGroup;
 
 

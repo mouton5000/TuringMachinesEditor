@@ -5,9 +5,11 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
@@ -21,15 +23,15 @@ abstract class OptionRectangle extends Group{
     private MinimizedOptionRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;
 
-    protected Timeline timeline;
+    Timeline timeline;
 
     private boolean maximized;
 
-    OptionRectangle(TuringMachineDrawer drawer){
+    OptionRectangle(TuringMachineDrawer drawer, EventHandler<Event> mouseHandler){
         this.drawer = drawer;
 
         minimizedRectangle = new MinimizedOptionRectangle(this);
-        minimizedRectangle.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        minimizedRectangle.setOnMouseClicked(mouseHandler);
 
         Rectangle clipRectangle = new Rectangle();
         this.setClip(clipRectangle);
@@ -47,12 +49,7 @@ abstract class OptionRectangle extends Group{
         maximizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
 
         timeline = new Timeline();
-        timeline.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                drawer.animating = false;
-            }
-        });
+        timeline.setOnFinished(actionEvent -> drawer.animating = false);
 
         maximized = false;
 
