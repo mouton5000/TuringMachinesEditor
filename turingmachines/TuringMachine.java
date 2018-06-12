@@ -54,6 +54,9 @@ public class TuringMachine {
         addTape();
 
         symbols = new ArrayList<>();
+        symbols.add("B");
+        symbols.add("0");
+        symbols.add("1");
     }
 
     public Transition addTransition(Integer input, Integer output){

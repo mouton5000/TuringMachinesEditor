@@ -62,6 +62,10 @@ public class TuringMachineDrawer extends Application {
     static final Integer TAPE_DEFAULT_LEFT = null;
     static final Integer TAPE_DEFAULT_RIGHT = null;
 
+    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 17;
+    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING = 15;
+    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
+    static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
     boolean animating;
 

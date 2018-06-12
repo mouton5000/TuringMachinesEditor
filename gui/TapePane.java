@@ -17,8 +17,8 @@ import java.util.ArrayList;
  */
 class TapePane extends Pane {
 
-    private TuringMachineDrawer drawer;
-    private HBox tapeHBox;
+    TuringMachineDrawer drawer;
+    HBox tapeHBox;
 
     TapeLinesGroup tapeLinesGroup;
 
