@@ -24,7 +24,7 @@ public class TuringMachineDrawer extends Application {
     private static int WIDTH;
     private static int HEIGHT;
     private static final int GRAPH_GRID_WIDTH = 10;
-    private static final double RATIO_HEIGHT_GRAPH_TAPES = 2.0/3;
+    private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
 
     static final int STATE_RADIUS = 20;
     static final double FINAL_STATE_RADIUS_RATIO = 0.8;

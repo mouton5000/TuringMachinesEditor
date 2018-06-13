@@ -2,6 +2,7 @@ package gui;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -23,7 +24,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
         if(drawer.animating)
             return;
 
-//        System.out.println(event.getEventType()+" "+event.getClass()+" "+event.getSource().getClass());
+        System.out.println(event.getEventType()+" "+event.getClass()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
@@ -61,6 +62,11 @@ public class TapesMouseHandler implements EventHandler<Event> {
         else if(source instanceof MinimizedOptionRectangle){
             TapePane tapePane = (TapePane)((MinimizedOptionRectangle) source).optionRectangle.associatedNode();
             tapePane.closeCellOptionRectangle();
+            mouseEvent.consume();
+        }
+        else if(source instanceof CellOptionRectangleSymbolLabel){
+            System.out.println(((CellOptionRectangleSymbolLabel) source).getText());
+
             mouseEvent.consume();
         }
     }

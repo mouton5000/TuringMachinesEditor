@@ -101,6 +101,7 @@ class TapePane extends Pane {
                 - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
         cellOptionRectangle.setTranslateX(0);
         cellOptionRectangle.setTranslateY(0);
+        cellOptionRectangle.setLineAndColumn(line, column);
         cellOptionRectangle.setVisible(true);
         cellOptionRectangle.maximize();
     }
