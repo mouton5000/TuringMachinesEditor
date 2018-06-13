@@ -64,11 +64,16 @@ public class TuringMachineDrawer extends Application {
     static final Integer TAPE_DEFAULT_LEFT = null;
     static final Integer TAPE_DEFAULT_RIGHT = null;
     static final double TAPE_CELL_SYMBOL_FONT_SIZE = TAPE_CELL_WIDTH * 0.75;
+    static final double TAPE_CELL_HEAD_SIZE = TAPE_CELL_WIDTH - 8;
+    static final double TAPE_CELL_HEAD_STROKE_WIDTH = 3;
 
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 34;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING = 15;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
     static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
+
+    public static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
+    static final int TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE = 32;
 
     boolean animating;
 

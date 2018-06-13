@@ -9,13 +9,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by dimitri.watel on 07/06/18.
@@ -32,12 +33,14 @@ class TapePane extends Pane {
 
     CellOptionRectangle cellOptionRectangle;
 
-    Map<Integer, Map<Integer, Label>> cellLabels;
+    private Map<Integer, Map<Integer, Label>> cellLabels;
+    private Map<CellOptionRectangleHeadRectangle, Rectangle> heads;
 
     TapePane(TuringMachineDrawer drawer, HBox tapeHBox) {
         this.drawer = drawer;
         this.tapeHBox = tapeHBox;
         this.cellLabels = new HashMap<>();
+        this.heads = new HashMap<>();
 
         this.setOnMousePressed(drawer.tapesMouseHandler);
         this.setOnMouseClicked(drawer.tapesMouseHandler);
@@ -165,6 +168,22 @@ class TapePane extends Pane {
                 cellLabel.setText(symbol);
         }
 
+    }
+
+    public void moveHead(int line, int column, CellOptionRectangleHeadRectangle head) {
+
+        Rectangle headRectangle = heads.get(head);
+        if(headRectangle == null){
+            headRectangle = new Rectangle(0, 0,
+                    TuringMachineDrawer.TAPE_CELL_HEAD_SIZE, TuringMachineDrawer.TAPE_CELL_HEAD_SIZE);
+            headRectangle.setFill(Color.TRANSPARENT);
+            headRectangle.setStroke(head.getStroke());
+            headRectangle.setStrokeWidth(TuringMachineDrawer.TAPE_CELL_HEAD_STROKE_WIDTH);
+            heads.put(head, headRectangle);
+            this.getChildren().add(headRectangle);
+        }
+        headRectangle.setLayoutX(getX(column) - TuringMachineDrawer.TAPE_CELL_HEAD_SIZE / 2);
+        headRectangle.setLayoutY(getY(line) - TuringMachineDrawer.TAPE_CELL_HEAD_SIZE / 2);
     }
 }
 

@@ -5,7 +5,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 /**
@@ -15,6 +17,7 @@ class CellOptionRectangle extends OptionRectangle{
 
     final TapePane tapePane;
     final CellOptionRectangleSymbolsGroup symbolsGroup;
+    final CellOptionRectangleHeadGroup headsGroup;
     int currentLine;
     int currentColumn;
 
@@ -22,6 +25,7 @@ class CellOptionRectangle extends OptionRectangle{
         super(drawer, drawer.tapesMouseHandler);
         this.tapePane = tapePane;
         symbolsGroup = new CellOptionRectangleSymbolsGroup(this);
+        headsGroup = new CellOptionRectangleHeadGroup(this);
 
         Line separator = new Line(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
@@ -29,7 +33,7 @@ class CellOptionRectangle extends OptionRectangle{
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                         - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
-        this.getChildren().addAll(symbolsGroup, separator);
+        this.getChildren().addAll(symbolsGroup, headsGroup, separator);
 
 
         symbolsGroup.setLayoutX(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
@@ -37,6 +41,14 @@ class CellOptionRectangle extends OptionRectangle{
         symbolsGroup.setLayoutY(
                 - TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE / 2
                 - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
+        );
+
+        headsGroup.setLayoutX(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+                + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
+        headsGroup.setLayoutY(
+                - TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE / 2
+                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
+                + TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
         );
 
     }
@@ -53,12 +65,10 @@ class CellOptionRectangle extends OptionRectangle{
 }
 
 class CellOptionRectangleSymbolsGroup extends HBox {
-    private CellOptionRectangle optionRectangle;
 
     CellOptionRectangleSymbolsGroup(CellOptionRectangle optionRectangle) {
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
-        this.optionRectangle = optionRectangle;
 
         ImageView symbolsIcon = new ImageView("./images/edit-icon.png");
         this.getChildren().add(symbolsIcon);
@@ -102,6 +112,40 @@ class CellOptionRectangleSymbolLabel extends Label {
 
     CellOptionRectangleSymbolLabel(CellOptionRectangle optionRectangle, String s) {
         super(s);
+        this.optionRectangle = optionRectangle;
+    }
+}
+
+class CellOptionRectangleHeadGroup extends HBox{
+
+    public CellOptionRectangleHeadGroup(CellOptionRectangle optionRectangle) {
+        this.setSpacing(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING);
+
+        ImageView symbolsIcon = new ImageView("./images/add_head.png");
+        this.getChildren().add(symbolsIcon);
+//        symbolsIcon.setTranslateX(- symbolsIcon.getBoundsInLocal().getWidth() / 2);
+        symbolsIcon.setTranslateY(- symbolsIcon.getBoundsInLocal().getHeight() / 2
+                + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE / 2);
+
+        CellOptionRectangleHeadRectangle headRectangle = new CellOptionRectangleHeadRectangle(
+                optionRectangle,
+                0, 0,
+                TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE,
+                TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE);
+        headRectangle.setFill(Color.WHITE);
+        headRectangle.setStroke(Color.BLACK);
+        headRectangle.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
+        this.getChildren().add(headRectangle);
+
+    }
+}
+
+class CellOptionRectangleHeadRectangle extends Rectangle{
+    CellOptionRectangle optionRectangle;
+
+    public CellOptionRectangleHeadRectangle(CellOptionRectangle optionRectangle,
+                                            double v, double v1, double v2, double v3) {
+        super(v, v1, v2, v3);
         this.optionRectangle = optionRectangle;
     }
 }

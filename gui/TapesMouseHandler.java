@@ -2,7 +2,6 @@ package gui;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -75,6 +74,15 @@ public class TapesMouseHandler implements EventHandler<Event> {
             optionRectangle.tapePane.drawSymbol(line, column, symbol);
 
 
+            mouseEvent.consume();
+        }
+        else if(source instanceof CellOptionRectangleHeadRectangle){
+            CellOptionRectangleHeadRectangle head = (CellOptionRectangleHeadRectangle) source;
+            CellOptionRectangle optionRectangle = head.optionRectangle;
+
+            int line = optionRectangle.currentLine;
+            int column = optionRectangle.currentColumn;
+            optionRectangle.tapePane.moveHead(line, column, head);
             mouseEvent.consume();
         }
     }
