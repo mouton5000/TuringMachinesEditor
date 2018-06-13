@@ -26,6 +26,8 @@ public class TuringMachineDrawer extends Application {
     private static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
 
+    static final int OPTION_RECTANGLE_TIMELINE_DURATION = 200;
+
     static final int STATE_RADIUS = 20;
     static final double FINAL_STATE_RADIUS_RATIO = 0.8;
     static final Color STATE_OUTER_COLOR = Color.BLACK;
@@ -61,8 +63,9 @@ public class TuringMachineDrawer extends Application {
     static final Integer TAPE_DEFAULT_BOTTOM = 0;
     static final Integer TAPE_DEFAULT_LEFT = null;
     static final Integer TAPE_DEFAULT_RIGHT = null;
+    static final double TAPE_CELL_SYMBOL_FONT_SIZE = TAPE_CELL_WIDTH * 0.75;
 
-    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 17;
+    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 34;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING = 15;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
     static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";

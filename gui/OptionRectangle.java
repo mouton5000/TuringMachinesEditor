@@ -98,7 +98,7 @@ abstract class OptionRectangle extends Group{
         KeyValue kw = new KeyValue(maximizedRectangle.widthProperty(), width, Interpolator.EASE_BOTH);
         KeyValue kh = new KeyValue(maximizedRectangle.heightProperty(), height, Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(600), kx, ky, kh, kw)
+                new KeyFrame(Duration.millis(TuringMachineDrawer.OPTION_RECTANGLE_TIMELINE_DURATION), kx, ky, kh, kw)
         );
         timeline.play();
     }

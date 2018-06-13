@@ -65,7 +65,15 @@ public class TapesMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof CellOptionRectangleSymbolLabel){
-            System.out.println(((CellOptionRectangleSymbolLabel) source).getText());
+            CellOptionRectangleSymbolLabel label = (CellOptionRectangleSymbolLabel) source;
+            CellOptionRectangle optionRectangle = label.optionRectangle;
+            int line = optionRectangle.currentLine;
+            int column = optionRectangle.currentColumn;
+
+            String symbol = label.getText();
+            symbol = symbol.equals("\u2205")?null:symbol;
+            optionRectangle.tapePane.drawSymbol(line, column, symbol);
+
 
             mouseEvent.consume();
         }

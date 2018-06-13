@@ -3,14 +3,19 @@ package gui;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Created by dimitri.watel on 07/06/18.
@@ -27,9 +32,12 @@ class TapePane extends Pane {
 
     CellOptionRectangle cellOptionRectangle;
 
+    Map<Integer, Map<Integer, Label>> cellLabels;
+
     TapePane(TuringMachineDrawer drawer, HBox tapeHBox) {
         this.drawer = drawer;
         this.tapeHBox = tapeHBox;
+        this.cellLabels = new HashMap<>();
 
         this.setOnMousePressed(drawer.tapesMouseHandler);
         this.setOnMouseClicked(drawer.tapesMouseHandler);
@@ -114,6 +122,49 @@ class TapePane extends Pane {
             cellOptionRectangle.timeline.setOnFinished(handler);
         });
         cellOptionRectangle.minimize(true);
+    }
+
+    void drawSymbol(int line, int column, String symbol) {
+        Map<Integer, Label> h = cellLabels.get(line);
+        if(symbol == null) { // White symbol
+            if (h == null) // All the column is white
+                return;
+            Label cellLabel = h.get(column);
+            if (cellLabel != null) {
+                this.getChildren().remove(cellLabel);
+                h.remove(column);
+                if (h.size() == 0)
+                    cellLabels.remove(line);
+            }
+        }
+        else{
+            if (h == null) {
+                h = new HashMap<>();
+                cellLabels.put(line, h);
+            }
+            Label cellLabel = h.get(column);
+
+            if(cellLabel == null) {
+                cellLabel = new Label(symbol);
+                cellLabel.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                        TuringMachineDrawer.TAPE_CELL_SYMBOL_FONT_SIZE));
+
+                cellLabel.setMinWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
+                cellLabel.setMaxWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
+                cellLabel.setMinHeight(TuringMachineDrawer.TAPE_CELL_WIDTH);
+                cellLabel.setMaxHeight(TuringMachineDrawer.TAPE_CELL_WIDTH);
+                cellLabel.setAlignment(Pos.CENTER);
+
+                this.getChildren().add(cellLabel);
+                cellLabel.setLayoutX(getX(column)- cellLabel.getMinWidth() / 2);
+                cellLabel.setLayoutY(getY(line)- cellLabel.getMinHeight() / 2);
+
+                h.put(column, cellLabel);
+            }
+            else
+                cellLabel.setText(symbol);
+        }
+
     }
 }
 
