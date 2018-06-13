@@ -74,6 +74,7 @@ public class TuringMachineDrawer extends Application {
 
     public static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
     static final int TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE = 32;
+    static final double TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH = 300;
 
     boolean animating;
 

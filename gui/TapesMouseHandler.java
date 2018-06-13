@@ -3,6 +3,7 @@ package gui;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -63,8 +64,8 @@ public class TapesMouseHandler implements EventHandler<Event> {
             tapePane.closeCellOptionRectangle();
             mouseEvent.consume();
         }
-        else if(source instanceof CellOptionRectangleSymbolLabel){
-            CellOptionRectangleSymbolLabel label = (CellOptionRectangleSymbolLabel) source;
+        else if(source instanceof ChooseSymbolOptionLabel){
+            ChooseSymbolOptionLabel label = (ChooseSymbolOptionLabel) source;
             CellOptionRectangle optionRectangle = label.optionRectangle;
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
@@ -76,13 +77,23 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(source instanceof CellOptionRectangleHeadRectangle){
-            CellOptionRectangleHeadRectangle head = (CellOptionRectangleHeadRectangle) source;
-            CellOptionRectangle optionRectangle = head.optionRectangle;
+        else if(source instanceof ChooseHeadOptionRectangle){
+            ChooseHeadOptionRectangle chooseHeadRectangle = (ChooseHeadOptionRectangle) source;
+            CellOptionRectangle optionRectangle = chooseHeadRectangle.optionRectangle;
+            Color color = (Color) chooseHeadRectangle.getStroke();
 
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
+            int head = optionRectangle.tapePane.getHead(color);
             optionRectangle.tapePane.moveHead(line, column, head);
+            mouseEvent.consume();
+        }
+        else if(source instanceof AddHeadOptionIcon){
+            CellOptionRectangle optionRectangle = ((AddHeadOptionIcon) source).optionRectangle;
+
+            int line = optionRectangle.currentLine;
+            int column = optionRectangle.currentColumn;
+            optionRectangle.tapePane.addHead(line, column);
             mouseEvent.consume();
         }
     }

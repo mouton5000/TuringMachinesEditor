@@ -16,16 +16,16 @@ import javafx.scene.text.Font;
 class CellOptionRectangle extends OptionRectangle{
 
     final TapePane tapePane;
-    final CellOptionRectangleSymbolsGroup symbolsGroup;
-    final CellOptionRectangleHeadGroup headsGroup;
+    final CellOptionRectangleSymbolsOptionsGroup symbolsGroup;
+    final CellOptionRectangleHeadOptionsGroup headsGroup;
     int currentLine;
     int currentColumn;
 
     CellOptionRectangle(TuringMachineDrawer drawer, TapePane tapePane) {
         super(drawer, drawer.tapesMouseHandler);
         this.tapePane = tapePane;
-        symbolsGroup = new CellOptionRectangleSymbolsGroup(this);
-        headsGroup = new CellOptionRectangleHeadGroup(this);
+        symbolsGroup = new CellOptionRectangleSymbolsOptionsGroup(this);
+        headsGroup = new CellOptionRectangleHeadOptionsGroup(this);
 
         Line separator = new Line(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
@@ -53,6 +53,10 @@ class CellOptionRectangle extends OptionRectangle{
 
     }
 
+    void addHead(Color color){
+        headsGroup.addHead(color);
+    }
+
     @Override
     protected Node associatedNode() {
         return tapePane;
@@ -64,9 +68,9 @@ class CellOptionRectangle extends OptionRectangle{
     }
 }
 
-class CellOptionRectangleSymbolsGroup extends HBox {
+class CellOptionRectangleSymbolsOptionsGroup extends HBox {
 
-    CellOptionRectangleSymbolsGroup(CellOptionRectangle optionRectangle) {
+    CellOptionRectangleSymbolsOptionsGroup(CellOptionRectangle optionRectangle) {
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
 
@@ -77,7 +81,7 @@ class CellOptionRectangleSymbolsGroup extends HBox {
         + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE / 2);
 
         {
-            CellOptionRectangleSymbolLabel label = new CellOptionRectangleSymbolLabel(optionRectangle, "\u2205");
+            ChooseSymbolOptionLabel label = new ChooseSymbolOptionLabel(optionRectangle, "\u2205");
             label.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
                     TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
             label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
@@ -91,7 +95,7 @@ class CellOptionRectangleSymbolsGroup extends HBox {
         }
 
         for(String symbol: optionRectangle.tapePane.drawer.machine.getSymbols()){
-            CellOptionRectangleSymbolLabel label = new CellOptionRectangleSymbolLabel(optionRectangle, symbol);
+            ChooseSymbolOptionLabel label = new ChooseSymbolOptionLabel(optionRectangle, symbol);
             label.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
                     TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
             label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
@@ -106,46 +110,61 @@ class CellOptionRectangleSymbolsGroup extends HBox {
     }
 }
 
-class CellOptionRectangleSymbolLabel extends Label {
+class ChooseSymbolOptionLabel extends Label {
 
     CellOptionRectangle optionRectangle;
 
-    CellOptionRectangleSymbolLabel(CellOptionRectangle optionRectangle, String s) {
+    ChooseSymbolOptionLabel(CellOptionRectangle optionRectangle, String s) {
         super(s);
         this.optionRectangle = optionRectangle;
     }
 }
 
-class CellOptionRectangleHeadGroup extends HBox{
+class CellOptionRectangleHeadOptionsGroup extends HBox{
 
-    public CellOptionRectangleHeadGroup(CellOptionRectangle optionRectangle) {
+    private CellOptionRectangle optionRectangle;
+
+    public CellOptionRectangleHeadOptionsGroup(CellOptionRectangle optionRectangle) {
+        this.optionRectangle = optionRectangle;
         this.setSpacing(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING);
 
-        ImageView symbolsIcon = new ImageView("./images/add_head.png");
-        this.getChildren().add(symbolsIcon);
-//        symbolsIcon.setTranslateX(- symbolsIcon.getBoundsInLocal().getWidth() / 2);
-        symbolsIcon.setTranslateY(- symbolsIcon.getBoundsInLocal().getHeight() / 2
+        ImageView addHeadIcon = new AddHeadOptionIcon(optionRectangle, "./images/add_head.png");
+        addHeadIcon.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
+
+        this.getChildren().add(addHeadIcon);
+        addHeadIcon.setTranslateY(- addHeadIcon.getBoundsInLocal().getHeight() / 2
                 + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE / 2);
 
-        CellOptionRectangleHeadRectangle headRectangle = new CellOptionRectangleHeadRectangle(
+    }
+
+    public void addHead(Color color) {
+        ChooseHeadOptionRectangle headRectangle = new ChooseHeadOptionRectangle(
                 optionRectangle,
                 0, 0,
                 TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE,
                 TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE);
         headRectangle.setFill(Color.WHITE);
-        headRectangle.setStroke(Color.BLACK);
+        headRectangle.setStroke(color);
+        headRectangle.setStrokeWidth(TuringMachineDrawer.TAPE_CELL_HEAD_STROKE_WIDTH);
         headRectangle.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
         this.getChildren().add(headRectangle);
-
     }
 }
 
-class CellOptionRectangleHeadRectangle extends Rectangle{
+class ChooseHeadOptionRectangle extends Rectangle{
     CellOptionRectangle optionRectangle;
 
-    public CellOptionRectangleHeadRectangle(CellOptionRectangle optionRectangle,
-                                            double v, double v1, double v2, double v3) {
+    public ChooseHeadOptionRectangle(CellOptionRectangle optionRectangle,
+                                     double v, double v1, double v2, double v3) {
         super(v, v1, v2, v3);
+        this.optionRectangle = optionRectangle;
+    }
+}
+
+class AddHeadOptionIcon extends ImageView{
+    CellOptionRectangle optionRectangle;
+    public AddHeadOptionIcon(CellOptionRectangle optionRectangle, String url) {
+        super(url);
         this.optionRectangle = optionRectangle;
     }
 }
