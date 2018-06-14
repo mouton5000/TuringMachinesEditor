@@ -1,9 +1,13 @@
 package gui;
 
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -14,6 +18,9 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
     private Double dragX;
     private Double dragY;
+
+    private Timer timer;
+    private TimerTask currentTask;
 
     public TapesMouseHandler(TuringMachineDrawer drawer) {
         this.drawer = drawer;
@@ -33,6 +40,32 @@ public class TapesMouseHandler implements EventHandler<Event> {
         }
         else if(event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
             this.handleDragEvent((MouseEvent) event);
+        }
+    }
+
+    private void handlePressEvent(MouseEvent mouseEvent) {
+        Object source = mouseEvent.getSource();
+
+
+        if(source instanceof TapeBorderPane
+                || source instanceof CellOptionRectangleSymbolsOptionsGroup
+                || source instanceof CellOptionRectangleHeadOptionsGroup) {
+            dragX = mouseEvent.getX();
+            dragY = mouseEvent.getY();
+            mouseEvent.consume();
+        }
+        else if(source instanceof HeadMenuSelect){
+            if(currentTask == null) {
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        currentTask = null;
+                    }
+                };
+                currentTask = timerTask;
+                timer = new Timer();
+                timer.schedule(timerTask, TuringMachineDrawer.TAPE_HEAD_MENU_EDIT_PRESS_DURATION);
+            }
         }
     }
 
@@ -84,24 +117,31 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
-            int head = optionRectangle.tapePane.getHead(color);
-            optionRectangle.tapePane.moveHead(line, column, head);
+            int head = drawer.getHead(color);
+            drawer.moveHead(0, line, column, head);
             mouseEvent.consume();
         }
         else if(source instanceof AddHeadOptionIcon){
-            CellOptionRectangle optionRectangle = ((AddHeadOptionIcon) source).optionRectangle;
+            AddHeadOptionIcon addHeadOptionIcon = (AddHeadOptionIcon) source;
+            CellOptionRectangle optionRectangle = addHeadOptionIcon.optionRectangle;
 
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
-            optionRectangle.tapePane.addHead(line, column);
+            drawer.addHead(0, line, column);
             mouseEvent.consume();
         }
-    }
-
-    private void handlePressEvent(MouseEvent mouseEvent) {
-        dragX = mouseEvent.getX();
-        dragY = mouseEvent.getY();
-        mouseEvent.consume();
+        else if(source instanceof HeadMenuSelect){
+            if(currentTask != null) {
+                currentTask = null;
+                timer.cancel();
+                drawer.translateTo((Color) ((HeadMenuSelect) source).getStroke());
+            }
+            else
+                drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
+            mouseEvent.consume();
+        }
+        else if(source instanceof OptionRectangle)
+            mouseEvent.consume();
     }
 
     private void handleDragEvent(MouseEvent mouseEvent) {
@@ -112,16 +152,36 @@ public class TapesMouseHandler implements EventHandler<Event> {
         double x = mouseEvent.getX();
         double y = mouseEvent.getY();
 
-        if(source instanceof TapePane){
+        if(source instanceof TapeBorderPane){
             if(dragX == null){
                 dragX = x;
                 dragY = y;
             }
             else {
-                TapePane pane = (TapePane) source;
+                TapeBorderPane pane = (TapeBorderPane) source;
                 pane.translate(x - dragX, y - dragY);
                 dragX = x;
                 dragY = y;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof CellOptionRectangleHeadOptionsGroup){
+            if(dragX == null)
+                dragX = x;
+            else {
+                CellOptionRectangleHeadOptionsGroup group = (CellOptionRectangleHeadOptionsGroup) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof CellOptionRectangleSymbolsOptionsGroup){
+            if(dragX == null)
+                dragX = x;
+            else {
+                CellOptionRectangleSymbolsOptionsGroup group = (CellOptionRectangleSymbolsOptionsGroup) source;
+                group.translate(x - dragX);
+                dragX = x;
             }
             mouseEvent.consume();
         }

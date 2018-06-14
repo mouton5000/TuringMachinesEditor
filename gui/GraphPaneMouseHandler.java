@@ -111,6 +111,8 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
+        else if(source instanceof OptionRectangle)
+            mouseEvent.consume();
 
     }
 

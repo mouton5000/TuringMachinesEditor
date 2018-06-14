@@ -65,6 +65,7 @@ abstract class OptionRectangle extends Group{
 
     void maximize(){
         maximized = true;
+        this.toFront();
         animateSize(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
     }

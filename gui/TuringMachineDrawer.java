@@ -1,6 +1,7 @@
 package gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -8,14 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TuringMachineDrawer extends Application {
 
@@ -58,6 +60,13 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
+    static final double TAPE_COORDINATES_WIDTH = 30;
+    static final double TAPES_HEAD_MENU_HEIGHT = 50;
+    static final double TAPES_HEAD_MENU_SPACING = 15;
+    static final double TAPES_HEAD_MENU_HEAD_SIZE = 40;
+    static final double TAPE_HEAD_MENU_HEAD_STROKE_WIDTH = 3;
+    static final long TAPE_HEAD_MENU_EDIT_PRESS_DURATION = 300;
+
     static final double TAPE_CELL_WIDTH = 50;
     static final Integer TAPE_DEFAULT_TOP = 0;
     static final Integer TAPE_DEFAULT_BOTTOM = 0;
@@ -70,6 +79,7 @@ public class TuringMachineDrawer extends Application {
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 34;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING = 15;
     static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
+    static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_STROKE_WIDTH = 3;
     static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
     public static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
@@ -80,7 +90,9 @@ public class TuringMachineDrawer extends Application {
 
     private Stage stage;
     private Pane graphPane;
-    private HBox tapesPane;
+    private VBox tapesPaneVBox;
+    private TapesHeadMenu tapesHeadMenu;
+    private TapeBorderPanesHBox tapesPane;
 
     public MenuItem newButton;
     public MenuItem saveButton;
@@ -90,6 +102,8 @@ public class TuringMachineDrawer extends Application {
     public TuringMachine machine;
     public Map<StateGroup, Integer> stateGroupToState;
     private Map<Group, Transition> arrowGroupToTransition;
+
+    private List<Color> headsColors;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
@@ -103,6 +117,8 @@ public class TuringMachineDrawer extends Application {
     public void start(Stage stage) throws Exception{
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
         HEIGHT = (int) Screen.getPrimary().getVisualBounds().getHeight()* 3 / 4;
+
+        this.headsColors = new ArrayList<>();
 
         this.stage = stage;
         this.machine = new TuringMachine();
@@ -123,6 +139,7 @@ public class TuringMachineDrawer extends Application {
         stateGroupToState = new HashMap<>();
         arrowGroupToTransition = new HashMap<Group, Transition>();
 
+
         currentDefaultStateChar = 'A';
 
         graphOffsetX = 0;
@@ -137,29 +154,23 @@ public class TuringMachineDrawer extends Application {
         graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
         graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
 
-        tapesPane.setMinWidth(WIDTH);
-        tapesPane.setMaxWidth(WIDTH);
-        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPaneVBox.setMinWidth(WIDTH);
+        tapesPaneVBox.setMaxWidth(WIDTH);
+        tapesPaneVBox.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPaneVBox.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
     }
 
     public void reinitDraw(){
         graphPane = new Pane();
-        tapesPane = new HBox();
+        tapesPaneVBox = new VBox();
 
         Rectangle graphClip = new Rectangle();
-        Rectangle tapesClip = new Rectangle();
 
         graphPane.setClip(graphClip);
-        tapesPane.setClip(tapesClip);
 
         graphPane.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
             graphClip.setWidth(newValue.getWidth());
             graphClip.setHeight(newValue.getHeight());
-        });
-        tapesPane.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
-            tapesClip.setWidth(newValue.getWidth());
-            tapesClip.setHeight(newValue.getHeight());
         });
 
         resizePanes();
@@ -170,19 +181,22 @@ public class TuringMachineDrawer extends Application {
         graphPane.setOnMouseDragged(graphPaneMouseHandler);
 
         tapesMouseHandler = new TapesMouseHandler(this);
-        tapesPane.setOnMouseClicked(tapesMouseHandler);
-        tapesPane.setOnMouseDragged(tapesMouseHandler);
-        tapesPane.setAlignment(Pos.CENTER);
+        tapesPaneVBox.setAlignment(Pos.CENTER);
 
-        TapePane tapePane = new TapePane(this, tapesPane);
-        tapesPane.getChildren().add(tapePane);
-        tapesPane.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
+        tapesHeadMenu = new TapesHeadMenu(this);
+        tapesHeadMenu.setTranslateX(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
+
+        tapesPane = new TapeBorderPanesHBox(this);
+        tapesPaneVBox.getChildren().addAll(tapesHeadMenu, new Separator(), tapesPane);
+        tapesPaneVBox.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth();
             double height = newVal.getHeight();
-            tapePane.setMinHeight(height);
-            tapePane.setMaxHeight(height);
-            tapePane.setMinWidth(width);
-            tapePane.setMaxWidth(width);
+            tapesHeadMenu.setMinWidth(width);
+            tapesHeadMenu.setMaxWidth(width);
+            tapesPane.setMinHeight(height - TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
+            tapesPane.setMaxHeight(height - TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
+            tapesPane.setMinWidth(width);
+            tapesPane.setMaxWidth(width);
         });
 
 
@@ -212,11 +226,14 @@ public class TuringMachineDrawer extends Application {
         separator.setMinHeight(SEPARATOR_WIDTH);
 
         VBox box = new VBox();
-        box.getChildren().addAll(menuBar, graphPane, separator, tapesPane);
+        box.getChildren().addAll(menuBar, graphPane, separator, tapesPaneVBox);
+
+        this.addHead(0, 0, 0, Color.BLACK);
 
         Scene scene = new Scene(box, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
+
 
     }
 
@@ -307,9 +324,80 @@ public class TuringMachineDrawer extends Application {
         arrow.toBack();
     }
 
-
-    public static void main(String[] args) {
-        launch(args);
+    void moveHead(int tape, int line, int column, int head) {
+        tapesPane.moveHead(tape, line, column, head);
     }
 
+    private Optional<Color> colorDialog(){
+        Dialog<Color> colorDialog = new Dialog<>();
+        colorDialog.setTitle("Choose new head color.");
+        colorDialog.initStyle(StageStyle.UTILITY);
+        colorDialog.setWidth(TuringMachineDrawer.TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH);
+        colorDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+
+        VBox box = new VBox();
+        box.setMaxWidth(TuringMachineDrawer.TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH);
+        box.setAlignment(Pos.CENTER);
+        box.setSpacing(5);
+
+        ColorPicker colorPicker = new ColorPicker();
+
+        Label warningLabel = new Label("This color was already chosen for another head.");
+        warningLabel.setTextFill(Color.RED);
+        warningLabel.setVisible(false);
+
+        colorPicker.setOnAction(actionEvent ->
+        {
+            boolean notavailable = headsColors.contains(colorPicker.getValue());
+            warningLabel.setVisible(notavailable);
+            colorDialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(notavailable);
+        });
+
+        box.getChildren().addAll(colorPicker, warningLabel);
+
+        colorDialog.getDialogPane().setContent(box);
+        colorDialog.setResultConverter(buttonType ->{
+            if(buttonType == ButtonType.OK){
+                return colorPicker.getValue();
+            }
+            return null;
+        });
+
+        return colorDialog.showAndWait();
+    }
+
+    void addHead(int tape, int line, int column) {
+        this.colorDialog().ifPresent(color -> this.addHead(tape, line, column, color));
+    }
+
+    void addHead(int tape, int line, int column, Color color){
+        headsColors.add(color);
+        tapesHeadMenu.addHead(tape, color);
+        tapesPane.addHead(tape, line, column, color);
+    }
+
+    int getHead(Color color) {
+        return headsColors.indexOf(color);
+    }
+
+    public void editHeadColor(Color color) {
+        int head = getHead(color);
+        this.colorDialog().ifPresent(color2 -> {
+            tapesPane.editHeadColor(0, head, color2);
+            tapesHeadMenu.editHeadColor(0, head, color2);
+            this.headsColors.set(head, color2);
+        });
+    }
+
+    void translateTo(Color color) {
+        int head = getHead(color);
+        tapesPane.translateTo(0, head);
+    }
+
+    public static void main(String[] args) {
+        Platform.setImplicitExit(true);
+        launch(args);
+        System.exit(0);
+    }
 }

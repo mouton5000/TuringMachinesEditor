@@ -16,6 +16,7 @@ class StateOptionRectangle extends OptionRectangle{
     StateOptionRectangle(TuringMachineDrawer drawer, StateGroup stateGroup) {
         super(drawer, drawer.graphPaneMouseHandler);
         this.stateGroup = stateGroup;
+        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
         FinalStateOption finalStateOption = new FinalStateOption(this);
         AcceptingStateOption acceptingStateOption = new AcceptingStateOption(this);

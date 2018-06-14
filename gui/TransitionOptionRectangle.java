@@ -12,6 +12,7 @@ public class TransitionOptionRectangle extends OptionRectangle {
     public TransitionOptionRectangle(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
         super(drawer, drawer.graphPaneMouseHandler);
         this.transitionArrowGroup = transitionArrowGroup;
+        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
 
 
