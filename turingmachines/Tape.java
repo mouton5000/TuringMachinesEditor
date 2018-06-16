@@ -77,14 +77,18 @@ public class Tape{
 
     public void addHead(){
         nbHeads++;
-        initialHeadsX.add(initX());
-        initialHeadsY.add(initY());
+        int column = initX();
+        int line = initY();
+        initialHeadsX.add(column);
+        initialHeadsY.add(line);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD, this.machine, this, nbHeads - 1, line, column);
     }
 
     public void removeHead(int head){
         nbHeads--;
         initialHeadsX.remove(head);
         initialHeadsY.remove(head);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this.machine, this, nbHeads);
     }
 
     public void setLeftBound(Integer left){

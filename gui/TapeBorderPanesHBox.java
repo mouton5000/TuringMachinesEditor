@@ -17,6 +17,9 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import turingmachines.Tape;
+import turingmachines.TuringMachine;
+import util.Subscriber;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +31,12 @@ import java.util.Map;
  */
 class TapeBorderPanesHBox extends HBox{
 
+    TuringMachineDrawer drawer;
+    private Map<Tape, TapeBorderPane> tapes;
+
     TapeBorderPanesHBox(TuringMachineDrawer drawer){
-        this.getChildren().add(new TapeBorderPane(drawer, 0));
+        this.drawer = drawer;
+        this.tapes = new HashMap<>();
 
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth();
@@ -43,46 +50,106 @@ class TapeBorderPanesHBox extends HBox{
             }
         });
 
+        Subscriber s = new Subscriber() {
+            @Override
+            public void read(String msg, Object... parameters) {
+                Tape tape = (Tape) parameters[1];
+                switch (msg) {
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_TAPE:{
+                        addTape(tape);
+                    }
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED: {
+                        Integer head = (Integer) parameters[2];
+                        Integer line = (Integer) parameters[3];
+                        Integer column = (Integer) parameters[3];
+                        moveHead(tape, line, column, head);
+                    }
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED: {
+                        Integer line = (Integer) parameters[2];
+                        Integer column = (Integer) parameters[3];
+                        String symbol = (String) parameters[4];
+                        setInputSymbol(tape, line, column, symbol);
+                    }
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED:
+                        Integer left = (Integer) parameters[2];
+                        setLeft(tape, left);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED:
+                        Integer right = (Integer) parameters[2];
+                        setRight(tape, right);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED:
+                        Integer bottom = (Integer) parameters[2];
+                        setBottom(tape, bottom);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED:
+                        Integer top = (Integer) parameters[2];
+                        setTop(tape, top);
+                        break;
+                }
+            }
+        };
+
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED);
+
     }
 
-    void moveHead(int tape, int line, int column, int head){
-        TapeBorderPane tapeBorderPane = (TapeBorderPane) this.getChildren().get(tape);
+    private void addTape(Tape tape){
+        TapeBorderPane tapeBorderPane = new TapeBorderPane(this.drawer, this.getChildren().size());
+        tapes.put(tape, tapeBorderPane);
+        this.getChildren().add(tapeBorderPane);
+    }
+
+    void moveHead(Tape tape, int line, int column, int head){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.moveHead(line, column, head);
     }
 
-    void addHead(int tape, int line, int column, Color color){
-        TapeBorderPane tapeBorderPane = (TapeBorderPane) this.getChildren().get(tape);
+    private void addHead(Tape tape, int line, int column, Color color){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.addHead(line, column, color);
     }
 
-    void translateTo(int tape, int head) {
-        TapeBorderPane tapeBorderPane = (TapeBorderPane) this.getChildren().get(tape);
+    private void translateTo(Tape tape, int head) {
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.translateTo(head);
     }
 
-    void editHeadColor(int tape, int head, Color color) {
-        TapeBorderPane tapeBorderPane = (TapeBorderPane) this.getChildren().get(tape);
+    private void editHeadColor(Tape tape, int head, Color color) {
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.editHeadColor(head, color);
     }
 
-    void setInputSymbol(int tape, int x, int y, String symbol){
-
+    private void setInputSymbol(Tape tape, int line, int column, String symbol){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.tapePane.drawSymbol(line, column, symbol);
     }
 
-    void setLeft(int tape, Integer left){
-
+    private void setLeft(Tape tape, Integer left){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.setTapeLeftBound(left);
     }
 
-    void setRight(int tape, Integer right){
-
+    private void setRight(Tape tape, Integer right){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.setTapeRightBound(right);
     }
 
-    void setBottom(int tape, Integer bottom){
-
+    private void setBottom(Tape tape, Integer bottom){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.setTapeBottomBound(bottom);
     }
 
-    void setTop(int tape, Integer top){
-
+    private void setTop(Tape tape, Integer top){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.setTapeTopBound(top);
     }
 }
 

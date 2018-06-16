@@ -14,10 +14,15 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import turingmachines.Tape;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
+import util.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class TuringMachineDrawer extends Application {
 
@@ -108,7 +113,7 @@ public class TuringMachineDrawer extends Application {
     public Map<StateGroup, Integer> stateGroupToState;
     private Map<Group, Transition> arrowGroupToTransition;
 
-    private List<Color> headsColors;
+    private Map<Color, Pair<Tape, Integer>> headsColors;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
@@ -123,7 +128,7 @@ public class TuringMachineDrawer extends Application {
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
         HEIGHT = (int) Screen.getPrimary().getVisualBounds().getHeight()* 3 / 4;
 
-        this.headsColors = new ArrayList<>();
+        this.headsColors = new HashMap<>();
 
         this.stage = stage;
         this.machine = new TuringMachine();
@@ -329,7 +334,7 @@ public class TuringMachineDrawer extends Application {
         arrow.toBack();
     }
 
-    void moveHead(int tape, int line, int column, int head) {
+    void moveHead(Tape tape, int line, int column, int head) {
         tapesPane.moveHead(tape, line, column, head);
     }
 
@@ -354,7 +359,7 @@ public class TuringMachineDrawer extends Application {
 
         colorPicker.setOnAction(actionEvent ->
         {
-            boolean notavailable = headsColors.contains(colorPicker.getValue());
+            boolean notavailable = headsColors.keySet().contains(colorPicker.getValue());
             warningLabel.setVisible(notavailable);
             colorDialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(notavailable);
         });
@@ -372,12 +377,12 @@ public class TuringMachineDrawer extends Application {
         return colorDialog.showAndWait();
     }
 
-    void addHead(int tape, int line, int column) {
+    void addHead(Tape tape, int line, int column) {
         this.colorDialog().ifPresent(color -> this.addHead(tape, line, column, color));
     }
 
-    void addHead(int tape, int line, int column, Color color){
-        headsColors.add(color);
+    void addHead(Tape tape, int head, int line, int column, Color color){
+        headsColors.put(color, new Pair<>(tape, head));
         tapesHeadMenu.addHead(tape, color);
         tapesPane.addHead(tape, line, column, color);
     }

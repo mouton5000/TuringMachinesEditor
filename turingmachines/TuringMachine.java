@@ -19,12 +19,33 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_COMPUTE_START = "TMComputeStart";
     public static final String SUBSCRIBER_MSG_COMPUTE_END = "TMComputeEnd";
 
-    public static final String SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED = "TMHeadInitialPositionChanged";
-    public static final String SUBSCRIBER_MSG_INPUT_CHANGED= "TMInputChanged";
+    public static final String SUBSCRIBER_MSG_ADD_STATE = "TMAddState";
+    public static final String SUBSCRIBER_MSG_REMOVE_STATE = "TMRemoveState";
+    public static final String SUBSCRIBER_MSG_SET_INITIAL_STATE = "TMSetInitialState";
+    public static final String SUBSCRIBER_MSG_UNSET_INITIAL_STATE = "TMUnsetInitialState";
+    public static final String SUBSCRIBER_MSG_SET_FINAL_STATE = "TMSetFinalState";
+    public static final String SUBSCRIBER_MSG_UNSET_FINAL_STATE = "TMUnsetFinalState";
+    public static final String SUBSCRIBER_MSG_SET_ACCEPTING_STATE = "TMSetAcceptingState";
+    public static final String SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE = "TMUnsetAcceptingState";
+
+    public static final String SUBSCRIBER_MSG_ADD_TRANSITION = "TMAddTransition";
+    public static final String SUBSCRIBER_MSG_REMOVE_TRANSITION = "TMRemoveTransition";
+
+    public static final String SUBSCRIBER_MSG_ADD_TAPE = "TMHeadAddTape";
+    public static final String SUBSCRIBER_MSG_REMOVE_TAPE = "TMRemoveTape";
     public static final String SUBSCRIBER_MSG_TAPE_LEFT_CHANGED = "TMTapeLeftChanged";
     public static final String SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED = "TMTapeRightChanged";
     public static final String SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED = "TMTapeBottomChanged";
     public static final String SUBSCRIBER_MSG_TAPE_TOP_CHANGED = "TMTapeTopChanged";
+
+    public static final String SUBSCRIBER_MSG_ADD_SYMBOL = "TMAddSymbol";
+    public static final String SUBSCRIBER_MSG_REMOVE_SYMBOL = "TMRemoveSymbol";
+
+    public static final String SUBSCRIBER_MSG_INPUT_CHANGED= "TMInputChanged";
+
+    public static final String SUBSCRIBER_MSG_ADD_HEAD = "TMHeadAddHead";
+    public static final String SUBSCRIBER_MSG_REMOVE_HEAD = "TMRemoveHead";
+    public static final String SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED = "TMHeadInitialPositionChanged";
 
     private int nbStates;
 
@@ -67,12 +88,14 @@ public class TuringMachine {
     public Transition addTransition(Integer input, Integer output){
         Transition a = new Transition(this, input, output);
         outputTransitions.get(input).add(a);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION, this, a);
         return a;
     }
 
     public void removeTransition(Transition a){
         Integer input = a.getInput();
         List<Transition> transitions = outputTransitions.get(input);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION, this, a);
         transitions.remove(a);
     }
 
@@ -86,6 +109,7 @@ public class TuringMachine {
         outputTransitions.add(new ArrayList<>());
         finalStates.add(false);
         acceptingStates.add(false);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_STATE, this, nbStates - 1);
         return nbStates - 1;
     }
 
@@ -99,14 +123,17 @@ public class TuringMachine {
         outputTransitions.remove(state);
         finalStates.remove(state);
         acceptingStates.remove(state);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE, this, state);
     }
 
     public void setInitialState(Integer state) {
         initialStates.add(state);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE, this, state);
     }
 
     public void unsetInitialState(Integer state) {
         initialStates.remove(state);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE, this, state);
     }
 
     public boolean isInitial(Integer state){ return initialStates.contains(state);}
@@ -135,6 +162,7 @@ public class TuringMachine {
     public Tape addTape(){
         Tape tape = new Tape(this);
         tapes.add(tape);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE, this, tape);
         return tape;
     }
 
@@ -143,15 +171,18 @@ public class TuringMachine {
     }
 
     public void removeTape(int i){
-        tapes.remove(i);
+        Tape tape = tapes.remove(i);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE, this, tape);
     }
 
     public void addSymbol(String symbol){
         symbols.add(symbol);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL, this, symbol);
     }
 
     public void removeSymbol(String symbol){
         symbols.remove(symbol);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL, this, symbol);
     }
 
     public List<String> getSymbols(){
@@ -160,20 +191,24 @@ public class TuringMachine {
 
     public void setFinalState(int state){
         finalStates.set(state, true);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE, this, state);
     }
 
     public void setAcceptingState(int state){
         acceptingStates.set(state, true);
         setFinalState(state);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE, this, state);
     }
 
     public void unsetFinalState(int state){
         finalStates.set(state, false);
         unsetAcceptingState(state);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE, this, state);
     }
 
     public void unsetAcceptingState(int state){
         acceptingStates.set(state, false);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE, this, state);
     }
 
     public boolean isFinal(int state){
@@ -603,22 +638,32 @@ public class TuringMachine {
         Subscriber s = new Subscriber() {
             @Override
             public void read(String msg, Object... parameters) {
-                if(msg.equals(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED))
-                    System.out.println(t.getStateName(t.getCurrentState()));
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION))
-                    System.out.println(parameters[1]);
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED))
-                    System.out.println(parameters[1]);
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE))
-                    System.out.println(parameters[1]);
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START))
-                    System.out.println("Explore Start");
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END))
-                    System.out.println("Explore End");
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_COMPUTE_START))
-                    System.out.println("Compute Start");
-                else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_COMPUTE_END))
-                    System.out.println("Compute End");
+                switch (msg) {
+                    case TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED:
+                        System.out.println(t.getStateName(t.getCurrentState()));
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION:
+                        System.out.println(parameters[1]);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED:
+                        System.out.println(parameters[1]);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE:
+                        System.out.println(parameters[1]);
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START:
+                        System.out.println("Explore Start");
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END:
+                        System.out.println("Explore End");
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_COMPUTE_START:
+                        System.out.println("Compute Start");
+                        break;
+                    case TuringMachine.SUBSCRIBER_MSG_COMPUTE_END:
+                        System.out.println("Compute End");
+                        break;
+                }
             }
         };
 
