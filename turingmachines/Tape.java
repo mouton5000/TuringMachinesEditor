@@ -106,6 +106,7 @@ public class Tape{
             if(left != null && x < left)
                 it.remove();
         }
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED, this.machine, this, tapeLeftBound);
     }
 
     public void setRightBound(Integer right){
@@ -127,6 +128,7 @@ public class Tape{
             if(right != null && x > right)
                 it.remove();
         }
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED, this.machine, this, tapeRightBound);
     }
 
     public void setBottomBound(Integer bottom){
@@ -154,6 +156,7 @@ public class Tape{
             if(entry1.getValue().isEmpty())
                 it1.remove();
         }
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED, this.machine, this, tapeBottomBound);
     }
 
     public void setTopBound(Integer top){
@@ -181,6 +184,7 @@ public class Tape{
             if(entry1.getValue().isEmpty())
                 it1.remove();
         }
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED, this.machine, this, tapeTopBound);
     }
 
     public Integer getInitialHeadX(int head){
@@ -195,12 +199,14 @@ public class Tape{
         if((tapeLeftBound == null || x >= tapeLeftBound)
                 && (tapeRightBound == null || x <= tapeRightBound) )
             initialHeadsX.set(head, x);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, x, initialHeadsY.get(head));
     }
 
     public void setInitialHeadY(int head, int y){
         if((tapeBottomBound == null || y >= tapeBottomBound)
                 && (tapeTopBound == null || y <= tapeTopBound) )
             initialHeadsY.set(head, y);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, initialHeadsX.get(head), y);
     }
 
     void reinit(){
@@ -309,6 +315,10 @@ public class Tape{
                 cells.put(x, column);
             }
             column.put(y, symbol);
+        }
+
+        if(input){
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, x, y, symbol);
         }
     }
 

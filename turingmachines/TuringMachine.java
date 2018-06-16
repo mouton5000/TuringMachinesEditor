@@ -4,7 +4,6 @@ import util.Pair;
 import util.Subscriber;
 
 import java.util.*;
-import java.util.concurrent.locks.Condition;
 
 public class TuringMachine {
 
@@ -19,6 +18,13 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END = "TMNonDeterministicExploreEnd";
     public static final String SUBSCRIBER_MSG_COMPUTE_START = "TMComputeStart";
     public static final String SUBSCRIBER_MSG_COMPUTE_END = "TMComputeEnd";
+
+    public static final String SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED = "TMHeadInitialPositionChanged";
+    public static final String SUBSCRIBER_MSG_INPUT_CHANGED= "TMInputChanged";
+    public static final String SUBSCRIBER_MSG_TAPE_LEFT_CHANGED = "TMTapeLeftChanged";
+    public static final String SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED = "TMTapeRightChanged";
+    public static final String SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED = "TMTapeBottomChanged";
+    public static final String SUBSCRIBER_MSG_TAPE_TOP_CHANGED = "TMTapeTopChanged";
 
     private int nbStates;
 
