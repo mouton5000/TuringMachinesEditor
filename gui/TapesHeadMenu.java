@@ -1,12 +1,17 @@
 package gui;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
-public class TapesHeadMenu extends HBox {
+class TapesHeadMenu extends HBox {
 
     private final TuringMachineDrawer drawer;
 
@@ -34,7 +39,7 @@ public class TapesHeadMenu extends HBox {
     }
 
 
-    public void editHeadColor(int tape, int head, Color color) {
+    void editHeadColor(int tape, int head, Color color) {
         TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) this.getChildren().get(tape);
         tapeHeadMenu.editHeadColor(head, color);
     }
@@ -60,7 +65,7 @@ class TapeHeadMenu extends HBox {
         this.getChildren().add(headRectangle);
     }
 
-    public void editHeadColor(int head, Color color) {
+    void editHeadColor(int head, Color color) {
         ((HeadMenuSelect)this.getChildren().get(head)).setStroke(color);
     }
 }
@@ -68,11 +73,36 @@ class TapeHeadMenu extends HBox {
 class HeadMenuSelect extends Rectangle {
 
     TuringMachineDrawer drawer;
+    private Timeline timeline;
+    boolean animating;
 
-    public HeadMenuSelect( TuringMachineDrawer drawer, double x, double y, double width, double height) {
+    HeadMenuSelect( TuringMachineDrawer drawer, double x, double y, double width, double height) {
         super(x, y, width, height);
         this.drawer = drawer;
+        this.timeline = new Timeline();
+        this.timeline.setOnFinished(actionEvent -> animating = false);
+        this.animating = false;
+
         this.setOnMouseClicked(drawer.tapesMouseHandler);
         this.setOnMousePressed(drawer.tapesMouseHandler);
+        this.setOnMouseDragged(drawer.tapesMouseHandler);
+    }
+
+    void startTimeline(){
+        animating = true;
+        timeline.getKeyFrames().clear();
+        KeyValue kfill = new KeyValue(this.fillProperty(),
+                TuringMachineDrawer.EDIT_PRESS_COLOR,
+                Interpolator.EASE_BOTH);
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.millis(TuringMachineDrawer.EDIT_PRESS_DURATION), kfill)
+        );
+        timeline.play();
+    }
+
+    void stopTimeline(){
+        timeline.stop();
+        this.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
+        animating = false;
     }
 }

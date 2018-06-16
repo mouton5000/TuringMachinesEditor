@@ -7,9 +7,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -65,7 +65,9 @@ public class TuringMachineDrawer extends Application {
     static final double TAPES_HEAD_MENU_SPACING = 15;
     static final double TAPES_HEAD_MENU_HEAD_SIZE = 40;
     static final double TAPE_HEAD_MENU_HEAD_STROKE_WIDTH = 3;
-    static final long TAPE_HEAD_MENU_EDIT_PRESS_DURATION = 300;
+    static final long EDIT_PRESS_DURATION = 300;
+    static final Color EDIT_PRESS_COLOR = Color.DARKGRAY;
+    static final Color TAPE_HEAD_MENU_DEFAULT_FILL_COLOR = Color.WHITE;
 
     static final double TAPE_CELL_WIDTH = 50;
     static final Integer TAPE_DEFAULT_TOP = 0;
@@ -82,9 +84,12 @@ public class TuringMachineDrawer extends Application {
     static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_STROKE_WIDTH = 3;
     static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
-    public static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
+    static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
     static final int TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE = 32;
     static final double TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH = 300;
+
+    static final int TAPE_TAPE_OPTION_RECTANGLE_SPACING = 15;
+    static final int TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH = 30;
 
     boolean animating;
 

@@ -1,13 +1,9 @@
 package gui;
 
-import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -18,9 +14,6 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
     private Double dragX;
     private Double dragY;
-
-    private Timer timer;
-    private TimerTask currentTask;
 
     public TapesMouseHandler(TuringMachineDrawer drawer) {
         this.drawer = drawer;
@@ -46,25 +39,25 @@ public class TapesMouseHandler implements EventHandler<Event> {
     private void handlePressEvent(MouseEvent mouseEvent) {
         Object source = mouseEvent.getSource();
 
+        double x = mouseEvent.getX();
+        double y = mouseEvent.getY();
 
         if(source instanceof TapeBorderPane
                 || source instanceof CellOptionRectangleSymbolsOptionsGroup
                 || source instanceof CellOptionRectangleHeadOptionsGroup) {
-            dragX = mouseEvent.getX();
-            dragY = mouseEvent.getY();
+            dragX = x;
+            dragY = y;
             mouseEvent.consume();
         }
         else if(source instanceof HeadMenuSelect){
-            if(currentTask == null) {
-                TimerTask timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        currentTask = null;
-                    }
-                };
-                currentTask = timerTask;
-                timer = new Timer();
-                timer.schedule(timerTask, TuringMachineDrawer.TAPE_HEAD_MENU_EDIT_PRESS_DURATION);
+            ((HeadMenuSelect) source).startTimeline();
+        }
+        else if(source instanceof TapePane){
+            TapePane tapePane = (TapePane) source;
+            if(!tapePane.cellOptionRectangle.isMaximized() && !tapePane.tapeOptionRectangle.isMaximized()) {
+                Integer line = tapePane.getLine(y);
+                Integer column = tapePane.getColumn(x);
+                tapePane.startTimeline(line, column);
             }
         }
     }
@@ -83,18 +76,29 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             if(tapePane.cellOptionRectangle.isMaximized())
                 tapePane.closeCellOptionRectangle();
+            else if(tapePane.tapeOptionRectangle.isMaximized())
+                tapePane.closeTapeOptionRectangle();
             else {
+                boolean pressFinished = !tapePane.animating;
+                tapePane.stopTimeline();
                 Integer line = tapePane.getLine(y);
                 Integer column = tapePane.getColumn(x);
-                if (line != null && column != null)
+
+                if(!pressFinished)
                     tapePane.openCellOptionRectangle(line, column);
+                else
+                    tapePane.openTapeOptionRectangle(line, column);
             }
 
             mouseEvent.consume();
         }
         else if(source instanceof MinimizedOptionRectangle){
-            TapePane tapePane = (TapePane)((MinimizedOptionRectangle) source).optionRectangle.associatedNode();
-            tapePane.closeCellOptionRectangle();
+            MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
+            TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
+            if(minimizedOptionRectangle.optionRectangle instanceof CellOptionRectangle)
+                tapePane.closeCellOptionRectangle();
+            else
+                tapePane.closeTapeOptionRectangle();
             mouseEvent.consume();
         }
         else if(source instanceof ChooseSymbolOptionLabel){
@@ -131,17 +135,77 @@ public class TapesMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof HeadMenuSelect){
-            if(currentTask != null) {
-                currentTask = null;
-                timer.cancel();
+            HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
+            boolean pressFinished = !headMenuSelect.animating;
+            headMenuSelect.stopTimeline();
+            if(!pressFinished)
                 drawer.translateTo((Color) ((HeadMenuSelect) source).getStroke());
-            }
             else
                 drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
             mouseEvent.consume();
         }
         else if(source instanceof OptionRectangle)
             mouseEvent.consume();
+        else if(source instanceof TapeOptionIcon){
+            TapeOptionIcon tapeOptionIcon = (TapeOptionIcon) source;
+            TapeBorderPane tapeBorderPane = tapeOptionIcon.optionRectangle.tapeBorderPane;
+            int line = tapeOptionIcon.optionRectangle.currentLine;
+            int column = tapeOptionIcon.optionRectangle.currentColumn;
+
+            Integer coord = -1;
+            Integer delta = 0;
+            switch (tapeOptionIcon.tapeOptionIconDirection){
+
+                case LEFT:
+                    delta = -1;
+                    coord = column;
+                    break;
+                case RIGHT:
+                    delta = 1;
+                    coord = column;
+                    break;
+                case BOTTOM:
+                    delta = -1;
+                    coord = line;
+                    break;
+                case TOP:
+                    delta = 1;
+                    coord = line;
+                    break;
+            }
+
+            Integer value = -1;
+
+            switch (tapeOptionIcon.tapeOptionIconAction){
+
+                case INFINITE:
+                    value = null;
+                    break;
+
+                case REMOVE:
+                    value = coord;
+                    break;
+
+                case ADD:
+                    value = coord + delta;
+                    break;
+            }
+
+            switch (tapeOptionIcon.tapeOptionIconDirection) {
+                case LEFT:
+                    tapeBorderPane.setTapeLeftBound(value);
+                    break;
+                case RIGHT:
+                    tapeBorderPane.setTapeRightBound(value);
+                    break;
+                case BOTTOM:
+                    tapeBorderPane.setTapeBottomBound(value);
+                    break;
+                case TOP:
+                    tapeBorderPane.setTapeTopBound(value);
+                    break;
+            }
+        }
     }
 
     private void handleDragEvent(MouseEvent mouseEvent) {
@@ -184,6 +248,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 dragX = x;
             }
             mouseEvent.consume();
+        }
+        else if(source instanceof HeadMenuSelect) {
+            ((HeadMenuSelect) source).stopTimeline();
+        }
+        else if(source instanceof TapePane) {
+            ((TapePane) source).stopTimeline();
         }
     }
 }
