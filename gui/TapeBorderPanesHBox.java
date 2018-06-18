@@ -626,6 +626,7 @@ class TapePane extends Pane {
                         (tapeBorderPane.top == null || index <= tapeBorderPane.top)
                         && (tapeBorderPane.bottom == null || index + 1 >= tapeBorderPane.bottom)
                 );
+                line.toBack();
             }
         }
 
@@ -661,6 +662,7 @@ class TapePane extends Pane {
                         (tapeBorderPane.right == null || index <= tapeBorderPane.right)
                                 && (tapeBorderPane.left == null || index + 1 >= tapeBorderPane.left)
                 );
+                column.toBack();
             }
         }
 
@@ -800,11 +802,4 @@ class TapePane extends Pane {
         animatedRectangle.setVisible(false);
         animating = false;
     }
-}
-
-class Cell extends Rectangle {
-
-    int i;
-    int j;
-
 }

@@ -100,41 +100,19 @@ public class Tape{
         else
             tapeLeftBound = left;
 
-        for(int i = 0; i < nbHeads; i++) {
-            int x = initialHeadsColumn.get(i);
-            if (tapeLeftBound != null && tapeLeftBound > x)
-                initialHeadsColumn.set(i, tapeLeftBound);
-        }
-
-        Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry<Integer, Map<Integer, String>> entry = it.next();
-            Integer column = entry.getKey();
-            if(left != null && column < left)
-                it.remove();
-        }
+        checkHeadsColumns();
+        checkInput(true, false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED, this.machine, this, tapeLeftBound);
     }
 
     public void setRightBound(Integer right){
-        if(right != null && tapeRightBound != null && tapeLeftBound > right)
+        if(right != null && tapeLeftBound != null && tapeLeftBound > right)
             tapeRightBound = tapeLeftBound;
         else
             tapeRightBound = right;
 
-        for(int i = 0; i < nbHeads; i++) {
-            int column = initialHeadsColumn.get(i);
-            if (tapeRightBound != null && tapeRightBound < column)
-                initialHeadsColumn.set(i, tapeRightBound);
-        }
-
-        Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry<Integer, Map<Integer, String>> entry = it.next();
-            Integer column = entry.getKey();
-            if(right != null && column > right)
-                it.remove();
-        }
+        checkHeadsColumns();
+        checkInput(true, false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED, this.machine, this, tapeRightBound);
     }
 
@@ -144,53 +122,19 @@ public class Tape{
         else
             tapeBottomBound = bottom;
 
-        for(int i = 0; i < nbHeads; i++) {
-            int line = initialHeadsLine.get(i);
-            if (tapeBottomBound != null && tapeBottomBound > line)
-                initialHeadsLine.set(i, tapeBottomBound);
-        }
-
-        Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
-        while(it1.hasNext()){
-            Map.Entry<Integer, Map<Integer, String>> entry1 = it1.next();
-            Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
-            while (it2.hasNext()) {
-                Map.Entry<Integer, String> entry2 = it2.next();
-                Integer line = entry2.getKey();
-                if (bottom != null && line < bottom)
-                    it2.remove();
-            }
-            if(entry1.getValue().isEmpty())
-                it1.remove();
-        }
+        checkHeadsLines();
+        checkInput(false, true);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED, this.machine, this, tapeBottomBound);
     }
 
     public void setTopBound(Integer top){
-        if(top != null && tapeTopBound != null && tapeBottomBound > top)
+        if(top != null && tapeBottomBound != null && tapeBottomBound > top)
             tapeTopBound = tapeBottomBound;
         else
             tapeTopBound = top;
 
-        for(int i = 0; i < nbHeads; i++) {
-            int line = initialHeadsLine.get(i);
-            if (tapeTopBound != null && tapeTopBound < line)
-                initialHeadsLine.set(i, tapeTopBound);
-        }
-
-        Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
-        while(it1.hasNext()){
-            Map.Entry<Integer, Map<Integer, String>> entry1 = it1.next();
-            Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
-            while (it2.hasNext()) {
-                Map.Entry<Integer, String> entry2 = it2.next();
-                Integer line = entry2.getKey();
-                if (top != null && line > top)
-                    it2.remove();
-            }
-            if(entry1.getValue().isEmpty())
-                it1.remove();
-        }
+        checkHeadsLines();
+        checkInput(false, true);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED, this.machine, this, tapeTopBound);
     }
 
@@ -210,13 +154,32 @@ public class Tape{
         }
     }
 
+    private void checkHeadsColumns(){
+        for(int i = 0; i < nbHeads; i++) {
+            int column = initialHeadsColumn.get(i);
+            if (tapeLeftBound != null && tapeLeftBound > column)
+                setInitialHeadColumn(i, tapeLeftBound);
+            if (tapeRightBound != null && tapeRightBound < column)
+                setInitialHeadColumn(i, tapeRightBound);
+        }
+    }
+
     public void setInitialHeadLine(int head, int line) {
-        System.out.println(tapeBottomBound + " " + tapeTopBound + " " + line);
         if ((tapeBottomBound == null || line >= tapeBottomBound)
                 && (tapeTopBound == null || line <= tapeTopBound)) {
             initialHeadsLine.set(head, line);
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, line, initialHeadsColumn.get(head));
 
+        }
+    }
+
+    private void checkHeadsLines(){
+        for(int i = 0; i < nbHeads; i++) {
+            int line = initialHeadsLine.get(i);
+            if (tapeBottomBound != null && tapeBottomBound > line)
+                setInitialHeadLine(i, tapeBottomBound);
+            if (tapeTopBound != null && tapeTopBound < line)
+                setInitialHeadLine(i, tapeTopBound);
         }
     }
 
@@ -328,8 +291,37 @@ public class Tape{
             columnCells.put(line, symbol);
         }
 
-        if(input){
+        if(input)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, line, column, symbol);
+    }
+
+    private void checkInput(boolean horizontalChange, boolean verticalChange){
+        Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
+        while(it1.hasNext()){
+            Map.Entry<Integer, Map<Integer, String>> entry1 = it1.next();
+            Integer column = entry1.getKey();
+            if(horizontalChange &&
+                    ((tapeLeftBound != null && column < tapeLeftBound) ||
+                            (tapeRightBound != null && column > tapeRightBound))
+                    ) {
+                for(Integer line : entry1.getValue().keySet())
+                    Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, line, column, null);
+                it1.remove();
+            }
+            else if(verticalChange){
+                Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
+                while (it2.hasNext()) {
+                    Map.Entry<Integer, String> entry2 = it2.next();
+                    Integer line = entry2.getKey();
+                    if ((tapeBottomBound != null && line < tapeBottomBound) ||
+                            (tapeTopBound != null && line > tapeTopBound)) {
+                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, line, column, null);
+                        it2.remove();
+                    }
+                }
+                if (entry1.getValue().isEmpty())
+                    it1.remove();
+            }
         }
     }
 
