@@ -40,10 +40,17 @@ class TapesHeadMenu extends HBox {
     }
 
     void addTape(Tape tape){
-        TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(this.drawer);
+        TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(this.drawer, tape);
         tapeToMenu.put(tape, tapeHeadMenu);
         this.getChildren().addAll(tapeHeadMenu, new Separator(Orientation.VERTICAL));
 
+    }
+
+    void removeTape(Tape tape){
+        TapeHeadMenu tapeHeadMenu = tapeToMenu.get(tape);
+        int index = this.getChildren().indexOf(tapeHeadMenu);
+        this.getChildren().remove(index + 1);
+        this.getChildren().remove(index);
     }
 
     void addHead(Tape tape, Color color){
@@ -60,10 +67,13 @@ class TapesHeadMenu extends HBox {
 
 class TapeHeadMenu extends HBox {
     TuringMachineDrawer drawer;
-    TapeHeadMenu(TuringMachineDrawer drawer) {
+
+    TapeHeadMenu(TuringMachineDrawer drawer, Tape tape) {
         this.drawer = drawer;
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
+
+        this.getChildren().add(new RemoveTapeIcon(drawer, tape));
     }
 
     void addHead(Color color){
@@ -127,5 +137,20 @@ class AddTapeIcon extends ImageView{
     AddTapeIcon(TuringMachineDrawer drawer){
         super("./images/add_tape.png");
         this.drawer = drawer;
+        this.setOnMouseClicked(drawer.tapesMouseHandler);
+    }
+}
+
+class RemoveTapeIcon extends ImageView{
+
+    TuringMachineDrawer drawer;
+    Tape tape;
+
+    RemoveTapeIcon(TuringMachineDrawer drawer, Tape tape){
+        super("./images/remove_tape.png");
+        this.drawer = drawer;
+        this.tape = tape;
+
+        this.setOnMouseClicked(drawer.tapesMouseHandler);
     }
 }

@@ -146,6 +146,14 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
             mouseEvent.consume();
         }
+        else if(source instanceof AddTapeIcon){
+            this.drawer.addTape();
+            mouseEvent.consume();
+        }
+        else if(source instanceof RemoveTapeIcon){
+            this.drawer.removeTape(((RemoveTapeIcon) source).tape);
+            mouseEvent.consume();
+        }
         else if(source instanceof OptionRectangle)
             mouseEvent.consume();
         else if(source instanceof TapeOptionIcon){
