@@ -54,7 +54,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             if(selected != null)
                 unselect();
             else
-                drawer.drawNewState(x, y);
+                drawer.addState(x, y);
 
         }
         else if(source instanceof StateCircle){
@@ -63,7 +63,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             if(selected == null)
                 select(circle);
             else if(selected instanceof StateGroup){
-                drawer.drawNewTransition((StateGroup) selected, circle);
+                drawer.addTransition((StateGroup) selected, circle);
                 unselect();
             }
             else {

@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -37,6 +38,7 @@ class TapeBorderPanesHBox extends HBox{
     TapeBorderPanesHBox(TuringMachineDrawer drawer){
         this.drawer = drawer;
         this.tapes = new HashMap<>();
+        this.setAlignment(Pos.CENTER_LEFT);
 
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) ->
             resizeChildren(newVal.getWidth(), newVal.getHeight())
@@ -94,9 +96,7 @@ class TapeBorderPanesHBox extends HBox{
         if(this.getChildren().size() == 1){
             Node child = this.getChildren().get(0);
 
-            this.setTranslateX(0);
             this.setSpacing(0);
-
             TapeBorderPane tapeBorderPane = (TapeBorderPane) child;
             tapeBorderPane.setMinHeight(height);
             tapeBorderPane.setMaxHeight(height);
@@ -105,9 +105,12 @@ class TapeBorderPanesHBox extends HBox{
         }
         else {
 
-            this.setSpacing(width * (1 - TuringMachineDrawer.TAPE_WIDTH_RATIO) / 2);
+            double leavingSpace = width * (1 - TuringMachineDrawer.TAPE_WIDTH_RATIO) / 2;
+            this.setSpacing((leavingSpace - TuringMachineDrawer.TAPE_HOBX_ARROW_WIDTH) * 2 / 3);
 
             for (Node child : this.getChildren()) {
+                if(!(child instanceof TapeBorderPane))
+                    continue;
                 TapeBorderPane tapeBorderPane = (TapeBorderPane) child;
                 tapeBorderPane.setMinHeight(height);
                 tapeBorderPane.setMaxHeight(height);
@@ -130,8 +133,42 @@ class TapeBorderPanesHBox extends HBox{
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0, 1, 0, 0))));
 
         tapes.put(tape, tapeBorderPane);
+
+        if(this.getChildren().size() != 0){
+            TapeBorderPane previousTapeBorderPane = (TapeBorderPane) this.getChildren().get(
+                    this.getChildren().size() - 1);
+            for(Node child : this.getChildren())
+                child.setTranslateX(0);
+            this.getChildren().addAll(
+                    new RightArrow(this.drawer, this, tapeBorderPane),
+                    new LeftArrow(this.drawer, this, previousTapeBorderPane)
+            );
+        }
+
         this.getChildren().add(tapeBorderPane);
         this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
+        this.centerOn(tapeBorderPane);
+    }
+
+    void removeTape(Tape tape){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        int index = this.getChildren().indexOf(tapeBorderPane);
+        this.getChildren().remove(index);
+        int size = this.getChildren().size();
+
+        if(size > 1) {
+            this.getChildren().remove(index - 1);
+            this.getChildren().remove(index - 2);
+
+            if(size > index){
+                ((TranslateTapesArrow)this.getChildren().get(index - 1)).tapeBorderPane =
+                        (TapeBorderPane) this.getChildren().get(index - 3);
+            }
+        }
+
+        this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
+        if(size != 0)
+            this.centerOn((TapeBorderPane) this.getChildren().get(index - 3));
     }
 
     private void moveHeadFromMachine(Tape tape, int line, int column, int head){
@@ -146,6 +183,7 @@ class TapeBorderPanesHBox extends HBox{
 
     void translateTo(Tape tape, int head) {
         TapeBorderPane tapeBorderPane = tapes.get(tape);
+        this.centerOn(tapeBorderPane);
         tapeBorderPane.translateTo(head);
     }
 
@@ -177,6 +215,27 @@ class TapeBorderPanesHBox extends HBox{
     private void setTopFromMachine(Tape tape, Integer top){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeTopBound(top);
+    }
+
+    void centerOn(TapeBorderPane tapeBorderPane){
+        double x = tapeBorderPane.getTranslateX();
+
+        int index = this.getChildren().indexOf(tapeBorderPane) / 3;
+        double leavingSpace =
+                (this.getChildren().size() == 1)?0:this.getMaxWidth() * ((1 - TuringMachineDrawer.TAPE_WIDTH_RATIO) / 2);
+
+        double targetX = -(index * this.getMaxWidth()) + leavingSpace;
+
+
+        this.translate(targetX - x);
+    }
+
+    private void translate(double dx){
+        if(dx == 0)
+            return;
+
+        for(Node child : this.getChildren())
+            child.setTranslateX(child.getTranslateX() + dx);
     }
 }
 
@@ -825,5 +884,42 @@ class TapePane extends Pane {
         animatedRectangle.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
         animatedRectangle.setVisible(false);
         animating = false;
+    }
+}
+
+abstract class TranslateTapesArrow extends Polygon{
+    TapeBorderPanesHBox tapeBorderPanesHBox;
+    TapeBorderPane tapeBorderPane;
+    TranslateTapesArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox,
+                        TapeBorderPane tapeBorderPane) {
+        this.tapeBorderPanesHBox = tapeBorderPanesHBox;
+        this.tapeBorderPane = tapeBorderPane;
+        this.setOnMouseClicked(drawer.tapesMouseHandler);
+    }
+}
+
+class RightArrow extends TranslateTapesArrow{
+
+    RightArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane) {
+        super(drawer, tapeBorderPanesHBox, tapeBorderPane);
+
+        this.getPoints().addAll(
+                0D, 0D,
+                TuringMachineDrawer.TAPE_HOBX_ARROW_WIDTH,
+                TuringMachineDrawer.TAPE_HOBX_ARROW_HEIGHT / 2,
+                0D, TuringMachineDrawer.TAPE_HOBX_ARROW_HEIGHT);
+    }
+}
+
+class LeftArrow extends TranslateTapesArrow{
+
+    LeftArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane){
+        super(drawer, tapeBorderPanesHBox, tapeBorderPane);
+
+        this.getPoints().addAll(
+                TuringMachineDrawer.TAPE_HOBX_ARROW_WIDTH, 0D,
+                0D,
+                TuringMachineDrawer.TAPE_HOBX_ARROW_HEIGHT / 2,
+                TuringMachineDrawer.TAPE_HOBX_ARROW_WIDTH, TuringMachineDrawer.TAPE_HOBX_ARROW_HEIGHT);
     }
 }

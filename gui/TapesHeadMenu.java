@@ -12,11 +12,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import turingmachines.Tape;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import turingmachines.Tape;
 
 class TapesHeadMenu extends HBox {
 
@@ -89,7 +88,7 @@ class TapeHeadMenu extends HBox {
     }
 
     void editHeadColor(int head, Color color) {
-        ((HeadMenuSelect)this.getChildren().get(head)).setStroke(color);
+        ((HeadMenuSelect)this.getChildren().get(head + 1)).setStroke(color);
     }
 }
 

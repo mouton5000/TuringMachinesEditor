@@ -166,8 +166,8 @@ public class TuringMachine {
         return tapes.get(i);
     }
 
-    public void removeTape(int i){
-        Tape tape = tapes.remove(i);
+    public void removeTape(Tape tape){
+        tapes.remove(tape);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE, this, tape);
     }
 

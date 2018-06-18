@@ -154,6 +154,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
             this.drawer.removeTape(((RemoveTapeIcon) source).tape);
             mouseEvent.consume();
         }
+        else if(source instanceof TranslateTapesArrow){
+            TranslateTapesArrow translateTapesArrow = ((TranslateTapesArrow) source);
+            translateTapesArrow.tapeBorderPanesHBox.centerOn(translateTapesArrow.tapeBorderPane);
+
+            mouseEvent.consume();
+        }
         else if(source instanceof OptionRectangle)
             mouseEvent.consume();
         else if(source instanceof TapeOptionIcon){

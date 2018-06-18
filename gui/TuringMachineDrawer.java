@@ -17,6 +17,7 @@ import javafx.stage.StageStyle;
 import turingmachines.Tape;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
+import util.BidirMap;
 import util.Colors;
 import util.Pair;
 import util.Subscriber;
@@ -65,6 +66,8 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
     static final double TAPE_WIDTH_RATIO = 4.0/5;
+    static final double TAPE_HOBX_ARROW_HEIGHT = 80;
+    static final double TAPE_HOBX_ARROW_WIDTH = 40;
 
     static final double TAPE_COORDINATES_WIDTH = 30;
     static final double TAPES_HEAD_MENU_HEIGHT = 50;
@@ -111,8 +114,16 @@ public class TuringMachineDrawer extends Application {
 
 
     public TuringMachine machine;
-    public Map<StateGroup, Integer> stateGroupToState;
+    public BidirMap<StateGroup, Integer> stateGroupToState;
     private Map<Group, Transition> arrowGroupToTransition;
+
+    private Double nextX;
+    private Double nextY;
+
+    private Double nextControl1X;
+    private Double nextControl1Y;
+    private Double nextControl2X;
+    private Double nextControl2Y;
 
     private Color nextHeadColor;
     private Map<Color, Pair<Tape, Integer>> headsColors;
@@ -143,11 +154,25 @@ public class TuringMachineDrawer extends Application {
             public void read(String msg, Object... parameters) {
 
                 switch (msg) {
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        addStateFromMachine(state);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
+                        Transition transition = (Transition) parameters[1];
+                        addTransitionFromMachine(transition);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_TAPE:{
                         Tape tape = (Tape) parameters[1];
                         addTapeFromMachine(tape);
                     }
-
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE:{
+                        Tape tape = (Tape) parameters[1];
+                        removeTapeFromMachine(tape);
+                    }
                     break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_HEAD:{
                         Tape tape = (Tape) parameters[1];
@@ -166,7 +191,10 @@ public class TuringMachineDrawer extends Application {
             }
         };
 
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL);
 
@@ -184,7 +212,7 @@ public class TuringMachineDrawer extends Application {
             resizePanes();
         });
 
-        stateGroupToState = new HashMap<>();
+        stateGroupToState = new BidirMap<>();
         arrowGroupToTransition = new HashMap<Group, Transition>();
 
 
@@ -196,8 +224,8 @@ public class TuringMachineDrawer extends Application {
         Tape tape = this.machine.addTape();
         tape.addHead();
 
-        this.machine.addSymbol("0");
-        this.machine.addSymbol("1");
+        this.addSymbol("0");
+        this.addSymbol("1");
 
         stage.show();
     }
@@ -301,16 +329,25 @@ public class TuringMachineDrawer extends Application {
         return ((int)value / GRAPH_GRID_WIDTH) * GRAPH_GRID_WIDTH;
     }
 
-    void drawNewState(double x, double y){
+    void addState(double x, double y){
         String name = Character.toString(currentDefaultStateChar);
+        this.addState(x, y, name);
+    }
+
+    void addState(double x, double y, String name){
+        this.nextX = x;
+        this.nextY = y;
+        machine.addState(name);
+    }
+
+    void addStateFromMachine(Integer state){
         currentDefaultStateChar++;
+        String name = this.machine.getStateName(state);
+        StateGroup circle = new StateGroup(this, name, nextX, nextY);
 
-        StateGroup circle = new StateGroup(this, name, x, y);
-
-        int state = machine.addState(name);
         stateGroupToState.put(circle, state);
-
         graphPane.getChildren().add(circle);
+
     }
 
     void moveStateGroup(StateGroup stateGroup, double x, double y){
@@ -333,7 +370,7 @@ public class TuringMachineDrawer extends Application {
 
     void toggleFinal(StateGroup stateGroup){
         stateGroup.toggleFinal();
-        Integer state = stateGroupToState.get(stateGroup);
+        Integer state = stateGroupToState.getV(stateGroup);
         if(machine.isFinal(state)){
             if(machine.isAccepting(state)){
                 machine.unsetAcceptingState(state);
@@ -349,7 +386,7 @@ public class TuringMachineDrawer extends Application {
 
     public void toggleAccepting(StateGroup stateGroup){
         stateGroup.toggleAccepting();
-        Integer state = stateGroupToState.get(stateGroup);
+        Integer state = stateGroupToState.getV(stateGroup);
         if(machine.isAccepting(state))
             machine.unsetFinalState(state);
         else
@@ -358,20 +395,47 @@ public class TuringMachineDrawer extends Application {
 
     public void toggleInitial(StateGroup stateGroup){
         stateGroup.toggleInitial();
-        Integer state = stateGroupToState.get(stateGroup);
+        Integer state = stateGroupToState.getV(stateGroup);
         if(machine.isInitial(state))
             machine.unsetInitialState(state);
         else
             machine.setInitialState(state);
     }
 
-    void drawNewTransition(StateGroup start, StateGroup end){
+    void addTransition(StateGroup start, StateGroup end){
+        addTransition(start, end, null, null, null, null);
+    }
+
+
+    void addTransition(StateGroup start, StateGroup end,
+                       Double nextControl1X, Double nextControl1Y,
+                       Double nextControl2X, Double nextControl2Y
+                       ){
+        Integer input = stateGroupToState.getV(start);
+        Integer output = stateGroupToState.getV(end);
+
+        this.nextControl1X = nextControl1X;
+        this.nextControl1Y = nextControl1Y;
+        this.nextControl2X = nextControl2X;
+        this.nextControl2Y = nextControl2Y;
+
+        machine.addTransition(input, output);
+    }
+
+    void addTransitionFromMachine(Transition transition){
+        Integer input = transition.getInput();
+        Integer output = transition.getOutput();
+
+        StateGroup start = stateGroupToState.getK(input);
+        StateGroup end = stateGroupToState.getK(output);
+
         TransitionArrowGroup arrow = new TransitionArrowGroup(this, start, end);
+        if(nextControl1X != null)
+            arrow.setControl1(nextControl1X, nextControl1Y);
+        if(nextControl2X != null)
+            arrow.setControl2(nextControl2X, nextControl2Y);
 
-        Integer input = stateGroupToState.get(start);
-        Integer output = stateGroupToState.get(end);
-        arrowGroupToTransition.put(arrow, machine.addTransition(input, output));
-
+        arrowGroupToTransition.put(arrow, transition);
         graphPane.getChildren().add(arrow);
         arrow.toBack();
     }
@@ -388,9 +452,37 @@ public class TuringMachineDrawer extends Application {
         this.machine.addTape();
     }
 
-    void addTapeFromMachine(Tape tape){
+    private void addTapeFromMachine(Tape tape){
         this.tapesHeadMenu.addTape(tape);
         this.tapesPane.addTape(tape);
+    }
+
+    void removeTape(Tape tape){ removeTape(tape, true);}
+
+    private void removeTape(Tape tape, boolean doConfirm){
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer la bande?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    this.machine.removeTape(tape);
+            });
+        }
+        else
+            this.machine.removeTape(tape);
+    }
+
+    private void removeTapeFromMachine(Tape tape){
+        Iterator<Map.Entry<Color, Pair<Tape, Integer>>> it = headsColors.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<Color, Pair<Tape, Integer>> entry = it.next();
+            if(entry.getValue().first == tape)
+                it.remove();
+        }
+        this.tapesHeadMenu.removeTape(tape);
+        this.tapesPane.removeTape(tape);
     }
 
     void moveHead(Tape tape, int line, int column, int head) {

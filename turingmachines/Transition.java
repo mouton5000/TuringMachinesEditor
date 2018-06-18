@@ -23,15 +23,15 @@ public class Transition {
         actions = new ArrayList<>();
     }
 
-    Integer getInput() {
+    public Integer getInput() {
         return input;
     }
 
-    Integer getOutput() {
+    public Integer getOutput() {
         return output;
     }
 
-    Iterator<Action> getActions(){
+    public Iterator<Action> getActions(){
         return actions.iterator();
     }
 
