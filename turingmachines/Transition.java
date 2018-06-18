@@ -13,7 +13,7 @@ public class Transition {
     private List<Action> actions;
     private TuringMachine machine;
 
-    public Transition(TuringMachine machine, Integer input, Integer output) {
+    Transition(TuringMachine machine, Integer input, Integer output) {
         this.machine = machine;
 
         this.input = input;
@@ -23,43 +23,43 @@ public class Transition {
         actions = new ArrayList<>();
     }
 
-    public Integer getInput() {
+    Integer getInput() {
         return input;
     }
 
-    public Integer getOutput() {
+    Integer getOutput() {
         return output;
     }
 
-    public Iterator<Action> getActions(){
+    Iterator<Action> getActions(){
         return actions.iterator();
     }
 
-    public void addAction(Action action){
+    void addAction(Action action){
         actions.add(action);
     }
 
-    public void setAction(int i, Action action){
+    void setAction(int i, Action action){
         actions.set(i, action);
     }
 
-    public void removeAction(int i){
+    void removeAction(int i){
         actions.remove(i);
     }
 
-    public Iterator<ReadSymbol> getReadSymbols(){
+    Iterator<ReadSymbol> getReadSymbols(){
         return readSymbols.iterator();
     }
 
-    public void addReadSymbol(ReadSymbol readSymbol){
+    void addReadSymbol(ReadSymbol readSymbol){
         readSymbols.add(readSymbol);
     }
 
-    public void setReadSymbol(int i, ReadSymbol readSymbol){
+    void setReadSymbol(int i, ReadSymbol readSymbol){
         readSymbols.set(i, readSymbol);
     }
 
-    public void removeReadSymbol(int i){
+    void removeReadSymbol(int i){
         readSymbols.remove(i);
     }
 

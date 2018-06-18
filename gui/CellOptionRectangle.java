@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import turingmachines.Tape;
 
 /**
  * Created by dimitri.watel on 11/06/18.
@@ -22,6 +23,7 @@ class CellOptionRectangle extends OptionRectangle{
     final TapePane tapePane;
     private final CellOptionRectangleSymbolsOptionsGroup symbolsGroup;
     private final CellOptionRectangleHeadOptionsGroup headsGroup;
+    Tape currentTape;
     int currentLine;
     int currentColumn;
 
@@ -57,6 +59,8 @@ class CellOptionRectangle extends OptionRectangle{
 
     }
 
+    void addSymbol(String symbol) {symbolsGroup.addSymbol(symbol);}
+
     void addHead(Color color){
         headsGroup.addHead(color);
     }
@@ -66,7 +70,8 @@ class CellOptionRectangle extends OptionRectangle{
         return tapePane;
     }
 
-    void setLineAndColumn(int line, int column){
+    void setLineAndColumn(Tape tape, int line, int column){
+        this.currentTape = tape;
         this.currentLine = line;
         this.currentColumn = column;
     }
@@ -80,8 +85,11 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
 
     private double offsetX;
     private ImageView symbolsIcon;
+    private CellOptionRectangle optionRectangle;
 
     CellOptionRectangleSymbolsOptionsGroup(CellOptionRectangle optionRectangle) {
+        this.optionRectangle = optionRectangle;
+
         this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
@@ -107,19 +115,8 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
             this.getChildren().add(label);
         }
 
-        for(String symbol: optionRectangle.tapePane.drawer.machine.getSymbols()){
-            ChooseSymbolOptionLabel label = new ChooseSymbolOptionLabel(optionRectangle, symbol);
-            label.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
-                    TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-            label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
-
-            label.setMinWidth(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxWidth(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMinHeight(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxHeight(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
-
-            this.getChildren().add(label);
-        }
+        for(String symbol: optionRectangle.tapePane.drawer.machine.getSymbols())
+            addSymbol(symbol);
     }
 
     void translate(double dx){
@@ -140,6 +137,20 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
         offsetX -= dx;
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
+    }
+
+    void addSymbol(String symbol){
+        ChooseSymbolOptionLabel label = new ChooseSymbolOptionLabel(optionRectangle, symbol);
+        label.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+        label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
+
+        label.setMinWidth(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMaxWidth(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMinHeight(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMaxHeight(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE);
+
+        this.getChildren().add(label);
     }
 }
 

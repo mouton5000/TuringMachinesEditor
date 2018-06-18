@@ -3,6 +3,7 @@ package gui;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Line;
+import turingmachines.Tape;
 
 /**
  * Created by dimitri.watel on 14/06/18.
@@ -30,6 +31,7 @@ class TapeOptionRectangle extends OptionRectangle{
     private final ImageView inf_line_top_icon_gray;
     TapeBorderPane tapeBorderPane;
 
+    Tape currentTape;
     int currentLine;
     int currentColumn;
 
@@ -213,7 +215,8 @@ class TapeOptionRectangle extends OptionRectangle{
         return tapeBorderPane;
     }
 
-    void setLineAndColumn(int line, int column){
+    void setLineAndColumn(Tape tape, int line, int column){
+        this.currentTape = tape;
         this.currentLine = line;
         this.currentColumn = column;
 

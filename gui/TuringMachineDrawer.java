@@ -17,12 +17,11 @@ import javafx.stage.StageStyle;
 import turingmachines.Tape;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
+import util.Colors;
 import util.Pair;
+import util.Subscriber;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class TuringMachineDrawer extends Application {
 
@@ -113,7 +112,10 @@ public class TuringMachineDrawer extends Application {
     public Map<StateGroup, Integer> stateGroupToState;
     private Map<Group, Transition> arrowGroupToTransition;
 
+    private Color nextHeadColor;
     private Map<Color, Pair<Tape, Integer>> headsColors;
+    private static List<Color> defaultColors = Colors.allColors();
+    private int defaultColorsIndex;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
@@ -131,8 +133,42 @@ public class TuringMachineDrawer extends Application {
         this.headsColors = new HashMap<>();
 
         this.stage = stage;
-        this.machine = new TuringMachine();
         this.animating = false;
+        this.defaultColorsIndex = 0;
+
+        Subscriber s = new Subscriber() {
+            @Override
+            public void read(String msg, Object... parameters) {
+
+                switch (msg) {
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_TAPE:{
+                        Tape tape = (Tape) parameters[1];
+                        addTapeFromMachine(tape);
+                    }
+
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_HEAD:{
+                        Tape tape = (Tape) parameters[1];
+                        Integer head = (Integer) parameters[2];
+                        Integer line = (Integer) parameters[3];
+                        Integer column = (Integer) parameters[4];
+                        addHeadFromMachine(tape, head, line, column);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL:{
+                        String symbol = (String) parameters[1];
+                        addSymbolFromMachine(symbol);
+                    }
+                    break;
+                }
+            }
+        };
+
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL);
+
+        this.machine = new TuringMachine();
 
         reinitDraw();
 
@@ -154,6 +190,12 @@ public class TuringMachineDrawer extends Application {
 
         graphOffsetX = 0;
         graphOffsetY = 0;
+
+        Tape tape = this.machine.addTape();
+        tape.addHead();
+
+        this.machine.addSymbol("0");
+        this.machine.addSymbol("1");
 
         stage.show();
     }
@@ -237,8 +279,6 @@ public class TuringMachineDrawer extends Application {
 
         VBox box = new VBox();
         box.getChildren().addAll(menuBar, graphPane, separator, tapesPaneVBox);
-
-        this.addHead(0, 0, 0, Color.BLACK);
 
         Scene scene = new Scene(box, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
@@ -334,8 +374,26 @@ public class TuringMachineDrawer extends Application {
         arrow.toBack();
     }
 
+    void addSymbol(String symbol){
+        this.machine.addSymbol(symbol);
+    }
+
+    void addSymbolFromMachine(String symbol){
+        this.tapesPane.addSymbol(symbol);
+    }
+
+    void addTape(){
+        this.machine.addTape();
+    }
+
+    void addTapeFromMachine(Tape tape){
+        this.tapesHeadMenu.addTape(tape);
+        this.tapesPane.addTape(tape);
+    }
+
     void moveHead(Tape tape, int line, int column, int head) {
-        tapesPane.moveHead(tape, line, column, head);
+        tape.setInitialHeadColumn(head, column);
+        tape.setInitialHeadLine(head, line);
     }
 
     private Optional<Color> colorDialog(){
@@ -378,31 +436,47 @@ public class TuringMachineDrawer extends Application {
     }
 
     void addHead(Tape tape, int line, int column) {
-        this.colorDialog().ifPresent(color -> this.addHead(tape, line, column, color));
+        this.colorDialog().ifPresent(color -> {
+            this.nextHeadColor = color;
+            tape.addHead(line, column);
+        });
     }
 
-    void addHead(Tape tape, int head, int line, int column, Color color){
+    private Color getDefaultColor(){
+        return defaultColors.get(defaultColorsIndex++);
+    }
+
+    void addHeadFromMachine(Tape tape, int head, int line, int column){
+        Color color = nextHeadColor;
+        if(color == null)
+            color = getDefaultColor();
+
+        nextHeadColor = null;
+
         headsColors.put(color, new Pair<>(tape, head));
         tapesHeadMenu.addHead(tape, color);
         tapesPane.addHead(tape, line, column, color);
     }
 
-    int getHead(Color color) {
-        return headsColors.indexOf(color);
+    Pair<Tape, Integer> getHead(Color color) {
+        return headsColors.get(color);
     }
 
     public void editHeadColor(Color color) {
-        int head = getHead(color);
+        Pair<Tape, Integer> pair = getHead(color);
+        Tape tape = pair.first;
+        Integer head = pair.second;
         this.colorDialog().ifPresent(color2 -> {
-            tapesPane.editHeadColor(0, head, color2);
-            tapesHeadMenu.editHeadColor(0, head, color2);
-            this.headsColors.set(head, color2);
+            tapesPane.editHeadColor(tape, head, color2);
+            tapesHeadMenu.editHeadColor(tape, head, color2);
+            this.headsColors.remove(color);
+            this.headsColors.put(color2, pair);
         });
     }
 
     void translateTo(Color color) {
-        int head = getHead(color);
-        tapesPane.translateTo(0, head);
+        Pair<Tape, Integer> pair = getHead(color);
+        tapesPane.translateTo(pair.first, pair.second);
     }
 
     public static void main(String[] args) {

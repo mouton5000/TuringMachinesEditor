@@ -11,36 +11,43 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import turingmachines.Tape;
+
 class TapesHeadMenu extends HBox {
 
     private final TuringMachineDrawer drawer;
+    private Map<Tape, TapeHeadMenu> tapeToMenu;
 
     TapesHeadMenu(TuringMachineDrawer drawer){
 
         this.drawer = drawer;
+        this.tapeToMenu = new HashMap<>();
 
         this.setMinHeight(TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
         this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
 
+    }
+
+    void addTape(Tape tape){
         TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(this.drawer);
-
-        Separator separator = new Separator();
-
-        this.getChildren().addAll(tapeHeadMenu, separator);
-
+        tapeToMenu.put(tape, tapeHeadMenu);
+        this.getChildren().addAll(tapeHeadMenu, new Separator());
 
     }
 
-    void addHead(int tape, Color color){
-        TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) this.getChildren().get(tape);
+    void addHead(Tape tape, Color color){
+        TapeHeadMenu tapeHeadMenu = tapeToMenu.get(tape);
         tapeHeadMenu.addHead(color);
     }
 
 
-    void editHeadColor(int tape, int head, Color color) {
-        TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) this.getChildren().get(tape);
+    void editHeadColor(Tape tape, int head, Color color) {
+        TapeHeadMenu tapeHeadMenu = tapeToMenu.get(tape);
         tapeHeadMenu.editHeadColor(head, color);
     }
 }

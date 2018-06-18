@@ -1,6 +1,6 @@
 package turingmachines;
 
-public enum Direction {
+enum Direction {
     TOP,
     BOTTOM,
     LEFT,

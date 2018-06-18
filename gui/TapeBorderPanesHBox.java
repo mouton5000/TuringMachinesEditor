@@ -55,44 +55,41 @@ class TapeBorderPanesHBox extends HBox{
             public void read(String msg, Object... parameters) {
                 Tape tape = (Tape) parameters[1];
                 switch (msg) {
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_TAPE:{
-                        addTape(tape);
-                    }
                     case TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED: {
                         Integer head = (Integer) parameters[2];
                         Integer line = (Integer) parameters[3];
-                        Integer column = (Integer) parameters[3];
-                        moveHead(tape, line, column, head);
+                        Integer column = (Integer) parameters[4];
+                        moveHeadFromMachine(tape, line, column, head);
                     }
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED: {
                         Integer line = (Integer) parameters[2];
                         Integer column = (Integer) parameters[3];
                         String symbol = (String) parameters[4];
-                        setInputSymbol(tape, line, column, symbol);
+                        setInputSymbolFromMachine(tape, line, column, symbol);
                     }
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED:
                         Integer left = (Integer) parameters[2];
-                        setLeft(tape, left);
+                        setLeftFromMachine(tape, left);
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED:
                         Integer right = (Integer) parameters[2];
-                        setRight(tape, right);
+                        setRightFromMachine(tape, right);
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED:
                         Integer bottom = (Integer) parameters[2];
-                        setBottom(tape, bottom);
+                        setBottomFromMachine(tape, bottom);
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED:
                         Integer top = (Integer) parameters[2];
-                        setTop(tape, top);
+                        setTopFromMachine(tape, top);
                         break;
                 }
             }
         };
 
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED);
@@ -101,53 +98,59 @@ class TapeBorderPanesHBox extends HBox{
 
     }
 
-    private void addTape(Tape tape){
-        TapeBorderPane tapeBorderPane = new TapeBorderPane(this.drawer, this.getChildren().size());
+    void addSymbol(String symbol){
+        for(TapeBorderPane tapeBorderPane: tapes.values()){
+            tapeBorderPane.tapePane.cellOptionRectangle.addSymbol(symbol);
+        }
+    }
+
+    void addTape(Tape tape){
+        TapeBorderPane tapeBorderPane = new TapeBorderPane(this.drawer, tape);
         tapes.put(tape, tapeBorderPane);
         this.getChildren().add(tapeBorderPane);
     }
 
-    void moveHead(Tape tape, int line, int column, int head){
+    private void moveHeadFromMachine(Tape tape, int line, int column, int head){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.moveHead(line, column, head);
     }
 
-    private void addHead(Tape tape, int line, int column, Color color){
+    void addHead(Tape tape, int line, int column, Color color){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.addHead(line, column, color);
     }
 
-    private void translateTo(Tape tape, int head) {
+    void translateTo(Tape tape, int head) {
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.translateTo(head);
     }
 
-    private void editHeadColor(Tape tape, int head, Color color) {
+    void editHeadColor(Tape tape, int head, Color color) {
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.editHeadColor(head, color);
     }
 
-    private void setInputSymbol(Tape tape, int line, int column, String symbol){
+    private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.drawSymbol(line, column, symbol);
     }
 
-    private void setLeft(Tape tape, Integer left){
+    private void setLeftFromMachine(Tape tape, Integer left){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeLeftBound(left);
     }
 
-    private void setRight(Tape tape, Integer right){
+    private void setRightFromMachine(Tape tape, Integer right){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeRightBound(right);
     }
 
-    private void setBottom(Tape tape, Integer bottom){
+    private void setBottomFromMachine(Tape tape, Integer bottom){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeBottomBound(bottom);
     }
 
-    private void setTop(Tape tape, Integer top){
+    private void setTopFromMachine(Tape tape, Integer top){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeTopBound(top);
     }
@@ -170,11 +173,12 @@ class TapeBorderPane extends BorderPane {
 
     double maxWidth;
     double maxHeight;
-    int tapeIndex;
 
-    TapeBorderPane(TuringMachineDrawer drawer, int tapeIndex) {
+    Tape tape;
+
+    TapeBorderPane(TuringMachineDrawer drawer, Tape tape) {
         this.drawer = drawer;
-        this.tapeIndex = tapeIndex;
+        this.tape = tape;
 
         horizontalCoordinates = new HorizontalCoordinates(drawer, this);
         horizontalCoordinates.setMinHeight(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
@@ -227,28 +231,24 @@ class TapeBorderPane extends BorderPane {
         this.left = left;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
         tapePane.tapeOptionRectangle.reset();
-        this.drawer.machine.getTape(tapeIndex).setLeftBound(left);
     }
 
     void setTapeRightBound(Integer right) {
         this.right = right;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
         tapePane.tapeOptionRectangle.reset();
-        this.drawer.machine.getTape(tapeIndex).setRightBound(right);
     }
 
     void setTapeBottomBound(Integer bottom) {
         this.bottom = bottom;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
         tapePane.tapeOptionRectangle.reset();
-        this.drawer.machine.getTape(tapeIndex).setBottomBound(bottom);
     }
 
     void setTapeTopBound(Integer top) {
         this.top = top;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
         tapePane.tapeOptionRectangle.reset();
-        this.drawer.machine.getTape(tapeIndex).setTopBound(top);
     }
 
     void translate(double dx, double dy) {
@@ -475,7 +475,7 @@ class TapePane extends Pane {
     CellOptionRectangle cellOptionRectangle;
     TapeOptionRectangle tapeOptionRectangle;
 
-    private TapeBorderPane tapeBorderPane;
+    TapeBorderPane tapeBorderPane;
 
     private Map<Integer, Map<Integer, Label>> cellLabels;
     private List<Rectangle> heads;
@@ -549,7 +549,7 @@ class TapePane extends Pane {
         cellOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         cellOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        cellOptionRectangle.setLineAndColumn(line, column);
+        cellOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
         cellOptionRectangle.setVisible(true);
         cellOptionRectangle.maximize();
     }
@@ -570,7 +570,7 @@ class TapePane extends Pane {
         tapeOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         tapeOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        tapeOptionRectangle.setLineAndColumn(line, column);
+        tapeOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
         tapeOptionRectangle.setVisible(true);
         tapeOptionRectangle.maximize();
     }
@@ -622,7 +622,6 @@ class TapePane extends Pane {
             for (int i = 0; i < lines.size(); i++) {
                 int index = i - zeroIndex;
                 Line line = lines.get(i);
-                System.out.println(index +" "+tapeBorderPane.top+" "+tapeBorderPane.bottom);
                 line.setVisible(
                         (tapeBorderPane.top == null || index <= tapeBorderPane.top)
                         && (tapeBorderPane.bottom == null || index + 1 >= tapeBorderPane.bottom)

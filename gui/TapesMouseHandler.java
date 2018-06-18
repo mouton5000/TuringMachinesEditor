@@ -4,6 +4,8 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import turingmachines.Tape;
+import util.Pair;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -109,8 +111,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             String symbol = label.getText();
             symbol = symbol.equals("\u2205")?null:symbol;
-            optionRectangle.tapePane.drawSymbol(line, column, symbol);
-
+            optionRectangle.tapePane.tapeBorderPane.tape.writeInput(line,column, symbol);
 
             mouseEvent.consume();
         }
@@ -121,17 +122,18 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
-            int head = drawer.getHead(color);
-            drawer.moveHead(0, line, column, head);
+            Pair<Tape, Integer> pair = drawer.getHead(color);
+            drawer.moveHead(pair.first, line, column, pair.second);
             mouseEvent.consume();
         }
         else if(source instanceof AddHeadOptionIcon){
             AddHeadOptionIcon addHeadOptionIcon = (AddHeadOptionIcon) source;
             CellOptionRectangle optionRectangle = addHeadOptionIcon.optionRectangle;
 
+            Tape tape = optionRectangle.currentTape;
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
-            drawer.addHead(0, line, column);
+            drawer.addHead(tape, line, column);
             mouseEvent.consume();
         }
         else if(source instanceof HeadMenuSelect){
@@ -193,16 +195,16 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             switch (tapeOptionIcon.tapeOptionIconDirection) {
                 case LEFT:
-                    tapeBorderPane.setTapeLeftBound(value);
+                    tapeBorderPane.tape.setLeftBound(value);
                     break;
                 case RIGHT:
-                    tapeBorderPane.setTapeRightBound(value);
+                    tapeBorderPane.tape.setRightBound(value);
                     break;
                 case BOTTOM:
-                    tapeBorderPane.setTapeBottomBound(value);
+                    tapeBorderPane.tape.setBottomBound(value);
                     break;
                 case TOP:
-                    tapeBorderPane.setTapeTopBound(value);
+                    tapeBorderPane.tape.setTopBound(value);
                     break;
             }
         }

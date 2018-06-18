@@ -1,15 +1,15 @@
 package turingmachines;
 
-public abstract class Action {
-    protected Tape tape;
-    protected int head;
+abstract class Action {
+    Tape tape;
+    int head;
 
-    public Action(Tape tape, int head) {
+    Action(Tape tape, int head) {
         this.tape = tape;
         this.head = head;
     }
 
-    public abstract void doAction(boolean log);
+    abstract void doAction(boolean log);
 }
 
 

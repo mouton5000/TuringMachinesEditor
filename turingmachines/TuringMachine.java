@@ -78,11 +78,7 @@ public class TuringMachine {
         currentState = null;
 
         tapes = new ArrayList<>();
-        addTape();
-
         symbols = new ArrayList<>();
-        symbols.add("0");
-        symbols.add("1");
     }
 
     public Transition addTransition(Integer input, Integer output){
@@ -482,12 +478,12 @@ public class TuringMachine {
         tape1.addHead();
 
         tape1.writeInput(0, 0, "1");
-        tape1.writeInput(1, 0, "0");
-        tape1.writeInput(2, 0, "1");
-        tape1.writeInput(3, 0, "1");
-        tape1.writeInput(4, 0, "1");
-        tape1.writeInput(5, 0, "0");
-        tape1.writeInput(6, 0, "1");
+        tape1.writeInput(0, 1, "0");
+        tape1.writeInput(0, 2, "1");
+        tape1.writeInput(0, 3, "1");
+        tape1.writeInput(0, 4, "1");
+        tape1.writeInput(0, 5, "0");
+        tape1.writeInput(0, 6, "1");
 
         int a = t.addState("A");
         int b = t.addState("B");
@@ -599,17 +595,17 @@ public class TuringMachine {
         tape1.setLeftBound(0);
         tape1.setRightBound(2);
 
-        tape1.setInitialHeadX(0, 0);
-        tape1.setInitialHeadY(0, 0);
+        tape1.setInitialHeadColumn(0, 0);
+        tape1.setInitialHeadLine(0, 0);
 
         tape1.writeInput(0, 0, "1");
-        tape1.writeInput(1, 0, "1");
-        tape1.writeInput(2, 0, "1");
         tape1.writeInput(0, 1, "1");
-        tape1.writeInput(1, 1, "2");
-        tape1.writeInput(2, 1, "2");
         tape1.writeInput(0, 2, "1");
-        tape1.writeInput(1, 2, "1");
+        tape1.writeInput(1, 0, "1");
+        tape1.writeInput(1, 1, "2");
+        tape1.writeInput(1, 2, "2");
+        tape1.writeInput(2, 0, "1");
+        tape1.writeInput(2, 1, "1");
         tape1.writeInput(2, 2, "0");
 
         int a = t.addState("A");

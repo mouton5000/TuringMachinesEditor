@@ -23,12 +23,12 @@ public class Tape{
     private Integer nbHeads;
 
     // Coordinates at the beginning of the computation
-    private List<Integer> initialHeadsX;
-    private List<Integer> initialHeadsY;
+    private List<Integer> initialHeadsColumn;
+    private List<Integer> initialHeadsLine;
 
     // Current coordinates
-    private List<Integer> headsX;
-    private List<Integer> headsY;
+    private List<Integer> headsColumn;
+    private List<Integer> headsLine;
 
     private TuringMachine machine;
 
@@ -41,17 +41,16 @@ public class Tape{
         tapeRightBound = null;
 
         nbHeads = 0;
-        initialHeadsX = new ArrayList<>();
-        initialHeadsY = new ArrayList<>();
-        headsX = new ArrayList<>();
-        headsY = new ArrayList<>();
-        addHead();
+        initialHeadsColumn = new ArrayList<>();
+        initialHeadsLine = new ArrayList<>();
+        headsColumn = new ArrayList<>();
+        headsLine = new ArrayList<>();
 
         cells = new HashMap<>();
         inputCells = new HashMap<>();
     }
 
-    private int initX(){
+    private int initColumn(){
         if(tapeLeftBound == null && tapeRightBound == null)
             return 0;
         if(tapeLeftBound == null)
@@ -61,7 +60,7 @@ public class Tape{
         return (tapeLeftBound + tapeRightBound) / 2;
     }
 
-    private int initY(){
+    private int initLine(){
         if(tapeTopBound == null && tapeBottomBound == null)
             return 0;
         if(tapeTopBound == null)
@@ -71,23 +70,27 @@ public class Tape{
         return (tapeTopBound + tapeBottomBound) / 2;
     }
 
-    public Integer getNbHeads() {
+    Integer getNbHeads() {
         return nbHeads;
     }
 
     public void addHead(){
+        int column = initColumn();
+        int line = initLine();
+        addHead(line, column);
+    }
+
+    public void addHead(int line, int column){
         nbHeads++;
-        int column = initX();
-        int line = initY();
-        initialHeadsX.add(column);
-        initialHeadsY.add(line);
+        initialHeadsColumn.add(column);
+        initialHeadsLine.add(line);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD, this.machine, this, nbHeads - 1, line, column);
     }
 
     public void removeHead(int head){
         nbHeads--;
-        initialHeadsX.remove(head);
-        initialHeadsY.remove(head);
+        initialHeadsColumn.remove(head);
+        initialHeadsLine.remove(head);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this.machine, this, nbHeads);
     }
 
@@ -98,16 +101,16 @@ public class Tape{
             tapeLeftBound = left;
 
         for(int i = 0; i < nbHeads; i++) {
-            int x = initialHeadsX.get(i);
+            int x = initialHeadsColumn.get(i);
             if (tapeLeftBound != null && tapeLeftBound > x)
-                initialHeadsX.set(i, tapeLeftBound);
+                initialHeadsColumn.set(i, tapeLeftBound);
         }
 
         Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
         while(it.hasNext()){
             Map.Entry<Integer, Map<Integer, String>> entry = it.next();
-            Integer x = entry.getKey();
-            if(left != null && x < left)
+            Integer column = entry.getKey();
+            if(left != null && column < left)
                 it.remove();
         }
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED, this.machine, this, tapeLeftBound);
@@ -120,16 +123,16 @@ public class Tape{
             tapeRightBound = right;
 
         for(int i = 0; i < nbHeads; i++) {
-            int x = initialHeadsX.get(i);
-            if (tapeRightBound != null && tapeRightBound < x)
-                initialHeadsX.set(i, tapeRightBound);
+            int column = initialHeadsColumn.get(i);
+            if (tapeRightBound != null && tapeRightBound < column)
+                initialHeadsColumn.set(i, tapeRightBound);
         }
 
         Iterator<Map.Entry<Integer, Map<Integer, String>>> it = inputCells.entrySet().iterator();
         while(it.hasNext()){
             Map.Entry<Integer, Map<Integer, String>> entry = it.next();
-            Integer x = entry.getKey();
-            if(right != null && x > right)
+            Integer column = entry.getKey();
+            if(right != null && column > right)
                 it.remove();
         }
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED, this.machine, this, tapeRightBound);
@@ -142,9 +145,9 @@ public class Tape{
             tapeBottomBound = bottom;
 
         for(int i = 0; i < nbHeads; i++) {
-            int y = initialHeadsY.get(i);
-            if (tapeBottomBound != null && tapeBottomBound > y)
-                initialHeadsY.set(i, tapeBottomBound);
+            int line = initialHeadsLine.get(i);
+            if (tapeBottomBound != null && tapeBottomBound > line)
+                initialHeadsLine.set(i, tapeBottomBound);
         }
 
         Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
@@ -153,8 +156,8 @@ public class Tape{
             Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
             while (it2.hasNext()) {
                 Map.Entry<Integer, String> entry2 = it2.next();
-                Integer y = entry2.getKey();
-                if (bottom != null && y < bottom)
+                Integer line = entry2.getKey();
+                if (bottom != null && line < bottom)
                     it2.remove();
             }
             if(entry1.getValue().isEmpty())
@@ -170,9 +173,9 @@ public class Tape{
             tapeTopBound = top;
 
         for(int i = 0; i < nbHeads; i++) {
-            int x = initialHeadsY.get(i);
-            if (tapeTopBound != null && tapeTopBound < x)
-                initialHeadsY.set(i, tapeTopBound);
+            int line = initialHeadsLine.get(i);
+            if (tapeTopBound != null && tapeTopBound < line)
+                initialHeadsLine.set(i, tapeTopBound);
         }
 
         Iterator<Map.Entry<Integer, Map<Integer, String>>> it1 = inputCells.entrySet().iterator();
@@ -181,8 +184,8 @@ public class Tape{
             Iterator<Map.Entry<Integer, String>> it2 = entry1.getValue().entrySet().iterator();
             while (it2.hasNext()) {
                 Map.Entry<Integer, String> entry2 = it2.next();
-                Integer y = entry2.getKey();
-                if (top != null && y > top)
+                Integer line = entry2.getKey();
+                if (top != null && line > top)
                     it2.remove();
             }
             if(entry1.getValue().isEmpty())
@@ -191,138 +194,142 @@ public class Tape{
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED, this.machine, this, tapeTopBound);
     }
 
-    public Integer getInitialHeadX(int head){
-        return initialHeadsX.get(head);
+    Integer getInitialHeadColumn(int head){
+        return initialHeadsColumn.get(head);
     }
 
-    public Integer getInitialHeadY(int head){
-        return initialHeadsY.get(head);
+    Integer getInitialHeadLine(int head){
+        return initialHeadsLine.get(head);
     }
 
-    public void setInitialHeadX(int head, int x){
-        if((tapeLeftBound == null || x >= tapeLeftBound)
-                && (tapeRightBound == null || x <= tapeRightBound) )
-            initialHeadsX.set(head, x);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, x, initialHeadsY.get(head));
+    public void setInitialHeadColumn(int head, int column) {
+        if ((tapeLeftBound == null || column >= tapeLeftBound)
+                && (tapeRightBound == null || column <= tapeRightBound)) {
+            initialHeadsColumn.set(head, column);
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, initialHeadsLine.get(head), column);
+        }
     }
 
-    public void setInitialHeadY(int head, int y){
-        if((tapeBottomBound == null || y >= tapeBottomBound)
-                && (tapeTopBound == null || y <= tapeTopBound) )
-            initialHeadsY.set(head, y);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, initialHeadsX.get(head), y);
+    public void setInitialHeadLine(int head, int line) {
+        System.out.println(tapeBottomBound + " " + tapeTopBound + " " + line);
+        if ((tapeBottomBound == null || line >= tapeBottomBound)
+                && (tapeTopBound == null || line <= tapeTopBound)) {
+            initialHeadsLine.set(head, line);
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, line, initialHeadsColumn.get(head));
+
+        }
     }
 
     void reinit(){
-        headsX.clear();
-        headsX.addAll(initialHeadsX);
-        headsY.clear();
-        headsY.addAll(initialHeadsY);
+        headsColumn.clear();
+        headsColumn.addAll(initialHeadsColumn);
+        headsLine.clear();
+        headsLine.addAll(initialHeadsLine);
 
         cells.clear();
         for(Map.Entry<Integer, Map<Integer, String>> pair: inputCells.entrySet()){
-            Integer x = pair.getKey();
-            Map<Integer, String> column = pair.getValue();
-            Map<Integer, String> column2 = new HashMap<>(column);
-            cells.put(x, column2);
+            Integer column = pair.getKey();
+            Map<Integer, String> columnCells = pair.getValue();
+            Map<Integer, String> columnCells2 = new HashMap<>(columnCells);
+            cells.put(column, columnCells2);
         }
     }
 
-    public void moveHead(int head, Direction direction, boolean log){
-        Integer x = headsX.get(head);
-        Integer y = headsY.get(head);
+    void moveHead(int head, Direction direction, boolean log){
+        Integer column = headsColumn.get(head);
+        Integer line = headsLine.get(head);
 
         switch (direction){
             case BOTTOM:
-                if(!y.equals(tapeBottomBound)) {
-                    headsY.set(head, y - 1);
+                if(!line.equals(tapeBottomBound)) {
+                    headsLine.set(head, line - 1);
                     if(log)
-                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, x, y - 1);
+                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, line - 1, column);
                 }
                 break;
             case TOP:
-                if(!y.equals(tapeTopBound)) {
-                    headsY.set(head, y + 1);
+                if(!line.equals(tapeTopBound)) {
+                    headsLine.set(head, line + 1);
                     if(log)
-                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, x, y + 1);
+                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, line + 1, column);
                 }
                 break;
             case LEFT:
-                if(!x.equals(tapeLeftBound)) {
-                    headsX.set(head, x - 1);
+                if(!column.equals(tapeLeftBound)) {
+                    headsColumn.set(head, column - 1);
                     if(log)
-                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, x - 1, y);
+                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, line, column - 1);
                 }
                 break;
             case RIGHT:
-                if(!x.equals(tapeRightBound)){
-                    headsX.set(head, x + 1);
+                if(!column.equals(tapeRightBound)){
+                    headsColumn.set(head, column + 1);
                     if(log)
-                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, x + 1, y);
+                        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, line, column + 1);
                 }
                 break;
         }
     }
 
-    public String read(int head){
+    String read(int head){
 
-        Integer x = headsX.get(head);
-        Integer y = headsY.get(head);
+        Integer column = headsColumn.get(head);
+        Integer line = headsLine.get(head);
 
-        return this.getSymbolAt(x, y, false);
+        return this.getSymbolAt(line, column, false);
     }
 
-    public String getSymbolAt(Integer x, Integer y, boolean input){
+    String getSymbolAt(Integer line, Integer column, boolean input){
 
         Map<Integer, Map<Integer, String>> cells = (input?this.inputCells:this.cells);
 
-        Map<Integer, String> column = cells.get(x);
-        if(column == null) // All the column is white
+        Map<Integer, String> columnCells = cells.get(column);
+        if(columnCells == null) // All the column is white
             return null;
-        return column.get(y);
+        return columnCells.get(line);
 
     }
 
-    public void writeInput(int x, int y, String symbol){
-        write(x, y, symbol, true);
+    public void writeInput(int line, int column, String symbol){
+        write(line, column, symbol, true);
     }
 
     void write(int head, String symbol, boolean log){
 
-        Integer x = headsX.get(head);
-        Integer y = headsY.get(head);
+        Integer column = headsColumn.get(head);
+        Integer line = headsLine.get(head);
 
-        this.write(x, y, symbol, false);
+        this.write(line, column, symbol, false);
         if(log)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE, this.machine, this, head, symbol);
 
     }
 
-    void write(Integer x, Integer y, String symbol, boolean input){
+    private void write(Integer line, Integer column, String symbol, boolean input){
 
         Map<Integer, Map<Integer, String>> cells = (input?this.inputCells:this.cells);
 
-        Map<Integer, String> column = cells.get(x);
+        Map<Integer, String> columnCells = cells.get(column);
         if(symbol == null) { // White symbol
-            if (column == null) // All the column is white
+            if (columnCells == null) // All the column is white
                 return;
-            String cell = column.get(y);
+            String cell = columnCells.get(line);
             if (cell != null) {
-                column.remove(y);
-                if (column.size() == 0)
-                    cells.remove(x);
+                columnCells.remove(line);
+                if (columnCells.size() == 0)
+                    cells.remove(column);
             }
         }
         else{
-            if (column == null) {
-                column = new HashMap<>();
-                cells.put(x, column);
+            if (columnCells == null) {
+                columnCells = new HashMap<>();
+                cells.put(column, columnCells);
             }
-            column.put(y, symbol);
+            columnCells.put(line, symbol);
         }
 
         if(input){
-            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, x, y, symbol);
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED, this.machine, this, line, column, symbol);
         }
     }
 
@@ -331,17 +338,17 @@ public class Tape{
         for(Map.Entry<Integer, Map<Integer, String>> entry: this.cells.entrySet())
             cells.put(entry.getKey(), new HashMap<>(entry.getValue()));
 
-        List<Integer> headsX = new ArrayList<>(this.headsX);
-        List<Integer> headsY = new ArrayList<>(this.headsY);
+        List<Integer> headsColumn = new ArrayList<>(this.headsColumn);
+        List<Integer> headsLine = new ArrayList<>(this.headsLine);
 
-        return new TapeConfiguration(cells, headsX, headsY);
+        return new TapeConfiguration(cells, headsColumn, headsLine);
     }
 
     void loadConfiguration(TapeConfiguration configuration){
-        this.headsX.clear();
-        this.headsY.clear();
-        headsX.addAll(configuration.headsX);
-        headsY.addAll(configuration.headsY);
+        this.headsColumn.clear();
+        this.headsLine.clear();
+        headsColumn.addAll(configuration.headsColumn);
+        headsLine.addAll(configuration.headsLine);
 
 //        Useless with GC?
 //        for(Map.Entry<Integer, Map<Integer, String>> entry: cells.entrySet())
@@ -361,37 +368,37 @@ public class Tape{
 
         StringBuilder s = new StringBuilder();
 
-        Integer minX = Integer.MAX_VALUE;
-        Integer maxX = Integer.MIN_VALUE;
-        Integer minY = Integer.MAX_VALUE;
-        Integer maxY = Integer.MIN_VALUE;
+        Integer minColumn = Integer.MAX_VALUE;
+        Integer maxColumn = Integer.MIN_VALUE;
+        Integer minLine = Integer.MAX_VALUE;
+        Integer maxLine = Integer.MIN_VALUE;
 
-        for(Integer x : cells.keySet()){
-            minX = Math.min(minX, x);
-            maxX = Math.max(maxX, x);
-            for(Integer y : cells.get(x).keySet()){
-                minY = Math.min(minY, y);
-                maxY = Math.max(maxY, y);
+        for(Integer column : cells.keySet()){
+            minColumn = Math.min(minColumn, column);
+            maxColumn = Math.max(maxColumn, column);
+            for(Integer line : cells.get(column).keySet()){
+                minLine = Math.min(minLine, line);
+                maxLine = Math.max(maxLine, line);
             }
         }
 
         for(int i = 0; i < nbHeads; i++){
-            Integer x = headsX.get(i);
-            Integer y = headsY.get(i);
-            minX = Math.min(minX, x);
-            maxX = Math.max(maxX, x);
-            minY = Math.min(minY, y);
-            maxY = Math.max(maxY, y);
+            Integer column = headsColumn.get(i);
+            Integer line = headsLine.get(i);
+            minColumn = Math.min(minColumn, column);
+            maxColumn = Math.max(maxColumn, column);
+            minLine = Math.min(minLine, line);
+            maxLine = Math.max(maxLine, line);
         }
 
         int headDigits = (int)Math.log10(nbHeads) + 1;
         String headFormat = "H%"+headDigits+"d";
 
-        for(int y = maxY; y >= minY; y--){
-            for(int x = minX; x <= maxX; x++){
+        for(int line = maxLine; line >= minLine; line--){
+            for(int column = minColumn; column <= maxColumn; column++){
                 boolean head = false;
                 for(int i = 0; i < nbHeads; i++){
-                    if(x == headsX.get(i) && y == headsY.get(i)) {
+                    if(column == headsColumn.get(i) && line == headsLine.get(i)) {
                         s.append(String.format(headFormat, i));
                         head = true;
                         break;
@@ -401,7 +408,7 @@ public class Tape{
                     for(int i = 0; i < headDigits + 1; i++)
                         s.append(" ");
 
-                String symbol = this.getSymbolAt(x, y, false);
+                String symbol = this.getSymbolAt(line, column, false);
                 s.append(" ");
                 s.append((symbol == null?"":symbol));
                 s.append(" | ");
@@ -416,12 +423,12 @@ public class Tape{
 class TapeConfiguration {
 
     Map<Integer, Map<Integer, String>> cells;
-    List<Integer> headsX;
-    List<Integer> headsY;
+    List<Integer> headsColumn;
+    List<Integer> headsLine;
 
-    TapeConfiguration(Map<Integer, Map<Integer, String>> cells, List<Integer> headsX, List<Integer> headsY) {
+    TapeConfiguration(Map<Integer, Map<Integer, String>> cells, List<Integer> headsColumn, List<Integer> headsLine) {
         this.cells = cells;
-        this.headsX = headsX;
-        this.headsY = headsY;
+        this.headsColumn = headsColumn;
+        this.headsLine = headsLine;
     }
 }
