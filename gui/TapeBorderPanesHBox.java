@@ -38,17 +38,9 @@ class TapeBorderPanesHBox extends HBox{
         this.drawer = drawer;
         this.tapes = new HashMap<>();
 
-        this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
-            double width = newVal.getWidth();
-            double height = newVal.getHeight();
-            for(Node child: this.getChildren()){
-                TapeBorderPane tapePane = (TapeBorderPane) child;
-                tapePane.setMinHeight(height);
-                tapePane.setMaxHeight(height);
-                tapePane.setMinWidth(width);
-                tapePane.setMaxWidth(width);
-            }
-        });
+        this.layoutBoundsProperty().addListener((obs, oldVal, newVal) ->
+            resizeChildren(newVal.getWidth(), newVal.getHeight())
+        );
 
         Subscriber s = new Subscriber() {
             @Override
@@ -98,6 +90,33 @@ class TapeBorderPanesHBox extends HBox{
 
     }
 
+    void resizeChildren(double width, double height){
+        if(this.getChildren().size() == 1){
+            Node child = this.getChildren().get(0);
+
+            this.setTranslateX(0);
+            this.setSpacing(0);
+
+            TapeBorderPane tapeBorderPane = (TapeBorderPane) child;
+            tapeBorderPane.setMinHeight(height);
+            tapeBorderPane.setMaxHeight(height);
+            tapeBorderPane.setMinWidth(width);
+            tapeBorderPane.setMaxWidth(width);
+        }
+        else {
+
+            this.setSpacing(width * (1 - TuringMachineDrawer.TAPE_WIDTH_RATIO) / 2);
+
+            for (Node child : this.getChildren()) {
+                TapeBorderPane tapeBorderPane = (TapeBorderPane) child;
+                tapeBorderPane.setMinHeight(height);
+                tapeBorderPane.setMaxHeight(height);
+                tapeBorderPane.setMinWidth(width * TuringMachineDrawer.TAPE_WIDTH_RATIO);
+                tapeBorderPane.setMaxWidth(width * TuringMachineDrawer.TAPE_WIDTH_RATIO);
+            }
+        }
+    }
+
     void addSymbol(String symbol){
         for(TapeBorderPane tapeBorderPane: tapes.values()){
             tapeBorderPane.tapePane.cellOptionRectangle.addSymbol(symbol);
@@ -106,8 +125,13 @@ class TapeBorderPanesHBox extends HBox{
 
     void addTape(Tape tape){
         TapeBorderPane tapeBorderPane = new TapeBorderPane(this.drawer, tape);
+
+        tapeBorderPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0, 1, 0, 0))));
+
         tapes.put(tape, tapeBorderPane);
         this.getChildren().add(tapeBorderPane);
+        this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
     }
 
     private void moveHeadFromMachine(Tape tape, int line, int column, int head){

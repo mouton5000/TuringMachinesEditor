@@ -4,8 +4,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Separator;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -31,12 +33,16 @@ class TapesHeadMenu extends HBox {
         this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
 
+        AddTapeIcon addTapeIcon = new AddTapeIcon(drawer);
+
+        this.getChildren().addAll(addTapeIcon, new Separator(Orientation.VERTICAL));
+
     }
 
     void addTape(Tape tape){
         TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(this.drawer);
         tapeToMenu.put(tape, tapeHeadMenu);
-        this.getChildren().addAll(tapeHeadMenu, new Separator());
+        this.getChildren().addAll(tapeHeadMenu, new Separator(Orientation.VERTICAL));
 
     }
 
@@ -111,5 +117,15 @@ class HeadMenuSelect extends Rectangle {
         timeline.stop();
         this.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
         animating = false;
+    }
+}
+
+class AddTapeIcon extends ImageView{
+
+    TuringMachineDrawer drawer;
+
+    AddTapeIcon(TuringMachineDrawer drawer){
+        super("./images/add_tape.png");
+        this.drawer = drawer;
     }
 }

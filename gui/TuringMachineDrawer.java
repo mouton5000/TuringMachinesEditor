@@ -64,6 +64,8 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
+    static final double TAPE_WIDTH_RATIO = 4.0/5;
+
     static final double TAPE_COORDINATES_WIDTH = 30;
     static final double TAPES_HEAD_MENU_HEIGHT = 50;
     static final double TAPES_HEAD_MENU_SPACING = 15;
