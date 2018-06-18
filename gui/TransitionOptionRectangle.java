@@ -7,19 +7,21 @@ import javafx.scene.Node;
  */
 public class TransitionOptionRectangle extends OptionRectangle {
 
-    TransitionArrowGroup transitionArrowGroup;
+    TransitionArrowGroup currentTransitionArrowGroup;
+    GraphPane graphPane;
 
-    public TransitionOptionRectangle(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
+    public TransitionOptionRectangle(TuringMachineDrawer drawer, GraphPane graphPane) {
         super(drawer, drawer.graphPaneMouseHandler);
-        this.transitionArrowGroup = transitionArrowGroup;
+        this.graphPane = graphPane;
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+    }
 
-
-
+    public void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+        this.currentTransitionArrowGroup = transitionArrowGroup;
     }
 
     @Override
     protected Node associatedNode() {
-        return transitionArrowGroup;
+        return graphPane;
     }
 }

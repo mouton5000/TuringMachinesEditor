@@ -210,11 +210,6 @@ class TapeOptionRectangle extends OptionRectangle{
 
     }
 
-    @Override
-    protected Node associatedNode() {
-        return tapeBorderPane;
-    }
-
     void setLineAndColumn(Tape tape, int line, int column){
         this.currentTape = tape;
         this.currentLine = line;
@@ -272,6 +267,11 @@ class TapeOptionRectangle extends OptionRectangle{
         inf_line_top_icon_gray.setVisible(infinite);
         add_line_top_icon.setVisible(border);
         remove_lines_top_icon.setVisible(!border);
+    }
+
+    @Override
+    protected Node associatedNode() {
+        return tapeBorderPane.tapePane;
     }
 }
 

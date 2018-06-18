@@ -65,11 +65,6 @@ class CellOptionRectangle extends OptionRectangle{
         headsGroup.addHead(color);
     }
 
-    @Override
-    protected Node associatedNode() {
-        return tapePane;
-    }
-
     void setLineAndColumn(Tape tape, int line, int column){
         this.currentTape = tape;
         this.currentLine = line;
@@ -78,6 +73,11 @@ class CellOptionRectangle extends OptionRectangle{
 
     void editHeadColor(int head, Color color) {
         headsGroup.editHeadColor(head, color);
+    }
+
+    @Override
+    protected Node associatedNode() {
+        return tapePane;
     }
 }
 

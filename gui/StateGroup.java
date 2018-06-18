@@ -1,73 +1,40 @@
 package gui;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.util.Duration;
 
-public class StateGroup extends Group {
+class StateGroup extends Group{
 
-    private TuringMachineDrawer drawer;
+    TuringMachineDrawer drawer;
+    boolean animating;
 
-    private StateCircle stateCircle;
-    StateOptionRectangle optionRectangle;
-
-    public StateGroup(TuringMachineDrawer drawer, String name, double x, double y){
-        this.drawer = drawer;
-
-        stateCircle = new StateCircle(this, name);
-        stateCircle.setOnMouseClicked(drawer.graphPaneMouseHandler);
-        stateCircle.setOnMouseDragged(drawer.graphPaneMouseHandler);
-
-        optionRectangle = new StateOptionRectangle(this.drawer, this);
-
-        this.getChildren().addAll(stateCircle, optionRectangle);
-
-        optionRectangle.setLayoutY(- TuringMachineDrawer.STATE_RADIUS
-                * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
-
-        drawer.moveStateGroup(this, x, y);
-        setUnselected();
-
-    }
-
-    void setSelected(){
-        stateCircle.setSelected();
-        optionRectangle.setVisible(true);
-    }
-
-    void setUnselected(){
-        stateCircle.setUnselected();
-        if(!optionRectangle.isMaximized())
-            optionRectangle.setVisible(false);
-    }
-
-    public void toggleFinal() {
-        this.stateCircle.toggleFinal();
-    }
-
-    public void toggleAccepting() {
-        this.stateCircle.toggleAccepting();
-    }
-
-    public void toggleInitial() {
-        this.stateCircle.toggleInitial();
-    }
-}
-
-class StateCircle extends Group{
     private Circle outerCircle;
     private Circle innerCircle;
     private ImageView acceptIcon;
     private Line initLine1;
     private Line initLine2;
     private Label label;
-    StateGroup stateGroup;
 
-    StateCircle(StateGroup stateGroup, String name){
-        this.stateGroup = stateGroup;
+
+    private Timeline timeline;
+
+    StateGroup(TuringMachineDrawer drawer, String name){
+        this.drawer = drawer;
+        this.timeline = new Timeline();
+        this.timeline.setOnFinished(actionEvent -> animating = false);
+
+        this.setOnMousePressed(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseDragged(drawer.graphPaneMouseHandler);
 
         outerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         outerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
@@ -113,6 +80,8 @@ class StateCircle extends Group{
         this.getChildren().addAll(outerCircle, innerCircle, acceptIcon, initLine1, initLine2, label);
         label.setLayoutX(- label.getMinWidth() / 2);
         label.setLayoutY(- label.getMinHeight() / 2);
+
+        setUnselected();
     }
 
     void setSelected(){
@@ -125,48 +94,55 @@ class StateCircle extends Group{
         innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
     }
 
-    private boolean isFinal(){
+    boolean isFinal(){
         return innerCircle.isVisible() && !acceptIcon.isVisible();
     }
 
-    private boolean isAccepted(){
+    boolean isAccepting(){
         return acceptIcon.isVisible();
     }
 
-    private boolean isInitial(){
+    boolean isInitial(){
         return initLine1.isVisible();
     }
 
-    void toggleFinal(){
-        if(isFinal())
-            innerCircle.setVisible(false);
-        else if(isAccepted())
-            acceptIcon.setVisible(false);
-        else
-            innerCircle.setVisible(true);
+    void setFinal(boolean isFinal){
+        innerCircle.setVisible(isFinal);
     }
 
-    void toggleAccepting(){
-        if(isFinal())
-            acceptIcon.setVisible(true);
-        else if(isAccepted()) {
-            innerCircle.setVisible(false);
-            acceptIcon.setVisible(false);
-        }
-        else{
-            innerCircle.setVisible(true);
-            acceptIcon.setVisible(true);
-        }
+    void setAccepting(boolean isAccepting){
+        acceptIcon.setVisible(isAccepting);
     }
 
-    void toggleInitial(){
-        if(isInitial()){
-            initLine1.setVisible(false);
-            initLine2.setVisible(false);
-        }
-        else{
-            initLine1.setVisible(true);
-            initLine2.setVisible(true);
-        }
+    void setInitial(boolean isInitial){
+        initLine1.setVisible(isInitial);
+        initLine2.setVisible(isInitial);
+    }
+
+
+    void startTimeline(){
+        this.animating = true;
+        timeline.getKeyFrames().clear();
+        KeyValue kOuterFill = new KeyValue(this.outerCircle.fillProperty(),
+                TuringMachineDrawer.STATE_PRESS_COLOR,
+                Interpolator.EASE_BOTH);
+        KeyValue kInnerfill = new KeyValue(this.outerCircle.fillProperty(),
+                TuringMachineDrawer.STATE_PRESS_COLOR,
+                Interpolator.EASE_BOTH);
+        timeline.getKeyFrames().addAll(
+                new KeyFrame(Duration.millis(TuringMachineDrawer.STATE_PRESS_DURATION),
+                        kOuterFill, kInnerfill)
+        );
+
+        this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        this.innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        timeline.play();
+    }
+
+    void stopTimeline(){
+        timeline.stop();
+        this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        this.innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        this.animating = false;
     }
 }

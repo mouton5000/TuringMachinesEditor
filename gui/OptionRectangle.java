@@ -4,12 +4,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
@@ -49,7 +47,6 @@ abstract class OptionRectangle extends Group{
         maximizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
 
         timeline = new Timeline();
-        timeline.setOnFinished(actionEvent -> drawer.animating = false);
 
         maximized = false;
 
@@ -65,6 +62,11 @@ abstract class OptionRectangle extends Group{
 
     void maximize(){
         maximized = true;
+
+        timeline.setOnFinished(actionEvent -> {
+            drawer.animating = false;
+        });
+
         this.toFront();
         animateSize(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH,
                 TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
@@ -75,8 +77,13 @@ abstract class OptionRectangle extends Group{
 
         double width = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH;
         double height = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT;
-        if(animate)
+        if(animate) {
+            timeline.setOnFinished(actionEvent -> {
+                drawer.animating = false;
+                this.setVisible(false);
+            });
             animateSize(width, height);
+        }
         else {
             maximizedRectangle.setX(maximizedRectangle.getX() + maximizedRectangle.getWidth() / 2 - width / 2);
             maximizedRectangle.setY(maximizedRectangle.getY() + maximizedRectangle.getHeight() - height);

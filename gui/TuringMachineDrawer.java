@@ -4,20 +4,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import turingmachines.Tape;
-import turingmachines.Transition;
 import turingmachines.TuringMachine;
-import util.BidirMap;
 import util.Colors;
 import util.Pair;
 import util.Subscriber;
@@ -30,7 +25,7 @@ public class TuringMachineDrawer extends Application {
     private static final int MARGIN = 30;
     private static int WIDTH;
     private static int HEIGHT;
-    private static final int GRAPH_GRID_WIDTH = 10;
+    static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
 
     static final int OPTION_RECTANGLE_TIMELINE_DURATION = 200;
@@ -40,6 +35,9 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OUTER_COLOR = Color.BLACK;
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
+    static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
+    static final long STATE_PRESS_DURATION = 300;
+
 
     static final double OPTION_RECTANGLE_MARGIN = 10;
 
@@ -54,6 +52,8 @@ public class TuringMachineDrawer extends Application {
     static final double ARROW_KEY_DISTANCE_RATIO = 0.25;
     static final double ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO = 8;
     static final double ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
+    static final double ARROW_PRESS_OPACITY = 0.8;
+    static final long ARROW_PRESS_DURATION = 300;
 
     static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
     static final double STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
@@ -103,10 +103,10 @@ public class TuringMachineDrawer extends Application {
     boolean animating;
 
     private Stage stage;
-    private Pane graphPane;
+    GraphPane graphPane;
     private VBox tapesPaneVBox;
-    private TapesHeadMenu tapesHeadMenu;
-    private TapeBorderPanesHBox tapesPane;
+    TapesHeadMenu tapesHeadMenu;
+    TapeBorderPanesHBox tapesPane;
 
     public MenuItem newButton;
     public MenuItem saveButton;
@@ -114,16 +114,6 @@ public class TuringMachineDrawer extends Application {
 
 
     public TuringMachine machine;
-    public BidirMap<StateGroup, Integer> stateGroupToState;
-    private Map<Group, Transition> arrowGroupToTransition;
-
-    private Double nextX;
-    private Double nextY;
-
-    private Double nextControl1X;
-    private Double nextControl1Y;
-    private Double nextControl2X;
-    private Double nextControl2Y;
 
     private Color nextHeadColor;
     private Map<Color, Pair<Tape, Integer>> headsColors;
@@ -133,10 +123,6 @@ public class TuringMachineDrawer extends Application {
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
 
-    private char currentDefaultStateChar;
-
-    private double graphOffsetX;
-    private double graphOffsetY;
 
     @Override
     public void start(Stage stage) throws Exception{
@@ -154,16 +140,6 @@ public class TuringMachineDrawer extends Application {
             public void read(String msg, Object... parameters) {
 
                 switch (msg) {
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        addStateFromMachine(state);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
-                        Transition transition = (Transition) parameters[1];
-                        addTransitionFromMachine(transition);
-                    }
-                    break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_TAPE:{
                         Tape tape = (Tape) parameters[1];
                         addTapeFromMachine(tape);
@@ -191,8 +167,6 @@ public class TuringMachineDrawer extends Application {
             }
         };
 
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD);
@@ -212,14 +186,7 @@ public class TuringMachineDrawer extends Application {
             resizePanes();
         });
 
-        stateGroupToState = new BidirMap<>();
-        arrowGroupToTransition = new HashMap<Group, Transition>();
 
-
-        currentDefaultStateChar = 'A';
-
-        graphOffsetX = 0;
-        graphOffsetY = 0;
 
         Tape tape = this.machine.addTape();
         tape.addHead();
@@ -243,26 +210,15 @@ public class TuringMachineDrawer extends Application {
     }
 
     public void reinitDraw(){
-        graphPane = new Pane();
+
+        graphPaneMouseHandler = new GraphPaneMouseHandler(this);
+        tapesMouseHandler = new TapesMouseHandler(this);
+
+        graphPane = new GraphPane(this);
         tapesPaneVBox = new VBox();
-
-        Rectangle graphClip = new Rectangle();
-
-        graphPane.setClip(graphClip);
-
-        graphPane.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
-            graphClip.setWidth(newValue.getWidth());
-            graphClip.setHeight(newValue.getHeight());
-        });
 
         resizePanes();
 
-        graphPaneMouseHandler = new GraphPaneMouseHandler(this);
-        graphPane.setOnMouseClicked(graphPaneMouseHandler);
-        graphPane.setOnMousePressed(graphPaneMouseHandler);
-        graphPane.setOnMouseDragged(graphPaneMouseHandler);
-
-        tapesMouseHandler = new TapesMouseHandler(this);
         tapesPaneVBox.setAlignment(Pos.CENTER);
 
         tapesHeadMenu = new TapesHeadMenu(this);
@@ -323,121 +279,6 @@ public class TuringMachineDrawer extends Application {
 
     ReadOnlyDoubleProperty screenHeightProperty(){
         return this.stage.heightProperty();
-    }
-
-    private int gridClosest(double value){
-        return ((int)value / GRAPH_GRID_WIDTH) * GRAPH_GRID_WIDTH;
-    }
-
-    void addState(double x, double y){
-        String name = Character.toString(currentDefaultStateChar);
-        this.addState(x, y, name);
-    }
-
-    void addState(double x, double y, String name){
-        this.nextX = x;
-        this.nextY = y;
-        machine.addState(name);
-    }
-
-    void addStateFromMachine(Integer state){
-        currentDefaultStateChar++;
-        String name = this.machine.getStateName(state);
-        StateGroup circle = new StateGroup(this, name, nextX, nextY);
-
-        stateGroupToState.put(circle, state);
-        graphPane.getChildren().add(circle);
-
-    }
-
-    void moveStateGroup(StateGroup stateGroup, double x, double y){
-        int xg = gridClosest(x);
-        int yg = gridClosest(y);
-        stateGroup.setLayoutX(xg + graphOffsetX);
-        stateGroup.setLayoutY(yg + graphOffsetY);
-    }
-
-    void translate(Pane pane, double dx, double dy) {
-        if(pane == graphPane){
-            for(StateGroup stateGroup : stateGroupToState.keySet()) {
-                stateGroup.setTranslateX(stateGroup.getTranslateX() + dx);
-                stateGroup.setTranslateY(stateGroup.getTranslateY() + dy);
-            }
-            graphOffsetX = (graphOffsetX + dx) % GRAPH_GRID_WIDTH;
-            graphOffsetY = (graphOffsetY + dy) % GRAPH_GRID_WIDTH;
-        }
-    }
-
-    void toggleFinal(StateGroup stateGroup){
-        stateGroup.toggleFinal();
-        Integer state = stateGroupToState.getV(stateGroup);
-        if(machine.isFinal(state)){
-            if(machine.isAccepting(state)){
-                machine.unsetAcceptingState(state);
-            }
-            else{
-                machine.unsetFinalState(state);
-            }
-        }
-        else{
-            machine.setFinalState(state);
-        }
-    }
-
-    public void toggleAccepting(StateGroup stateGroup){
-        stateGroup.toggleAccepting();
-        Integer state = stateGroupToState.getV(stateGroup);
-        if(machine.isAccepting(state))
-            machine.unsetFinalState(state);
-        else
-            machine.setAcceptingState(state);
-    }
-
-    public void toggleInitial(StateGroup stateGroup){
-        stateGroup.toggleInitial();
-        Integer state = stateGroupToState.getV(stateGroup);
-        if(machine.isInitial(state))
-            machine.unsetInitialState(state);
-        else
-            machine.setInitialState(state);
-    }
-
-    void addTransition(StateGroup start, StateGroup end){
-        addTransition(start, end, null, null, null, null);
-    }
-
-
-    void addTransition(StateGroup start, StateGroup end,
-                       Double nextControl1X, Double nextControl1Y,
-                       Double nextControl2X, Double nextControl2Y
-                       ){
-        Integer input = stateGroupToState.getV(start);
-        Integer output = stateGroupToState.getV(end);
-
-        this.nextControl1X = nextControl1X;
-        this.nextControl1Y = nextControl1Y;
-        this.nextControl2X = nextControl2X;
-        this.nextControl2Y = nextControl2Y;
-
-        machine.addTransition(input, output);
-    }
-
-    void addTransitionFromMachine(Transition transition){
-        Integer input = transition.getInput();
-        Integer output = transition.getOutput();
-
-        StateGroup start = stateGroupToState.getK(input);
-        StateGroup end = stateGroupToState.getK(output);
-
-        TransitionArrowGroup arrow = new TransitionArrowGroup(this, start, end);
-        if(nextControl1X != null)
-            arrow.setControl1(nextControl1X, nextControl1Y);
-        if(nextControl2X != null)
-            arrow.setControl2(nextControl2X, nextControl2Y);
-
-        arrowGroupToTransition.put(arrow, transition);
-        graphPane.getChildren().add(arrow);
-        arrow.toBack();
     }
 
     void addSymbol(String symbol){

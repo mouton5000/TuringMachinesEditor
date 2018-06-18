@@ -5,8 +5,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -638,12 +636,6 @@ class TapePane extends Pane {
     }
 
     void closeCellOptionRectangle(){
-        EventHandler<ActionEvent> handler = cellOptionRectangle.timeline.getOnFinished();
-        cellOptionRectangle.timeline.setOnFinished(actionEvent -> {
-            handler.handle(actionEvent);
-            cellOptionRectangle.setVisible(false);
-            cellOptionRectangle.timeline.setOnFinished(handler);
-        });
         cellOptionRectangle.minimize(true);
     }
 
@@ -659,12 +651,6 @@ class TapePane extends Pane {
     }
 
     void closeTapeOptionRectangle(){
-        EventHandler<ActionEvent> handler = tapeOptionRectangle.timeline.getOnFinished();
-        tapeOptionRectangle.timeline.setOnFinished(actionEvent -> {
-            handler.handle(actionEvent);
-            tapeOptionRectangle.setVisible(false);
-            tapeOptionRectangle.timeline.setOnFinished(handler);
-        });
         tapeOptionRectangle.minimize(true);
     }
 
