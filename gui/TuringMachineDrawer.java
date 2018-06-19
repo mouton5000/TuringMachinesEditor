@@ -64,7 +64,7 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
-    static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = 200;
+    static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = OPTION_RECTANGLE_MAXIMIZED_HEIGHT + 50;
 
     static final double TAPE_WIDTH_RATIO = 4.0/5;
     static final double TAPE_HOBX_ARROW_HEIGHT = 80;
@@ -88,14 +88,15 @@ public class TuringMachineDrawer extends Application {
     static final double TAPE_CELL_HEAD_SIZE = TAPE_CELL_WIDTH - 8;
     static final double TAPE_CELL_HEAD_STROKE_WIDTH = 3;
 
-    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE = 34;
-    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING = 15;
-    static final int TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
-    static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_STROKE_WIDTH = 3;
-    static final String TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
+    static final int OPTION_RECTANGLE_SYMBOL_SIZE = 34;
+    static final int OPTION_RECTANGLE_SYMBOL_SPACING = 15;
+    static final int OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
+    static final String OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
-    static final double TAPE_CELL_OPTION_RECTANGLE_HEAD_SPACING = 15;
-    static final int TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE = 32;
+    static final double OPTION_RECTANGLE_HEAD_STROKE_WIDTH = 3;
+    static final double OPTION_RECTANGLE_HEAD_SPACING = 15;
+    static final int OPTION_RECTANGLE_HEAD_SIZE = 32;
+
     static final double TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH = 300;
 
     static final int TAPE_TAPE_OPTION_RECTANGLE_SPACING = 15;
@@ -287,7 +288,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void addSymbolFromMachine(String symbol){
-        this.tapesPane.addSymbol(symbol);
+        tapesPane.addSymbol(symbol);
+        graphPane.transitionOptionRectangle.addSymbol(symbol);
     }
 
     void addTape(){
@@ -295,8 +297,9 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void addTapeFromMachine(Tape tape){
-        this.tapesHeadMenu.addTape(tape);
-        this.tapesPane.addTape(tape);
+        graphPane.transitionOptionRectangle.addTape(tape);
+        tapesHeadMenu.addTape(tape);
+        tapesPane.addTape(tape);
     }
 
     void removeTape(Tape tape){ removeTape(tape, true);}
@@ -323,6 +326,7 @@ public class TuringMachineDrawer extends Application {
             if(entry.getValue().first == tape)
                 it.remove();
         }
+        this.graphPane.transitionOptionRectangle.removeTape(tape);
         this.tapesHeadMenu.removeTape(tape);
         this.tapesPane.removeTape(tape);
     }
@@ -390,6 +394,7 @@ public class TuringMachineDrawer extends Application {
         nextHeadColor = null;
 
         headsColors.put(color, new Pair<>(tape, head));
+        graphPane.transitionOptionRectangle.addHead(tape, color);
         tapesHeadMenu.addHead(tape, color);
         tapesPane.addHead(tape, line, column, color);
     }
@@ -403,10 +408,11 @@ public class TuringMachineDrawer extends Application {
         Tape tape = pair.first;
         Integer head = pair.second;
         this.colorDialog().ifPresent(color2 -> {
-            tapesPane.editHeadColor(tape, head, color2);
-            tapesHeadMenu.editHeadColor(tape, head, color2);
             this.headsColors.remove(color);
             this.headsColors.put(color2, pair);
+            graphPane.transitionOptionRectangle.editHeadColor(tape, head, color2);
+            tapesHeadMenu.editHeadColor(tape, head, color2);
+            tapesPane.editHeadColor(tape, head, color2);
         });
     }
 

@@ -16,7 +16,7 @@ import javafx.util.Duration;
  */
 abstract class OptionRectangle extends Group{
 
-    private final TuringMachineDrawer drawer;
+    final TuringMachineDrawer drawer;
 
     private MinimizedOptionRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;

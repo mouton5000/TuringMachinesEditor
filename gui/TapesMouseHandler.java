@@ -103,8 +103,8 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 tapePane.closeTapeOptionRectangle();
             mouseEvent.consume();
         }
-        else if(source instanceof ChooseSymbolOptionLabel){
-            ChooseSymbolOptionLabel label = (ChooseSymbolOptionLabel) source;
+        else if(source instanceof CellOptionRectangleChooseSymbolOptionLabel){
+            CellOptionRectangleChooseSymbolOptionLabel label = (CellOptionRectangleChooseSymbolOptionLabel) source;
             CellOptionRectangle optionRectangle = label.optionRectangle;
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
@@ -115,8 +115,8 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(source instanceof ChooseHeadOptionRectangle){
-            ChooseHeadOptionRectangle chooseHeadRectangle = (ChooseHeadOptionRectangle) source;
+        else if(source instanceof CellOptionRectangleChooseHead){
+            CellOptionRectangleChooseHead chooseHeadRectangle = (CellOptionRectangleChooseHead) source;
             CellOptionRectangle optionRectangle = chooseHeadRectangle.optionRectangle;
             Color color = (Color) chooseHeadRectangle.getStroke();
 

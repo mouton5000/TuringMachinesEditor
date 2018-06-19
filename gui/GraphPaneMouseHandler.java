@@ -5,6 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -45,7 +46,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double x = mouseEvent.getX();
         double y = mouseEvent.getY();
 
-        if(source instanceof Pane) {
+        if(source instanceof GraphPane
+                || source instanceof HeadOptionsGroup
+                || source instanceof ReadSymbolMenu
+                || source instanceof ActionsMenu) {
             dragX = x;
             dragY = y;
             mouseEvent.consume();
@@ -81,11 +85,13 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 || source instanceof EditStateNameOptionIcon)
                 && drawer.graphPane.stateOptionRectangle.isMaximized()) {
             drawer.graphPane.closeStateOptionRectangle();
-
         }
         else if(!(source instanceof TransitionOptionRectangle
                 || source instanceof ReadIcon
-                || source instanceof ActionsIcon)
+                || source instanceof ActionsIcon
+                || source instanceof TransitionOptionRectangleChooseHead
+                || source instanceof TransitionOptionRectangleChooseActionOptionLabel
+                || source instanceof TransitionOptionRectangleChooseSymbolOptionLabel)
                 && drawer.graphPane.transitionOptionRectangle.isMaximized())
             drawer.graphPane.closeTransitionOptionRectangle();
         else if(source instanceof Pane) {
@@ -154,9 +160,19 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         }
         else if(source instanceof ReadIcon){
             ((ReadIcon) source).optionRectangle.selectReadMenu();
+            mouseEvent.consume();
         }
         else if(source instanceof ActionsIcon){
             ((ActionsIcon) source).optionRectangle.selectActionsMenu();
+            mouseEvent.consume();
+        }
+        else if(source instanceof TransitionOptionRectangleChooseHead){
+            TransitionOptionRectangleChooseHead transitionOptionRectangleChooseHead =
+                    (TransitionOptionRectangleChooseHead) source;
+            transitionOptionRectangleChooseHead.optionRectangle.chooseHead(
+                    (Color) transitionOptionRectangleChooseHead.getStroke()
+            );
+            mouseEvent.consume();
         }
         else if(source instanceof OptionRectangle)
             mouseEvent.consume();
@@ -172,7 +188,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
 
-        if(source instanceof Pane){
+        if(source instanceof GraphPane){
             if(dragX == null){
                 dragX = x;
                 dragY = y;
@@ -198,8 +214,6 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             transitionArrowGroup.setControl2(x, y);
             mouseEvent.consume();
         }
-        else if(source instanceof TransitionArrowGroup){
-        }
         else if(source instanceof StateGroup) {
             StateGroup stateGroup = ((StateGroup) source);
             stateGroup.stopTimeline();
@@ -211,6 +225,36 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         else if(source instanceof TransitionOptionRectangle)
             mouseEvent.consume();
+        else if(source instanceof HeadOptionsGroup){
+            if(dragX == null)
+                dragX = x;
+            else {
+                HeadOptionsGroup group = (HeadOptionsGroup) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof ReadSymbolMenu){
+            if(dragX == null)
+                dragX = x;
+            else {
+                ReadSymbolMenu group = (ReadSymbolMenu) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof ActionsMenu){
+            if(dragX == null)
+                dragX = x;
+            else {
+                ActionsMenu group = (ActionsMenu) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
     }
 
     private void select(Node node) {

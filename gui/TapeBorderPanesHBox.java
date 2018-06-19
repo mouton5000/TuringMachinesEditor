@@ -154,7 +154,13 @@ class TapeBorderPanesHBox extends HBox{
         this.getChildren().remove(index);
         int size = this.getChildren().size();
 
-        if(size > 1) {
+        if(index == 0){
+            if(size > 1) {
+                this.getChildren().remove(0);
+                this.getChildren().remove(0);
+            }
+        }
+        else if(size > 1) {
             this.getChildren().remove(index - 1);
             this.getChildren().remove(index - 2);
 
@@ -165,8 +171,12 @@ class TapeBorderPanesHBox extends HBox{
         }
 
         this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
-        if(size != 0)
-            this.centerOn((TapeBorderPane) this.getChildren().get(index - 3));
+        if(size != 0) {
+            if(index == 0)
+                this.centerOn((TapeBorderPane) this.getChildren().get(index));
+            else
+                this.centerOn((TapeBorderPane) this.getChildren().get(index - 3));
+        }
     }
 
     private void moveHeadFromMachine(Tape tape, int line, int column, int head){
@@ -782,7 +792,7 @@ class TapePane extends Pane {
 
             if(cellLabel == null) {
                 cellLabel = new Label(symbol);
-                cellLabel.setFont(Font.font(TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                cellLabel.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
                         TuringMachineDrawer.TAPE_CELL_SYMBOL_FONT_SIZE));
 
                 cellLabel.setMinWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
