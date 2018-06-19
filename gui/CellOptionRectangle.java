@@ -33,28 +33,28 @@ class CellOptionRectangle extends OptionRectangle{
         symbolsGroup = new CellOptionRectangleSymbolsOptionsGroup(this);
         headsGroup = new CellOptionRectangleHeadOptionsGroup(this);
 
-        Line separator = new Line(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                        - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        Line separator = new Line(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2,
+                TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         this.getChildren().addAll(symbolsGroup, headsGroup, separator);
 
 
-        symbolsGroup.setLayoutX(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+        symbolsGroup.setLayoutX(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
                 + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
         symbolsGroup.setLayoutY(
                 - TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SIZE / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
         );
 
-        headsGroup.setLayoutX(-TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+        headsGroup.setLayoutX(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
                 + TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_SYMBOL_SPACING);
         headsGroup.setLayoutY(
                 - TuringMachineDrawer.TAPE_CELL_OPTION_RECTANGLE_HEAD_SIZE / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
-                + TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
+                + TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
         );
 
     }

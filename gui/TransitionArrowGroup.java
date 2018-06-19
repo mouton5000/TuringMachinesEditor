@@ -4,6 +4,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -29,6 +31,9 @@ public class TransitionArrowGroup extends Group {
     private Line control1Line;
     private Line control2Line;
 
+    private DoubleProperty centerX;
+    private DoubleProperty centerY;
+
     boolean animating;
     private Timeline timeline;
 
@@ -40,6 +45,9 @@ public class TransitionArrowGroup extends Group {
         this.animating = false;
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
+
+        this.centerX = new SimpleDoubleProperty();
+        this.centerY = new SimpleDoubleProperty();
 
         invisibleLine = new TransitionArrowInvisibleLine(this.drawer, this);
         invisibleLine.setStrokeWidth(TuringMachineDrawer.ARROW_HITBOX_WIDTH);
@@ -105,39 +113,46 @@ public class TransitionArrowGroup extends Group {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
             control1Line.setStartX(nv);
+            centerX.setValue(getCenterX());
         });
         centerLine.startYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartY(nv);
             control1Line.setStartY(nv);
+            centerY.setValue(getCenterY());
         });
         centerLine.endXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndX(nv);
             control2Line.setStartX(nv);
+            centerX.setValue(getCenterX());
         });
         centerLine.endYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndY(nv);
             control2Line.setStartY(nv);
+            centerY.setValue(getCenterY());
         });
         centerLine.controlX1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlX1(nv);
             control1Key.setCenterX(nv);
             control1Line.setEndX(nv);
+            centerX.setValue(getCenterX());
         });
         centerLine.controlY1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlY1(nv);
             control1Key.setCenterY(nv);
             control1Line.setEndY(nv);
+            centerY.setValue(getCenterY());
         });
         centerLine.controlX2Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setControlX2(nv);
             control2Key.setCenterX(nv);
             control2Line.setEndX(nv);
+            centerX.setValue(getCenterX());
             setArrow();
         });
         centerLine.controlY2Property().addListener((obs, oldVal, newVal) -> {
@@ -145,12 +160,21 @@ public class TransitionArrowGroup extends Group {
             invisibleLine.setControlY2(nv);
             control2Key.setCenterY(nv);
             control2Line.setEndY(nv);
+            centerY.setValue(getCenterY());
             setArrow();
         });
 
 
         computeCoordinates();
         setSelected(false);
+    }
+
+    public DoubleProperty centerXProperty() {
+        return centerX;
+    }
+
+    public DoubleProperty centerYProperty() {
+        return centerY;
     }
 
     private void computeCoordinates() {

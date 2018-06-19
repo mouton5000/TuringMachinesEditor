@@ -41,8 +41,8 @@ abstract class OptionRectangle extends Group{
         maximizedRectangle.widthProperty().bindBidirectional(clipRectangle.widthProperty());
         maximizedRectangle.heightProperty().bindBidirectional(clipRectangle.heightProperty());
 
-        maximizedRectangle.setWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH);
-        maximizedRectangle.setHeight(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        maximizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
+        maximizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         maximizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
         maximizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
 
@@ -53,7 +53,7 @@ abstract class OptionRectangle extends Group{
         this.getChildren().addAll(maximizedRectangle, minimizedRectangle);
 
         maximizedRectangle.setX(- maximizedRectangle.getWidth() / 2);
-        maximizedRectangle.setY(- maximizedRectangle.getHeight() / 2);
+        maximizedRectangle.setY(- maximizedRectangle.getHeight() + TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
     }
 
     boolean isMaximized(){
@@ -68,15 +68,22 @@ abstract class OptionRectangle extends Group{
         });
 
         this.toFront();
-        animateSize(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
+        animateSize(getMaximizedWidth(), getMaximizedHeight());
+    }
+
+    protected double getMaximizedWidth(){
+        return TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH;
+    }
+
+    protected double getMaximizedHeight(){
+        return TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
     void minimize(boolean animate){
         maximized = false;
 
-        double width = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH;
-        double height = TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT;
+        double width = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH;
+        double height = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT;
         if(animate) {
             timeline.setOnFinished(actionEvent -> {
                 drawer.animating = false;
@@ -123,8 +130,8 @@ class MinimizedOptionRectangle extends Group{
         this.optionRectangle = optionRectangle;
 
         minimizedRectangle = new Rectangle();
-        minimizedRectangle.setWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH);
-        minimizedRectangle.setHeight(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        minimizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
+        minimizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         minimizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
         minimizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
 

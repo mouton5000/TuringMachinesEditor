@@ -256,6 +256,7 @@ public class GraphPane extends Pane {
 
 
     void openStateOptionRectangle(StateGroup stateGroup){
+        stateOptionRectangle.setCurrentState(null);
         stateOptionRectangle.setLayoutX(stateGroup.getLayoutX());
         stateOptionRectangle.setLayoutY(stateGroup.getLayoutY() - TuringMachineDrawer.STATE_RADIUS
                 * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
@@ -271,6 +272,7 @@ public class GraphPane extends Pane {
     }
 
     void openTransitionOptionRectangle(TransitionArrowGroup transitionArrowGroup){
+        transitionOptionRectangle.setCurrentTransitionArrowGroup(null);
         transitionOptionRectangle.setLayoutX(transitionArrowGroup.getCenterX());
         transitionOptionRectangle.setLayoutY(transitionArrowGroup.getCenterY());
         transitionOptionRectangle.setCurrentTransitionArrowGroup(transitionArrowGroup);

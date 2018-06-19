@@ -1,5 +1,7 @@
 package gui;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
@@ -13,11 +15,21 @@ class StateOptionRectangle extends OptionRectangle{
 
     StateGroup currentState;
     private GraphPane graphPane;
+    private ChangeListener<Number> changeListener;
 
     StateOptionRectangle(TuringMachineDrawer drawer, GraphPane pane) {
         super(drawer, drawer.graphPaneMouseHandler);
         this.graphPane = pane;
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+
+        changeListener = new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldVal, Number newVal) {
+                StateOptionRectangle.this.setLayoutY(newVal.doubleValue()
+                        - TuringMachineDrawer.STATE_RADIUS
+                        * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
+            }
+        };
 
         FinalStateOption finalStateOption = new FinalStateOption(drawer, this);
         AcceptingStateOption acceptingStateOption = new AcceptingStateOption(drawer, this);
@@ -30,35 +42,53 @@ class StateOptionRectangle extends OptionRectangle{
         this.getChildren().addAll(finalStateOption, acceptingStateOption,
                 initialStateOption, editStateNameOptionIcon);
 
-        finalStateOption.setLayoutX(- TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+        finalStateOption.setLayoutX(- TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
                 + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        finalStateOption.setLayoutY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+        finalStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
                 + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
 
-        acceptingStateOption.setLayoutX(- TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+        acceptingStateOption.setLayoutX(- TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
                 + 3 * TuringMachineDrawer.STATE_RADIUS + 2 * TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        acceptingStateOption.setLayoutY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+        acceptingStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
                 + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
 
         initialStateOption.setLayoutX(
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
                         + (5 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) * TuringMachineDrawer.STATE_RADIUS
                         + 3 * TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        initialStateOption.setLayoutY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+        initialStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
                 + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
 
         editStateNameOptionIcon.setLayoutX(- editStateNameOptionIcon.getBoundsInLocal().getWidth() / 2);
         editStateNameOptionIcon.setLayoutY(
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.STATE_RADIUS - TuringMachineDrawer.OPTION_RECTANGLE_MARGIN
                 - editStateNameOptionIcon.getBoundsInLocal().getHeight() / 2);
     }
 
-    public void setCurrentState(StateGroup state) {
+    void setCurrentState(StateGroup state) {
+
+        if (state == null && this.currentState != null){
+            this.currentState.layoutYProperty().removeListener(changeListener);
+            this.layoutXProperty().unbind();
+            this.translateXProperty().unbind();
+            this.translateYProperty().unbind();
+        }
+
+
         this.currentState = state;
+
+        if(state == null)
+            return;
+
+        this.layoutXProperty().bind(state.layoutXProperty());
+        state.layoutYProperty().addListener(changeListener);
+        this.translateXProperty().bind(state.translateXProperty());
+        this.translateYProperty().bind(state.translateYProperty());
+
     }
 
     @Override

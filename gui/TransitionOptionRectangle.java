@@ -16,14 +16,16 @@ import javafx.scene.shape.Rectangle;
  */
 class TransitionOptionRectangle extends OptionRectangle {
 
-    private final ReadGroup readGroup;
-    private final ActionsGroup actionsGroup;
+    private final ReadIcon readIcon;
+    private final ActionsIcon actionsIcon;
+    private boolean readMenuSelected;
     TransitionArrowGroup currentTransitionArrowGroup;
     GraphPane graphPane;
 
     private ReadMenu readMenu;
     private ActionsMenu actionsMenu;
 
+    private VBox vbox;
     private Rectangle ReadBackgroundColor;
     private Rectangle ActionsBackgroupeColor;
 
@@ -32,41 +34,59 @@ class TransitionOptionRectangle extends OptionRectangle {
         this.graphPane = graphPane;
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
-        VBox vbox = new VBox();
+        vbox = new VBox();
 
         HBox iconsHBox = new HBox();
-        iconsHBox.setMinWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        iconsHBox.setMaxWidth(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        iconsHBox.setMinWidth(getMaximizedWidth());
+        iconsHBox.setMaxWidth(getMaximizedWidth());
         iconsHBox.setAlignment(Pos.CENTER);
 
-        readGroup = new ReadGroup(drawer, this);
-        actionsGroup = new ActionsGroup(drawer, this);
+        readIcon = new ReadIcon(drawer, this);
+        actionsIcon = new ActionsIcon(drawer, this);
 
-        iconsHBox.setSpacing((TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH
-                - readGroup.getBoundsInLocal().getWidth()
-                - actionsGroup.getBoundsInLocal().getWidth()) / 4);
+        iconsHBox.setSpacing((getMaximizedWidth()
+                - readIcon.getBoundsInLocal().getWidth()
+                - actionsIcon.getBoundsInLocal().getWidth()) / 4);
 
-        iconsHBox.getChildren().addAll(readGroup, actionsGroup);
+        iconsHBox.getChildren().addAll(readIcon, actionsIcon);
 
         readMenu = new ReadMenu();
         actionsMenu = new ActionsMenu();
 
 
-        vbox.getChildren().addAll(iconsHBox, new Separator(), readMenu, actionsMenu);
+        vbox.getChildren().addAll(iconsHBox, new Separator(), readMenu);
 
-        vbox.setLayoutX(- TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2);
-        vbox.setLayoutY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-        - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
+        vbox.setLayoutX(- getMaximizedWidth() / 2);
+        vbox.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+            - getMaximizedHeight());
 
-
-        this.selectReadMenu();
+        readMenuSelected = true;
+        readIcon.setSelected(true);
+        actionsIcon.setSelected(false);
 
         this.getChildren().add(vbox);
 
     }
 
+    @Override
+    protected double getMaximizedHeight(){
+        return TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT;
+    }
+
     void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+
+        if(transitionArrowGroup == null && this.currentTransitionArrowGroup != null){
+            this.layoutXProperty().unbind();
+            this.layoutYProperty().unbind();
+        }
+
         this.currentTransitionArrowGroup = transitionArrowGroup;
+
+        if(transitionArrowGroup == null)
+            return;
+
+        this.layoutXProperty().bind(transitionArrowGroup.centerXProperty());
+        this.layoutYProperty().bind(transitionArrowGroup.centerYProperty());
     }
 
     @Override
@@ -75,28 +95,34 @@ class TransitionOptionRectangle extends OptionRectangle {
     }
 
     void selectReadMenu(){
-        readGroup.setSelected(true);
-        readMenu.setVisible(true);
-        actionsGroup.setSelected(false);
-        actionsMenu.setVisible(false);
+        if(readMenuSelected)
+            return;
+        readMenuSelected = true;
+        vbox.getChildren().add(readMenu);
+        readIcon.setSelected(true);
+        vbox.getChildren().remove(actionsMenu);
+        actionsIcon.setSelected(false);
     }
 
     void selectActionsMenu(){
-        readGroup.setSelected(false);
-        readMenu.setVisible(false);
-        actionsGroup.setSelected(true);
-        actionsMenu.setVisible(true);
+        if(!readMenuSelected)
+            return;
+        readMenuSelected = false;
+        readIcon.setSelected(false);
+        vbox.getChildren().remove(readMenu);
+        actionsIcon.setSelected(true);
+        vbox.getChildren().add(actionsMenu);
     }
 }
 
-class ReadGroup extends Group{
+class ReadIcon extends Group{
 
     TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
 
     private Rectangle backgroundColor;
 
-    ReadGroup(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+    ReadIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
 
         ImageView readIcon = new ImageView("./images/read_tape_icon.png");
         this.drawer = drawer;
@@ -106,9 +132,9 @@ class ReadGroup extends Group{
         readIcon.setLayoutY(-readIcon.getBoundsInLocal().getHeight() / 2);
 
         backgroundColor = new Rectangle(
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 4,
+                - this.optionRectangle.getMaximizedWidth() / 4,
                 - readIcon.getBoundsInLocal().getHeight() / 2,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                this.optionRectangle.getMaximizedWidth() / 2,
                 readIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
@@ -122,13 +148,13 @@ class ReadGroup extends Group{
     }
 }
 
-class ActionsGroup extends Group{
+class ActionsIcon extends Group{
 
     TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
     private Rectangle backgroundColor;
 
-    ActionsGroup(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+    ActionsIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
 
         ImageView actionsIcon = new ImageView("./images/action_tape_icon.png");
         this.drawer = drawer;
@@ -138,9 +164,9 @@ class ActionsGroup extends Group{
         actionsIcon.setLayoutY(-actionsIcon.getBoundsInLocal().getHeight() / 2);
 
         backgroundColor = new Rectangle(
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 4,
+                - this.optionRectangle.getMaximizedWidth() / 4,
                 - actionsIcon.getBoundsInLocal().getHeight() / 2,
-                TuringMachineDrawer.STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                this.optionRectangle.getMaximizedWidth() / 2,
                 actionsIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 

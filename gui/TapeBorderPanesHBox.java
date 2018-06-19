@@ -629,7 +629,7 @@ class TapePane extends Pane {
             return;
         cellOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         cellOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
+                - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
         cellOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
         cellOptionRectangle.setVisible(true);
         cellOptionRectangle.maximize();
@@ -644,7 +644,7 @@ class TapePane extends Pane {
             return;
         tapeOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         tapeOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
-                - TuringMachineDrawer.STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
+                - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
         tapeOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
         tapeOptionRectangle.setVisible(true);
         tapeOptionRectangle.maximize();

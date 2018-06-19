@@ -84,8 +84,8 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
         }
         else if(!(source instanceof TransitionOptionRectangle
-                || source instanceof ReadGroup
-                || source instanceof ActionsGroup)
+                || source instanceof ReadIcon
+                || source instanceof ActionsIcon)
                 && drawer.graphPane.transitionOptionRectangle.isMaximized())
             drawer.graphPane.closeTransitionOptionRectangle();
         else if(source instanceof Pane) {
@@ -152,11 +152,11 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
 
         }
-        else if(source instanceof ReadGroup){
-            ((ReadGroup) source).optionRectangle.selectReadMenu();
+        else if(source instanceof ReadIcon){
+            ((ReadIcon) source).optionRectangle.selectReadMenu();
         }
-        else if(source instanceof ActionsGroup){
-            ((ActionsGroup) source).optionRectangle.selectActionsMenu();
+        else if(source instanceof ActionsIcon){
+            ((ActionsIcon) source).optionRectangle.selectActionsMenu();
         }
         else if(source instanceof OptionRectangle)
             mouseEvent.consume();
@@ -172,12 +172,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
 
-        if(!(source instanceof StateOptionRectangle)
-                && drawer.graphPane.stateOptionRectangle.isMaximized())
-            drawer.graphPane.closeStateOptionRectangle();
-        else if(!(source instanceof TransitionOptionRectangle) && drawer.graphPane.transitionOptionRectangle.isMaximized())
-            drawer.graphPane.closeTransitionOptionRectangle();
-        else if(source instanceof Pane){
+        if(source instanceof Pane){
             if(dragX == null){
                 dragX = x;
                 dragY = y;

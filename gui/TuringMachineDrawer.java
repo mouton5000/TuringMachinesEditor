@@ -38,9 +38,6 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
     static final long STATE_PRESS_DURATION = 300;
 
-
-    static final double OPTION_RECTANGLE_MARGIN = 10;
-
     static final double ARROW_ANGLE = Math.PI/6;
     static final double ARROW_SIZE = STATE_RADIUS;
     static final double ARROW_HITBOX_WIDTH = STATE_RADIUS * 2.3;
@@ -55,15 +52,19 @@ public class TuringMachineDrawer extends Application {
     static final double ARROW_PRESS_OPACITY = 0.8;
     static final long ARROW_PRESS_DURATION = 300;
 
-    static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
-    static final double STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
-    static final double STATE_OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
-    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = STATE_OPTION_RECTANGLE_MINIMIZED_HEIGHT +
+    static final double OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
+    static final double OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
+    static final double OPTION_RECTANGLE_MARGIN = 10;
+    static final double OPTION_RECTANGLE_MAXIMIZED_HEIGHT = OPTION_RECTANGLE_MINIMIZED_HEIGHT +
             4 * STATE_RADIUS + 3 * OPTION_RECTANGLE_MARGIN;
-    static final double STATE_OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(ARROW_ANGLE)) * STATE_RADIUS +
+    static final double OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(ARROW_ANGLE)) * STATE_RADIUS +
             4 * OPTION_RECTANGLE_MARGIN;
+
+    static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
+
+    static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = 200;
 
     static final double TAPE_WIDTH_RATIO = 4.0/5;
     static final double TAPE_HOBX_ARROW_HEIGHT = 80;
