@@ -62,6 +62,7 @@ abstract class OptionRectangle extends Group{
 
     void maximize(){
         maximized = true;
+        minimizedRectangle.toFront();
 
         timeline.setOnFinished(actionEvent -> {
             drawer.animating = false;

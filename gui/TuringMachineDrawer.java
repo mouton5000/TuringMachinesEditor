@@ -64,7 +64,8 @@ public class TuringMachineDrawer extends Application {
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
 
-    static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT = OPTION_RECTANGLE_MAXIMIZED_HEIGHT + 50;
+    static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT =
+            OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3.0 / 2 + 50;
 
     static final double TAPE_WIDTH_RATIO = 4.0/5;
     static final double TAPE_HOBX_ARROW_HEIGHT = 80;

@@ -67,7 +67,10 @@ class TransitionOptionRectangle extends OptionRectangle {
         readSymbolMenu.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
         actionsMenu.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
 
-        vbox.getChildren().addAll(iconsHBox, new Separator(), headOptionsGroup, new Separator(), readSymbolMenu);
+        vbox.getChildren().addAll(
+                iconsHBox, new Separator(),
+                headOptionsGroup, new Separator(),
+                readSymbolMenu);
 
         vbox.setLayoutX(- getMaximizedWidth() / 2);
         vbox.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
