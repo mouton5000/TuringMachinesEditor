@@ -165,16 +165,22 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 headMenuSelect.stopTimeline();
 
                 if (!pressFinished)
-                    drawer.translateTo((Color) ((HeadMenuSelect) source).getStroke());
+                    drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
                 else
 //                drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
-                    headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.head);
+                    headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.getHead());
             }
             mouseEvent.consume();
         }
+        else if(source instanceof RemoveHeadIcon){
+            RemoveHeadIcon removeHeadIcon = (RemoveHeadIcon) source;
+            Tape tape = removeHeadIcon.optionRectangle.tape;
+            int head = removeHeadIcon.optionRectangle.currentHead;
+            removeHeadIcon.drawer.removeHead(tape, head, true);
+        }
         else if(source instanceof TranslateTapesArrow){
             TranslateTapesArrow translateTapesArrow = ((TranslateTapesArrow) source);
-            translateTapesArrow.tapeBorderPanesHBox.centerOn(translateTapesArrow.tapeBorderPane);
+            drawer.tapesPane.centerOn(translateTapesArrow.tapeBorderPane.tape);
 
             mouseEvent.consume();
         }

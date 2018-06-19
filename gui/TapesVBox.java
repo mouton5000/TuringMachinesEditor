@@ -49,6 +49,7 @@ class TapesVBox extends VBox {
     void addTape(Tape tape) {
         tapesHeadMenu.addTape(tape);
         tapesPane.addTape(tape);
+        this.centerOn(tape);
     }
 
     void removeTape(Tape tape) {
@@ -71,7 +72,12 @@ class TapesVBox extends VBox {
         tapesPane.editHeadColor(tape, head, color);
     }
 
-    void translateTo(Tape tape, Integer head) {
-        tapesPane.translateTo(tape, head);
+    void centerOn(Tape tape, Integer head) {
+        tapesPane.centerOn(tape, head);
+    }
+
+    void centerOn(Tape tape){
+        this.tapesHeadMenu.centerOn(tape);
+        this.tapesPane.centerOn(tape);
     }
 }

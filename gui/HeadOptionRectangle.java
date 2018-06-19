@@ -24,7 +24,7 @@ class HeadOptionRectangle extends OptionRectangle{
         ColorPicker changeColorPicker = new ColorPicker();
         changeColorPicker.setOpacity(0);
 
-        ImageView removeHeadIcon = new ImageView("./images/remove_head.png");
+        RemoveHeadIcon removeHeadIcon = new RemoveHeadIcon(drawer, this, "./images/remove_head.png");
 
 
         changeColorPicker.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
@@ -106,5 +106,19 @@ class HeadOptionRectangle extends OptionRectangle{
 
     public void setHead(int head) {
         this.currentHead = head;
+    }
+}
+
+class RemoveHeadIcon extends ImageView{
+
+    TuringMachineDrawer drawer;
+    HeadOptionRectangle optionRectangle;
+
+    public RemoveHeadIcon(TuringMachineDrawer drawer, HeadOptionRectangle headOptionRectangle, String s) {
+        super(s);
+        this.drawer = drawer;
+        this.optionRectangle = headOptionRectangle;
+
+        this.setOnMouseClicked(drawer.tapesMouseHandler);
     }
 }

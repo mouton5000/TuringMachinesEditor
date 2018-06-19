@@ -4,10 +4,14 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Separator;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -21,6 +25,15 @@ class TapesHeadMenu extends HBox {
 
     private final TuringMachineDrawer drawer;
     private Map<Tape, TapeHeadMenu> tapeToMenu;
+
+    private static final Background CENTERED_BACKGROUND = new Background(
+            new BackgroundFill(TuringMachineDrawer.TAPE_HEAD_MENU_CENTERED_FILL_COLOR,
+                    CornerRadii.EMPTY, Insets.EMPTY));
+    private static final Background NOT_CENTERED_BACKGROUND = new Background(
+            new BackgroundFill(TuringMachineDrawer.TAPE_HEAD_MENU_NOT_CENTERED_FILL_COLOR,
+                    CornerRadii.EMPTY, Insets.EMPTY));
+
+    TapeHeadMenu centered;
 
     TapesHeadMenu(TuringMachineDrawer drawer) {
 
@@ -67,14 +80,24 @@ class TapesHeadMenu extends HBox {
         TapeHeadMenu tapeHeadMenu = tapeToMenu.get(tape);
         tapeHeadMenu.editHeadColor(head, color);
     }
+
+    void centerOn(Tape tape) {
+        TapeHeadMenu tapeHeadMenu = tapeToMenu.get(tape);
+        if(centered != null)
+            centered.setBackground(TapesHeadMenu.NOT_CENTERED_BACKGROUND);
+        tapeHeadMenu.setBackground(TapesHeadMenu.CENTERED_BACKGROUND);
+        centered = tapeHeadMenu;
+    }
 }
 
 class TapeHeadMenu extends HBox {
     TuringMachineDrawer drawer;
     HeadOptionRectangle headOptionRectangle;
+    Tape tape;
 
     TapeHeadMenu(TuringMachineDrawer drawer, Tape tape) {
         this.drawer = drawer;
+        this.tape = tape;
 
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
@@ -94,7 +117,6 @@ class TapeHeadMenu extends HBox {
         HeadMenuSelect headRectangle = new HeadMenuSelect(
                 drawer,
                 this,
-                this.getChildren().size() - 1,
                 0, 0,
                 TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE,
                 TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE);
@@ -129,15 +151,13 @@ class HeadMenuSelect extends Rectangle {
 
     TuringMachineDrawer drawer;
     TapeHeadMenu tapeHeadMenu;
-    int head;
     private Timeline timeline;
     boolean animating;
 
-    HeadMenuSelect( TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu, int head, double x, double y, double width, double height) {
+    HeadMenuSelect( TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu, double x, double y, double width, double height) {
         super(x, y, width, height);
         this.drawer = drawer;
         this.tapeHeadMenu = tapeHeadMenu;
-        this.head = head;
 
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
@@ -146,6 +166,10 @@ class HeadMenuSelect extends Rectangle {
         this.setOnMouseClicked(drawer.tapesMouseHandler);
         this.setOnMousePressed(drawer.tapesMouseHandler);
         this.setOnMouseDragged(drawer.tapesMouseHandler);
+    }
+
+    int getHead(){
+        return ((TapeHeadMenu)this.getParent()).getChildren().indexOf(this) - 1;
     }
 
     void startTimeline(){

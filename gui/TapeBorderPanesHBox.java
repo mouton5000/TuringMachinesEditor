@@ -150,7 +150,6 @@ class TapeBorderPanesHBox extends HBox{
 
         this.getChildren().add(tapeBorderPane);
         this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
-        this.centerOn(tapeBorderPane);
     }
 
     void removeTape(Tape tape){
@@ -178,9 +177,9 @@ class TapeBorderPanesHBox extends HBox{
         this.resizeChildren(this.getMaxWidth(), this.getMaxHeight());
         if(size != 0) {
             if(index == 0)
-                this.centerOn((TapeBorderPane) this.getChildren().get(index));
+                this.centerOn(((TapeBorderPane) this.getChildren().get(index)).tape);
             else
-                this.centerOn((TapeBorderPane) this.getChildren().get(index - 3));
+                this.centerOn(((TapeBorderPane) this.getChildren().get(index - 3)).tape);
         }
     }
 
@@ -192,12 +191,6 @@ class TapeBorderPanesHBox extends HBox{
     void addHead(Tape tape, int line, int column, Color color){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.addHead(line, column, color);
-    }
-
-    void translateTo(Tape tape, int head) {
-        TapeBorderPane tapeBorderPane = tapes.get(tape);
-        this.centerOn(tapeBorderPane);
-        tapeBorderPane.translateTo(head);
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
@@ -235,7 +228,14 @@ class TapeBorderPanesHBox extends HBox{
         tapeBorderPane.setTapeTopBound(top);
     }
 
-    void centerOn(TapeBorderPane tapeBorderPane){
+    void centerOn(Tape tape, int head) {
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        this.drawer.tapesPane.centerOn(tape);
+        tapeBorderPane.centerOn(head);
+    }
+
+    void centerOn(Tape tape){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
         double x = tapeBorderPane.getTranslateX();
 
         int index = this.getChildren().indexOf(tapeBorderPane) / 3;
@@ -368,7 +368,7 @@ class TapeBorderPane extends BorderPane {
         verticalCoordinates.checkLines(height);
     }
 
-    void translateTo(int head){
+    void centerOn(int head){
         int line = tapePane.lineOf(head);
         int column = tapePane.columnOf(head);
 
@@ -860,8 +860,10 @@ class TapePane extends Pane {
     }
 
     void removeHead(int head) {
-        Rectangle headRectangle = heads.get(head);
-        this.getChildren().remove(headRectangle);
+        Rectangle headRectangle = heads.remove(head);
+        tapeLinesGroup.getChildren().remove(headRectangle);
+        headsLines.remove(headRectangle);
+        headsColumns.remove(headRectangle);
 
         cellOptionRectangle.removeHead(head);
     }
