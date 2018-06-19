@@ -15,6 +15,7 @@ import javafx.scene.text.Font;
 import turingmachines.Tape;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -171,6 +172,11 @@ class TransitionOptionRectangle extends OptionRectangle {
         readSymbolMenu.addSymbol(symbol);
         actionsMenu.addSymbol(symbol);
     }
+
+    void removeSymbol(String symbol) {
+        readSymbolMenu.removeSymbol(symbol);
+        actionsMenu.removeSymbol(symbol);
+    }
 }
 
 class ReadIcon extends Group{
@@ -242,7 +248,7 @@ class HeadOptionsGroup extends HBox{
         if(size == 0)
             return;
 
-        if(size < index)
+        if(index != 0)
             this.getChildren().remove(index - 1);
         else
             this.getChildren().remove(index);
@@ -416,6 +422,16 @@ class ReadSymbolMenu extends HBox{
             label.setTextFill(color);
         }
     }
+
+    void removeSymbol(String symbol) {
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            TransitionOptionRectangleChooseSymbolOptionLabel label =
+                    (TransitionOptionRectangleChooseSymbolOptionLabel) it.next();
+            if(label.getText().equals(symbol))
+                it.remove();
+        }
+    }
 }
 
 class TransitionOptionRectangleChooseSymbolOptionLabel extends Label{
@@ -533,6 +549,16 @@ class ActionsMenu extends HBox {
             TransitionOptionRectangleChooseActionOptionLabel label =
                     (TransitionOptionRectangleChooseActionOptionLabel) child;
             label.setTextFill(color);
+        }
+    }
+
+    void removeSymbol(String symbol) {
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            TransitionOptionRectangleChooseActionOptionLabel label =
+                    (TransitionOptionRectangleChooseActionOptionLabel) it.next();
+            if(label.getText().equals(symbol))
+                it.remove();
         }
     }
 }

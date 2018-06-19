@@ -20,10 +20,7 @@ import turingmachines.Tape;
 import turingmachines.TuringMachine;
 import util.Subscriber;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by dimitri.watel on 07/06/18.
@@ -119,9 +116,17 @@ class TapeBorderPanesHBox extends HBox{
     }
 
     void addSymbol(String symbol){
-        for(TapeBorderPane tapeBorderPane: tapes.values()){
+        for(TapeBorderPane tapeBorderPane: tapes.values())
             tapeBorderPane.tapePane.cellOptionRectangle.addSymbol(symbol);
-        }
+    }
+
+    void removeSymbol(String symbol) {
+        for(TapeBorderPane tapeBorderPane: tapes.values())
+            tapeBorderPane.tapePane.cellOptionRectangle.removeSymbol(symbol);
+
+        for(TapeBorderPane tapeBorderPane : tapes.values())
+            tapeBorderPane.tapePane.removeSymbol(symbol);
+
     }
 
     void addTape(Tape tape){
@@ -198,6 +203,11 @@ class TapeBorderPanesHBox extends HBox{
     void editHeadColor(Tape tape, int head, Color color) {
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.editHeadColor(head, color);
+    }
+
+    void removeHead(Tape tape, int head){
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.tapePane.removeHead(head);
     }
 
     private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
@@ -641,6 +651,7 @@ class TapePane extends Pane {
         cellOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
         cellOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
+        cellOptionRectangle.toFront();
         cellOptionRectangle.setVisible(true);
         cellOptionRectangle.maximize();
     }
@@ -656,6 +667,7 @@ class TapePane extends Pane {
         tapeOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
         tapeOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
+        tapeOptionRectangle.toFront();
         tapeOptionRectangle.setVisible(true);
         tapeOptionRectangle.maximize();
     }
@@ -845,6 +857,33 @@ class TapePane extends Pane {
         headRectangle.setStroke(color);
 
         cellOptionRectangle.editHeadColor(head, color);
+    }
+
+    void removeHead(int head) {
+        Rectangle headRectangle = heads.get(head);
+        this.getChildren().remove(headRectangle);
+
+        cellOptionRectangle.removeHead(head);
+    }
+
+    void removeSymbol(String symbol) {
+        Iterator<Map.Entry<Integer, Map<Integer, Label>>> itColumns = cellLabels.entrySet().iterator();
+
+        while (itColumns.hasNext()){
+            Map.Entry<Integer, Map<Integer, Label>> entry = itColumns.next();
+            Iterator<Map.Entry<Integer, Label>> itLines = entry.getValue().entrySet().iterator();
+            while(itLines.hasNext()){
+                Map.Entry<Integer, Label> entry2 = itLines.next();
+                if(entry2.getValue().getText().equals(symbol)) {
+                    this.getChildren().remove(entry2.getValue());
+                    itLines.remove();
+                }
+            }
+            if(entry.getValue().isEmpty())
+                itColumns.remove();
+        }
+
+        cellOptionRectangle.removeSymbol(symbol);
     }
 
     int lineOf(int head){

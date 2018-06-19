@@ -2,7 +2,9 @@ package gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -14,6 +16,8 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
+
+import java.util.Iterator;
 
 /**
  * Created by dimitri.watel on 11/06/18.
@@ -61,6 +65,10 @@ class CellOptionRectangle extends OptionRectangle{
 
     void addSymbol(String symbol) {symbolsGroup.addSymbol(symbol);}
 
+    void removeSymbol(String symbol) {
+        symbolsGroup.removeSymbol(symbol);
+    }
+
     void addHead(Color color){
         headsGroup.addHead(color);
     }
@@ -74,6 +82,8 @@ class CellOptionRectangle extends OptionRectangle{
     void editHeadColor(int head, Color color) {
         headsGroup.editHeadColor(head, color);
     }
+
+    void removeHead(int head) {headsGroup.removeHead(head);}
 
     @Override
     protected Node associatedNode() {
@@ -149,6 +159,19 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
 
         this.getChildren().add(label);
     }
+
+    void removeSymbol(String symbol) {
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            Node child = it.next();
+            if(!(child instanceof CellOptionRectangleChooseSymbolOptionLabel))
+                continue;
+            CellOptionRectangleChooseSymbolOptionLabel label =
+                    (CellOptionRectangleChooseSymbolOptionLabel) child;
+            if(label.getText().equals(symbol))
+                it.remove();
+        }
+    }
 }
 
 class CellOptionRectangleChooseSymbolOptionLabel extends Label {
@@ -165,6 +188,7 @@ class CellOptionRectangleHeadOptionsGroup extends HBox{
 
     private CellOptionRectangle optionRectangle;
     private double offsetX;
+
     private AddHeadOptionIcon addHeadIcon;
 
     CellOptionRectangleHeadOptionsGroup(CellOptionRectangle optionRectangle) {
@@ -198,17 +222,17 @@ class CellOptionRectangleHeadOptionsGroup extends HBox{
         ((CellOptionRectangleChooseHead) this.getChildren().get(head + 1)).setStroke(color);
     }
 
+    void removeHead(int head) {
+        this.getChildren().remove(head + 1);
+    }
+
     void translate(double dx){
         if(dx > offsetX)
             dx = offsetX;
 
         int nbHeads = this.getChildren().size() - 1;
-        if(dx < offsetX - addHeadIcon.getBoundsInLocal().getWidth()
-                - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING +
-                TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE))
-            dx = offsetX - addHeadIcon.getBoundsInLocal().getWidth()
-                    - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING +
-                    TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+        if(dx < offsetX - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING))
+            dx = offsetX - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
         if(dx == 0)
             return;
@@ -217,8 +241,6 @@ class CellOptionRectangleHeadOptionsGroup extends HBox{
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
-
-
 }
 
 class CellOptionRectangleChooseHead extends Rectangle{
@@ -233,12 +255,34 @@ class CellOptionRectangleChooseHead extends Rectangle{
     }
 }
 
-class AddHeadOptionIcon extends ImageView {
+class AddHeadOptionIcon extends Group {
     CellOptionRectangle optionRectangle;
 
     AddHeadOptionIcon(CellOptionRectangle optionRectangle) {
-        super("./images/add_head.png");
+        super();
+
         this.optionRectangle = optionRectangle;
-        this.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
+        ImageView addHeadIcon = new ImageView("./images/add_head.png");
+
+        ColorPicker changeColorPicker = new ColorPicker();
+
+        changeColorPicker.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+
+        changeColorPicker.setOpacity(0);
+
+        changeColorPicker.setOnAction(actionEvent ->{
+            Color color = changeColorPicker.getValue();
+            if(optionRectangle.drawer.isAvailable(color)){
+                Tape tape = optionRectangle.currentTape;
+                Integer line = optionRectangle.currentLine;
+                Integer column = optionRectangle.currentColumn;
+                optionRectangle.drawer.addHead(tape, line, column, color);
+            }
+        });
+
+        this.getChildren().addAll(addHeadIcon, changeColorPicker);
     }
 }

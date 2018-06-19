@@ -91,7 +91,7 @@ public class Tape{
         nbHeads--;
         initialHeadsColumn.remove(head);
         initialHeadsLine.remove(head);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this.machine, this, nbHeads);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this.machine, this, head);
     }
 
     public void setLeftBound(Integer left){

@@ -1,9 +1,15 @@
 package gui;
 
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import turingmachines.Tape;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
 import util.BidirMap;
@@ -39,6 +45,8 @@ public class GraphPane extends Pane {
 
     GraphPane(TuringMachineDrawer drawer){
         this.drawer = drawer;
+
+        this.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         this.stateOptionRectangle = new StateOptionRectangle(drawer, this);
         this.stateOptionRectangle.setVisible(false);
@@ -263,6 +271,7 @@ public class GraphPane extends Pane {
         stateOptionRectangle.setTranslateX(stateGroup.getTranslateX());
         stateOptionRectangle.setTranslateY(stateGroup.getTranslateY());
         stateOptionRectangle.setCurrentState(stateGroup);
+        stateOptionRectangle.toFront();
         stateOptionRectangle.setVisible(true);
         stateOptionRectangle.maximize();
     }
@@ -276,6 +285,7 @@ public class GraphPane extends Pane {
         transitionOptionRectangle.setLayoutX(transitionArrowGroup.getCenterX());
         transitionOptionRectangle.setLayoutY(transitionArrowGroup.getCenterY());
         transitionOptionRectangle.setCurrentTransitionArrowGroup(transitionArrowGroup);
+        transitionOptionRectangle.toFront();
         transitionOptionRectangle.setVisible(true);
         transitionOptionRectangle.maximize();
     }
@@ -284,4 +294,32 @@ public class GraphPane extends Pane {
         transitionOptionRectangle.minimize(true);
     }
 
+
+    void addSymbol(String symbol) {
+        this.transitionOptionRectangle.addSymbol(symbol);
+    }
+
+    void removeSymbol(String symbol) {
+        this.transitionOptionRectangle.removeSymbol(symbol);
+    }
+
+    void addTape(Tape tape) {
+        this.transitionOptionRectangle.addTape(tape);
+    }
+
+    void removeTape(Tape tape) {
+        this.transitionOptionRectangle.removeTape(tape);
+    }
+
+    void addHead(Tape tape, Color color) {
+        this.transitionOptionRectangle.addHead(tape, color);
+    }
+
+    void editHeadColor(Tape tape, Integer head, Color color) {
+        this.transitionOptionRectangle.editHeadColor(tape, head, color);
+    }
+
+    void removeHead(Tape tape, int head) {
+        this.transitionOptionRectangle.removeHead(tape, head);
+    }
 }

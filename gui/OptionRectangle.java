@@ -67,8 +67,11 @@ abstract class OptionRectangle extends Group{
             drawer.animating = false;
         });
 
-        this.toFront();
-        animateSize(getMaximizedWidth(), getMaximizedHeight());
+        animateSize(
+                minimizedRectangle.getLayoutX() + getOffsetX(),
+                minimizedRectangle.getLayoutY() + getOffsetY(),
+                getMaximizedWidth(),
+                getMaximizedHeight());
     }
 
     protected double getMaximizedWidth(){
@@ -79,37 +82,41 @@ abstract class OptionRectangle extends Group{
         return TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
+    protected double getOffsetX(){return -TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2;}
+
+    protected double getOffsetY(){
+        return TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - getMaximizedHeight();
+    }
+
     void minimize(boolean animate){
         maximized = false;
 
-        double width = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH;
-        double height = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT;
         if(animate) {
             timeline.setOnFinished(actionEvent -> {
                 drawer.animating = false;
                 this.setVisible(false);
             });
-            animateSize(width, height);
+            animateSize(minimizedRectangle.getLayoutX() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2,
+                    minimizedRectangle.getLayoutY() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
+                    TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH,
+                    TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         }
         else {
-            maximizedRectangle.setX(maximizedRectangle.getX() + maximizedRectangle.getWidth() / 2 - width / 2);
-            maximizedRectangle.setY(maximizedRectangle.getY() + maximizedRectangle.getHeight() - height);
-            maximizedRectangle.setWidth(width);
-            maximizedRectangle.setHeight(height);
+            maximizedRectangle.setX(minimizedRectangle.getLayoutX() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2);
+            maximizedRectangle.setY(minimizedRectangle.getLayoutY() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
+            maximizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
+            maximizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         }
     }
 
-    private void animateSize(double width, double height){
+    private void animateSize(double x, double y, double width, double height){
         if(drawer.animating)
             return;
         drawer.animating = true;
         timeline.getKeyFrames().clear();
-        KeyValue kx = new KeyValue(maximizedRectangle.xProperty(),
-                maximizedRectangle.getX() + maximizedRectangle.getWidth() / 2 - width / 2,
-                Interpolator.EASE_BOTH);
-        KeyValue ky = new KeyValue(maximizedRectangle.yProperty(),
-                maximizedRectangle.getY() + maximizedRectangle.getHeight() - height,
-                Interpolator.EASE_BOTH);
+        KeyValue kx = new KeyValue(maximizedRectangle.xProperty(), x, Interpolator.EASE_BOTH);
+        KeyValue ky = new KeyValue(maximizedRectangle.yProperty(), y, Interpolator.EASE_BOTH);
         KeyValue kw = new KeyValue(maximizedRectangle.widthProperty(), width, Interpolator.EASE_BOTH);
         KeyValue kh = new KeyValue(maximizedRectangle.heightProperty(), height, Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(

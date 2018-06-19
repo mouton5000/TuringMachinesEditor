@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import turingmachines.Tape;
 import turingmachines.TuringMachine;
+import util.BidirMap;
 import util.Colors;
 import util.Pair;
 import util.Subscriber;
@@ -106,9 +107,7 @@ public class TuringMachineDrawer extends Application {
 
     private Stage stage;
     GraphPane graphPane;
-    private VBox tapesPaneVBox;
-    TapesHeadMenu tapesHeadMenu;
-    TapeBorderPanesHBox tapesPane;
+    private TapesVBox tapesPane;
 
     public MenuItem newButton;
     public MenuItem saveButton;
@@ -118,7 +117,7 @@ public class TuringMachineDrawer extends Application {
     public TuringMachine machine;
 
     private Color nextHeadColor;
-    private Map<Color, Pair<Tape, Integer>> headsColors;
+    private BidirMap<Color, Pair<Tape, Integer>> headsColors;
     private static List<Color> defaultColors = Colors.allColors();
     private int defaultColorsIndex;
 
@@ -131,7 +130,7 @@ public class TuringMachineDrawer extends Application {
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
         HEIGHT = (int) Screen.getPrimary().getVisualBounds().getHeight()* 3 / 4;
 
-        this.headsColors = new HashMap<>();
+        this.headsColors = new BidirMap<>();
 
         this.stage = stage;
         this.animating = false;
@@ -160,9 +159,20 @@ public class TuringMachineDrawer extends Application {
                         addHeadFromMachine(tape, head, line, column);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD:{
+                        Tape tape = (Tape) parameters[1];
+                        Integer head = (Integer) parameters[2];
+                        removeHeadFromMachine(tape, head);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL:{
                         String symbol = (String) parameters[1];
                         addSymbolFromMachine(symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL:{
+                        String symbol = (String) parameters[1];
+                        removeSymbolFromMachine(symbol);
                     }
                     break;
                 }
@@ -172,6 +182,7 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL);
 
         this.machine = new TuringMachine();
@@ -205,10 +216,10 @@ public class TuringMachineDrawer extends Application {
         graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
         graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
 
-        tapesPaneVBox.setMinWidth(WIDTH);
-        tapesPaneVBox.setMaxWidth(WIDTH);
-        tapesPaneVBox.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-        tapesPaneVBox.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMinWidth(WIDTH);
+        tapesPane.setMaxWidth(WIDTH);
+        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
     }
 
     public void reinitDraw(){
@@ -217,28 +228,11 @@ public class TuringMachineDrawer extends Application {
         tapesMouseHandler = new TapesMouseHandler(this);
 
         graphPane = new GraphPane(this);
-        tapesPaneVBox = new VBox();
+        tapesPane = new TapesVBox(this);
 
         resizePanes();
 
-        tapesPaneVBox.setAlignment(Pos.CENTER);
-
-        tapesHeadMenu = new TapesHeadMenu(this);
-        tapesHeadMenu.setTranslateX(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
-
-        tapesPane = new TapeBorderPanesHBox(this);
-        tapesPaneVBox.getChildren().addAll(tapesHeadMenu, new Separator(), tapesPane);
-        tapesPaneVBox.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
-            double width = newVal.getWidth();
-            double height = newVal.getHeight();
-            tapesHeadMenu.setMinWidth(width);
-            tapesHeadMenu.setMaxWidth(width);
-            tapesPane.setMinHeight(height - TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
-            tapesPane.setMaxHeight(height - TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
-            tapesPane.setMinWidth(width);
-            tapesPane.setMaxWidth(width);
-        });
-
+        tapesPane.setAlignment(Pos.CENTER);
 
         MenuBar menuBar = new MenuBar();
         menuBar.setMinHeight(MARGIN);
@@ -266,7 +260,7 @@ public class TuringMachineDrawer extends Application {
         separator.setMinHeight(SEPARATOR_WIDTH);
 
         VBox box = new VBox();
-        box.getChildren().addAll(menuBar, graphPane, separator, tapesPaneVBox);
+        box.getChildren().addAll(menuBar, graphPane, separator, tapesPane);
 
         Scene scene = new Scene(box, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
@@ -288,8 +282,17 @@ public class TuringMachineDrawer extends Application {
     }
 
     void addSymbolFromMachine(String symbol){
+        graphPane.addSymbol(symbol);
         tapesPane.addSymbol(symbol);
-        graphPane.transitionOptionRectangle.addSymbol(symbol);
+    }
+
+    void removeSymbol(String symbol){
+        this.machine.removeSymbol(symbol);
+    }
+
+    void removeSymbolFromMachine(String symbol){
+        graphPane.removeSymbol(symbol);
+        tapesPane.removeSymbol(symbol);
     }
 
     void addTape(){
@@ -297,8 +300,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void addTapeFromMachine(Tape tape){
-        graphPane.transitionOptionRectangle.addTape(tape);
-        tapesHeadMenu.addTape(tape);
+        graphPane.addTape(tape);
         tapesPane.addTape(tape);
     }
 
@@ -320,15 +322,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void removeTapeFromMachine(Tape tape){
-        Iterator<Map.Entry<Color, Pair<Tape, Integer>>> it = headsColors.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry<Color, Pair<Tape, Integer>> entry = it.next();
-            if(entry.getValue().first == tape)
-                it.remove();
-        }
-        this.graphPane.transitionOptionRectangle.removeTape(tape);
-        this.tapesHeadMenu.removeTape(tape);
-        this.tapesPane.removeTape(tape);
+        graphPane.removeTape(tape);
+        tapesPane.removeTape(tape);
     }
 
     void moveHead(Tape tape, int line, int column, int head) {
@@ -338,7 +333,7 @@ public class TuringMachineDrawer extends Application {
 
     private Optional<Color> colorDialog(){
         Dialog<Color> colorDialog = new Dialog<>();
-        colorDialog.setTitle("Choose new head color.");
+        colorDialog.setTitle("Choose new currentHead color.");
         colorDialog.initStyle(StageStyle.UTILITY);
         colorDialog.setWidth(TuringMachineDrawer.TAPE_CELL_OPTION_COLOR_DIALOG_WIDTH);
         colorDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -351,7 +346,7 @@ public class TuringMachineDrawer extends Application {
 
         ColorPicker colorPicker = new ColorPicker();
 
-        Label warningLabel = new Label("This color was already chosen for another head.");
+        Label warningLabel = new Label("This color was already chosen for another currentHead.");
         warningLabel.setTextFill(Color.RED);
         warningLabel.setVisible(false);
 
@@ -375,11 +370,9 @@ public class TuringMachineDrawer extends Application {
         return colorDialog.showAndWait();
     }
 
-    void addHead(Tape tape, int line, int column) {
-        this.colorDialog().ifPresent(color -> {
-            this.nextHeadColor = color;
-            tape.addHead(line, column);
-        });
+    void addHead(Tape tape, int line, int column, Color color) {
+        this.nextHeadColor = color;
+        tape.addHead(line, column);
     }
 
     private Color getDefaultColor(){
@@ -394,26 +387,49 @@ public class TuringMachineDrawer extends Application {
         nextHeadColor = null;
 
         headsColors.put(color, new Pair<>(tape, head));
-        graphPane.transitionOptionRectangle.addHead(tape, color);
-        tapesHeadMenu.addHead(tape, color);
-        tapesPane.addHead(tape, line, column, color);
+        graphPane.addHead(tape, color);
+        tapesPane.addHead(tape, color, line, column);
+    }
+
+    boolean isAvailable(Color color) {
+        return !headsColors.containsK(color);
     }
 
     Pair<Tape, Integer> getHead(Color color) {
-        return headsColors.get(color);
+        return headsColors.getV(color);
     }
 
-    public void editHeadColor(Color color) {
+    void editHeadColor(Tape tape, int head, Color color2) {
+        this.headsColors.put(color2, new Pair<>(tape, head));
+        graphPane.editHeadColor(tape, head, color2);
+        tapesPane.editHeadColor(tape, head, color2);
+    }
+
+    void removeHead(Color color, boolean doConfirm){
         Pair<Tape, Integer> pair = getHead(color);
-        Tape tape = pair.first;
-        Integer head = pair.second;
-        this.colorDialog().ifPresent(color2 -> {
-            this.headsColors.remove(color);
-            this.headsColors.put(color2, pair);
-            graphPane.transitionOptionRectangle.editHeadColor(tape, head, color2);
-            tapesHeadMenu.editHeadColor(tape, head, color2);
-            tapesPane.editHeadColor(tape, head, color2);
-        });
+        removeHead(pair.first, pair.second, doConfirm);
+    }
+
+    void removeHead(Tape tape, int head, boolean doConfirm){
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer la tête?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    tape.removeHead(head);
+            });
+        }
+        else
+            tape.removeHead(head);
+    }
+
+    void removeHeadFromMachine(Tape tape, int head){
+        headsColors.removeV(new Pair<>(tape, head));
+
+        graphPane.removeHead(tape, head);
+        tapesPane.removeHead(tape, head);
     }
 
     void translateTo(Color color) {

@@ -21,10 +21,11 @@ public class BidirMap<K, V> {
     public void put(K key, V value){
 
         V pvalue = direct.get(key);
-        K pkey = reverse.get(key);
+        K pkey = reverse.get(value);
 
         direct.put(key, value);
         reverse.put(value, key);
+
 
         if(pvalue != null)
             reverse.remove(pvalue);
@@ -59,5 +60,23 @@ public class BidirMap<K, V> {
 
     public K getK(V value){
         return reverse.get(value);
+    }
+
+    public void removeK(K key){
+        V value = direct.remove(key);
+        reverse.remove(value);
+    }
+
+    public void removeV(V value){
+        K key = reverse.remove(value);
+        direct.remove(key);
+    }
+
+    public boolean containsK(K key) {
+        return direct.containsKey(key);
+    }
+
+    public boolean containsV(V value) {
+        return reverse.containsKey(value);
     }
 }

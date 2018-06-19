@@ -52,7 +52,10 @@ public class TapesMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof HeadMenuSelect){
-            ((HeadMenuSelect) source).startTimeline();
+            HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
+            if(!headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized()){
+                headMenuSelect.startTimeline();
+            }
         }
         else if(source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
@@ -96,11 +99,18 @@ public class TapesMouseHandler implements EventHandler<Event> {
         }
         else if(source instanceof MinimizedOptionRectangle){
             MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
-            TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
-            if(minimizedOptionRectangle.optionRectangle instanceof CellOptionRectangle)
+            if(minimizedOptionRectangle.optionRectangle instanceof CellOptionRectangle) {
+                TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
                 tapePane.closeCellOptionRectangle();
-            else
+            }
+            else if(minimizedOptionRectangle.optionRectangle instanceof TapeOptionRectangle) {
+                TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
                 tapePane.closeTapeOptionRectangle();
+            }
+            else if(minimizedOptionRectangle.optionRectangle instanceof HeadOptionRectangle) {
+                HeadOptionRectangle optionRectangle = (HeadOptionRectangle) minimizedOptionRectangle.optionRectangle;
+                optionRectangle.tapeHeadMenu.closeHeadOptionRectangle();
+            }
             mouseEvent.consume();
         }
         else if(source instanceof CellOptionRectangleChooseSymbolOptionLabel){
@@ -126,32 +136,40 @@ public class TapesMouseHandler implements EventHandler<Event> {
             drawer.moveHead(pair.first, line, column, pair.second);
             mouseEvent.consume();
         }
-        else if(source instanceof AddHeadOptionIcon){
-            AddHeadOptionIcon addHeadOptionIcon = (AddHeadOptionIcon) source;
-            CellOptionRectangle optionRectangle = addHeadOptionIcon.optionRectangle;
-
-            Tape tape = optionRectangle.currentTape;
-            int line = optionRectangle.currentLine;
-            int column = optionRectangle.currentColumn;
-            drawer.addHead(tape, line, column);
-            mouseEvent.consume();
-        }
-        else if(source instanceof HeadMenuSelect){
-            HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
-            boolean pressFinished = !headMenuSelect.animating;
-            headMenuSelect.stopTimeline();
-            if(!pressFinished)
-                drawer.translateTo((Color) ((HeadMenuSelect) source).getStroke());
-            else
-                drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
-            mouseEvent.consume();
-        }
         else if(source instanceof AddTapeIcon){
             this.drawer.addTape();
             mouseEvent.consume();
         }
+        else if(source instanceof TapeHeadMenu){
+            TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) source;
+            if(tapeHeadMenu.headOptionRectangle.isMaximized())
+                tapeHeadMenu.closeHeadOptionRectangle();
+            mouseEvent.consume();
+        }
         else if(source instanceof RemoveTapeIcon){
-            this.drawer.removeTape(((RemoveTapeIcon) source).tape);
+            RemoveTapeIcon removeTapeIcon = (RemoveTapeIcon) source;
+            if(removeTapeIcon.tapeHeadMenu.headOptionRectangle.isMaximized())
+                removeTapeIcon.tapeHeadMenu.closeHeadOptionRectangle();
+            else
+                this.drawer.removeTape(removeTapeIcon.tape);
+            mouseEvent.consume();
+        }
+        else if(source instanceof HeadMenuSelect){
+
+            HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
+
+            if(headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized())
+                headMenuSelect.tapeHeadMenu.closeHeadOptionRectangle();
+            else {
+                boolean pressFinished = !headMenuSelect.animating;
+                headMenuSelect.stopTimeline();
+
+                if (!pressFinished)
+                    drawer.translateTo((Color) ((HeadMenuSelect) source).getStroke());
+                else
+//                drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
+                    headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.head);
+            }
             mouseEvent.consume();
         }
         else if(source instanceof TranslateTapesArrow){
