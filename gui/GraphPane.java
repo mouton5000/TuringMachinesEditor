@@ -2,6 +2,8 @@ package gui;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -14,6 +16,7 @@ import util.Subscriber;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -85,9 +88,19 @@ public class GraphPane extends Pane {
                         addStateFromMachine(state);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        removeStateFromMachine(state);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
                         Transition transition = (Transition) parameters[1];
                         addTransitionFromMachine(transition);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION:{
+                        Transition transition = (Transition) parameters[1];
+                        removeTransitionFromMachine(transition);
                     }
                     break;
                     case TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL:{
@@ -156,7 +169,9 @@ public class GraphPane extends Pane {
         };
 
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_ACTION);
@@ -195,6 +210,42 @@ public class GraphPane extends Pane {
         this.getChildren().add(circle);
 
     }
+
+    void removeState(StateGroup stateGroup) {
+        removeState(stateGroup, true);
+    }
+
+    void removeState(StateGroup stateGroup, boolean doConfirm){
+        Integer state = stateGroupToState.getV(stateGroup);
+
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer l'état?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    this.drawer.machine.removeState(state);
+            });
+        }
+        else
+            this.drawer.machine.removeState(state);
+    }
+
+    void removeStateFromMachine(Integer state){
+        StateGroup stateGroup = stateGroupToState.getK(state);
+        this.closeStateOptionRectangle();
+        this.closeTransitionOptionRectangle();
+        this.getChildren().remove(stateGroup);
+        this.stateGroupToState.removeV(state);
+
+        Set<Map.Entry<StateGroup, Integer>> entries = new HashSet<>(stateGroupToState.entrySet());
+        for(Map.Entry<StateGroup, Integer> entry : entries){
+            if(entry.getValue() >= state)
+                stateGroupToState.put(entry.getKey(), entry.getValue() - 1);
+        }
+    }
+
     void moveStateGroup(StateGroup stateGroup, double x, double y){
         int xg = gridClosest(x);
         int yg = gridClosest(y);
@@ -248,6 +299,35 @@ public class GraphPane extends Pane {
             for(int head = 0; head < tape.getNbHeads(); head++)
                 transitionArrowGroup.addHead(tape, drawer.getColorOfHead(tape, head));
         }
+    }
+
+    void removeTransition(TransitionArrowGroup transitionArrowGroup){
+        removeTransition(transitionArrowGroup, true);
+    }
+
+    void removeTransition(TransitionArrowGroup transitionArrowGroup, boolean doConfirm){
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer la transition?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    this.drawer.machine.removeTransition(transition);
+            });
+        }
+        else
+            this.drawer.machine.removeTransition(transition);
+    }
+
+    void removeTransitionFromMachine(Transition transition){
+        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+        this.closeStateOptionRectangle();
+        this.closeTransitionOptionRectangle();
+        this.getChildren().remove(transitionArrowGroup);
+
     }
 
     void toggleFinal(StateGroup stateGroup){
@@ -488,5 +568,4 @@ public class GraphPane extends Pane {
     void closeTransitionOptionRectangle(){
         transitionOptionRectangle.minimize(true);
     }
-
 }

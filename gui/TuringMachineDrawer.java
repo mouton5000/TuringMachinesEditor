@@ -35,8 +35,6 @@ public class TuringMachineDrawer extends Application {
     static final String DOWN_SYMBOL = "\u21D3";
     static final String UP_SYMBOL = "\u21D1";
 
-    static final int OPTION_RECTANGLE_TIMELINE_DURATION = 200;
-
     static final int STATE_RADIUS = 20;
     static final double FINAL_STATE_RADIUS_RATIO = 0.8;
     static final Color STATE_OUTER_COLOR = Color.BLACK;
@@ -74,10 +72,12 @@ public class TuringMachineDrawer extends Application {
             4 * STATE_RADIUS + 3 * OPTION_RECTANGLE_MARGIN;
     static final double OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(TRANSITION_ANGLE)) * STATE_RADIUS +
             4 * OPTION_RECTANGLE_MARGIN;
+    static final int OPTION_RECTANGLE_TIMELINE_DURATION = 200;
 
     static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
     static final Color STATE_OPTION_RECTANGLE_OUTER_COLOR = Color.BLACK;
     static final Color STATE_OPTION_RECTANGLE_INNER_COLOR = Color.WHITE;
+    static final double STATE_OPTION_RECTANGLE_SPACING = STATE_RADIUS / 2;
 
     static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT =
             OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3.0 / 2 + 50;

@@ -61,6 +61,9 @@ abstract class OptionRectangle extends Group{
     }
 
     void maximize(){
+        if(maximized)
+            return;
+        
         maximized = true;
         minimizedRectangle.toFront();
 
@@ -91,6 +94,9 @@ abstract class OptionRectangle extends Group{
     }
 
     void minimize(boolean animate){
+        if(!maximized)
+            return;
+
         maximized = false;
 
         if(animate) {

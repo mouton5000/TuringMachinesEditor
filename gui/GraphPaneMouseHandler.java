@@ -84,13 +84,15 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 || source instanceof FinalStateOption
                 || source instanceof AcceptingStateOption
                 || source instanceof InitialStateOption
-                || source instanceof EditStateNameOptionIcon)
+                || source instanceof EditStateNameOptionIcon
+                || source instanceof RemoveStateOptionIcon)
                 && drawer.graphPane.stateOptionRectangle.isMaximized()) {
             drawer.graphPane.closeStateOptionRectangle();
         }
         else if(!(source instanceof TransitionOptionRectangle
                 || source instanceof ReadIcon
                 || source instanceof ActionsIcon
+                || source instanceof RemoveTransitionIcon
                 || source instanceof TransitionOptionRectangleChooseHead
                 || source instanceof ChooseActionOptionLabel
                 || source instanceof ChooseSymbolOptionLabel
@@ -145,6 +147,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         else if(source instanceof EditStateNameOptionIcon){
             mouseEvent.consume();
         }
+        else if(source instanceof RemoveStateOptionIcon){
+            drawer.graphPane.removeState(((RemoveStateOptionIcon) source).optionRectangle.currentState);
+            mouseEvent.consume();
+        }
         else if(source instanceof TransitionArrowInvisibleLine){
             TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
 
@@ -167,6 +173,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         }
         else if(source instanceof ActionsIcon){
             ((ActionsIcon) source).optionRectangle.selectActionsMenu();
+            mouseEvent.consume();
+        }
+        else if(source instanceof RemoveTransitionIcon){
+            drawer.graphPane.removeTransition(((RemoveTransitionIcon) source).optionRectangle.currentTransitionArrowGroup);
             mouseEvent.consume();
         }
         else if(source instanceof TransitionOptionRectangleChooseHead){

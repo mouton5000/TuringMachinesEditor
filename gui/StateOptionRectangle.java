@@ -2,9 +2,12 @@ package gui;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
@@ -22,51 +25,59 @@ class StateOptionRectangle extends OptionRectangle{
         this.graphPane = pane;
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
-        changeListener = new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldVal, Number newVal) {
+        changeListener = (observableValue, oldVal, newVal) ->
                 StateOptionRectangle.this.setLayoutY(newVal.doubleValue()
-                        - TuringMachineDrawer.STATE_RADIUS
-                        * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
-            }
-        };
+                - TuringMachineDrawer.STATE_RADIUS
+                * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
+
+
+        VBox vbox = new VBox();
+        vbox.setSpacing(0);
+        vbox.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        vbox.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        vbox.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
+        vbox.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
+        vbox.setLayoutX(
+                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+        );
+        vbox.setLayoutY(
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+        );
+
+        HBox hBoxTop = new HBox();
+        hBoxTop.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxTop.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxTop.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxTop.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxTop.setAlignment(Pos.TOP_CENTER);
+        hBoxTop.setTranslateY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING / 2);
+        hBoxTop.setSpacing(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING);
+
+
+        HBox hBoxDown = new HBox();
+        hBoxDown.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxDown.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxDown.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxDown.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxDown.setAlignment(Pos.CENTER);
+        hBoxDown.setSpacing(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING);
 
         FinalStateOption finalStateOption = new FinalStateOption(drawer, this);
         AcceptingStateOption acceptingStateOption = new AcceptingStateOption(drawer, this);
         InitialStateOption initialStateOption = new InitialStateOption(drawer, this);
 
-        ImageView editStateNameOptionIcon = new EditStateNameOptionIcon(drawer, this,"./images/cursor_icon.png");
+        EditStateNameOptionIcon editStateNameOptionIcon = new EditStateNameOptionIcon(drawer, this);
         editStateNameOptionIcon.setPreserveRatio(true);
         editStateNameOptionIcon.setFitHeight(TuringMachineDrawer.STATE_RADIUS * 2);
 
-        this.getChildren().addAll(finalStateOption, acceptingStateOption,
-                initialStateOption, editStateNameOptionIcon);
+        RemoveStateOptionIcon removeStateOptionIcon = new RemoveStateOptionIcon(drawer, this);
 
-        finalStateOption.setLayoutX(- TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        finalStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
-                + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
+        hBoxTop.getChildren().addAll(finalStateOption, acceptingStateOption, initialStateOption);
+        hBoxDown.getChildren().addAll(editStateNameOptionIcon, removeStateOptionIcon);
+        vbox.getChildren().addAll(hBoxTop, hBoxDown);
+        this.getChildren().add(vbox);
 
-        acceptingStateOption.setLayoutX(- TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                + 3 * TuringMachineDrawer.STATE_RADIUS + 2 * TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        acceptingStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
-                + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-
-        initialStateOption.setLayoutX(
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                        + (5 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) * TuringMachineDrawer.STATE_RADIUS
-                        + 3 * TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-        initialStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
-                + TuringMachineDrawer.STATE_RADIUS + TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
-
-        editStateNameOptionIcon.setLayoutX(- editStateNameOptionIcon.getBoundsInLocal().getWidth() / 2);
-        editStateNameOptionIcon.setLayoutY(
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.STATE_RADIUS - TuringMachineDrawer.OPTION_RECTANGLE_MARGIN
-                - editStateNameOptionIcon.getBoundsInLocal().getHeight() / 2);
     }
 
     void setCurrentState(StateGroup state) {
@@ -182,8 +193,18 @@ class InitialStateOption extends Group{
 
 class EditStateNameOptionIcon extends ImageView{
     StateOptionRectangle optionRectangle;
-    EditStateNameOptionIcon(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle, String url){
-        super(url);
+    EditStateNameOptionIcon(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+        super("./images/cursor_icon.png");
+        this.optionRectangle = optionRectangle;
+
+        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+    }
+}
+
+class RemoveStateOptionIcon extends ImageView{
+    StateOptionRectangle optionRectangle;
+    RemoveStateOptionIcon(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+        super("./images/remove_state.png");
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);

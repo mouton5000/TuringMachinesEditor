@@ -32,6 +32,7 @@ class TransitionOptionRectangle extends OptionRectangle {
     GraphPane graphPane;
 
     private HeadOptionsGroup headOptionsGroup;
+    private RemoveTransitionIcon removeTransitionIcon;
     private ReadSymbolMenu readSymbolMenu;
     private ActionsMenu actionsMenu;
     private TransitionOptionRectangleSymbolsDisplay transitionOptionRectangleSymbolsDisplay;
@@ -56,12 +57,14 @@ class TransitionOptionRectangle extends OptionRectangle {
 
         readIcon = new ReadIcon(drawer, this);
         actionsIcon = new ActionsIcon(drawer, this);
+        removeTransitionIcon = new RemoveTransitionIcon(this);
 
         iconsHBox.setSpacing((getMaximizedWidth()
                 - readIcon.getBoundsInLocal().getWidth()
-                - actionsIcon.getBoundsInLocal().getWidth()) / 4);
+                - actionsIcon.getBoundsInLocal().getWidth()
+        - removeTransitionIcon.getBoundsInLocal().getWidth()) / 4);
 
-        iconsHBox.getChildren().addAll(readIcon, actionsIcon);
+        iconsHBox.getChildren().addAll(readIcon, actionsIcon, removeTransitionIcon);
 
         headOptionsGroup = new HeadOptionsGroup(this);
         readSymbolMenu = new ReadSymbolMenu(this);
@@ -235,39 +238,6 @@ class TransitionOptionRectangle extends OptionRectangle {
     }
 }
 
-class ReadIcon extends Group{
-
-    TuringMachineDrawer drawer;
-    TransitionOptionRectangle optionRectangle;
-
-    private Rectangle backgroundColor;
-
-    ReadIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
-
-        ImageView readIcon = new ImageView("./images/read_tape_icon.png");
-        this.drawer = drawer;
-        this.optionRectangle = optionRectangle;
-
-        readIcon.setLayoutX(-readIcon.getBoundsInLocal().getWidth() / 2);
-        readIcon.setLayoutY(-readIcon.getBoundsInLocal().getHeight() / 2);
-
-        backgroundColor = new Rectangle(
-                - this.optionRectangle.getMaximizedWidth() / 4,
-                - readIcon.getBoundsInLocal().getHeight() / 2,
-                this.optionRectangle.getMaximizedWidth() / 2,
-                readIcon.getBoundsInLocal().getHeight());
-        backgroundColor.setFill(Color.GREEN);
-
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
-
-        this.getChildren().addAll(backgroundColor, readIcon);
-    }
-
-    void setSelected(boolean selected){
-        this.backgroundColor.setOpacity(selected?1:0);
-    }
-}
-
 class HeadOptionsGroup extends HBox{
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
@@ -381,6 +351,50 @@ class HeadOptionsGroup extends HBox{
         offsetX -= dx;
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
+    }
+}
+
+class RemoveTransitionIcon extends ImageView{
+    TransitionOptionRectangle optionRectangle;
+
+    RemoveTransitionIcon(TransitionOptionRectangle optionRectangle) {
+        super("./images/remove_transition.png");
+        this.optionRectangle = optionRectangle;
+
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+}
+
+class ReadIcon extends Group{
+
+    TuringMachineDrawer drawer;
+    TransitionOptionRectangle optionRectangle;
+
+    private Rectangle backgroundColor;
+
+    ReadIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+
+        ImageView readIcon = new ImageView("./images/read_tape_icon.png");
+        this.drawer = drawer;
+        this.optionRectangle = optionRectangle;
+
+        readIcon.setLayoutX(-readIcon.getBoundsInLocal().getWidth() / 2);
+        readIcon.setLayoutY(-readIcon.getBoundsInLocal().getHeight() / 2);
+
+        backgroundColor = new Rectangle(
+                - this.optionRectangle.getMaximizedWidth() / 6,
+                - readIcon.getBoundsInLocal().getHeight() / 2,
+                this.optionRectangle.getMaximizedWidth() / 3,
+                readIcon.getBoundsInLocal().getHeight());
+        backgroundColor.setFill(Color.GREEN);
+
+        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+
+        this.getChildren().addAll(backgroundColor, readIcon);
+    }
+
+    void setSelected(boolean selected){
+        this.backgroundColor.setOpacity(selected?1:0);
     }
 }
 
@@ -738,9 +752,9 @@ class ActionsIcon extends Group{
         actionsIcon.setLayoutY(-actionsIcon.getBoundsInLocal().getHeight() / 2);
 
         backgroundColor = new Rectangle(
-                - this.optionRectangle.getMaximizedWidth() / 4,
+                - this.optionRectangle.getMaximizedWidth() / 6,
                 - actionsIcon.getBoundsInLocal().getHeight() / 2,
-                this.optionRectangle.getMaximizedWidth() / 2,
+                this.optionRectangle.getMaximizedWidth() / 3,
                 actionsIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
