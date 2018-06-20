@@ -18,6 +18,7 @@ import util.Pair;
 import util.Subscriber;
 
 import java.util.List;
+import java.util.Set;
 
 public class TuringMachineDrawer extends Application {
 
@@ -28,6 +29,12 @@ public class TuringMachineDrawer extends Application {
     static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
 
+    static final String BLANK_SYMBOL = "\u2205";
+    static final String LEFT_SYMBOL = "\u21D0";
+    static final String RIGHT_SYMBOL = "\u21D2";
+    static final String DOWN_SYMBOL = "\u21D3";
+    static final String UP_SYMBOL = "\u21D1";
+
     static final int OPTION_RECTANGLE_TIMELINE_DURATION = 200;
 
     static final int STATE_RADIUS = 20;
@@ -37,27 +44,35 @@ public class TuringMachineDrawer extends Application {
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
     static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
     static final long STATE_PRESS_DURATION = 300;
+    static final int STATE_SYMBOL_FONT_SIZE = 15;
+    static final String STATE_SYMBOL_FONT_NAME = "Cambria";
 
-    static final double ARROW_ANGLE = Math.PI/6;
-    static final double ARROW_SIZE = STATE_RADIUS;
-    static final double ARROW_HITBOX_WIDTH = STATE_RADIUS * 2.3;
-    static final double ARROW_KEY_RADIUS = 8;
-    static final Color ARROW_KEY_COLOR = Color.GREENYELLOW;
-    static final Color ARROW_KEY_STROKE_COLOR = Color.BLACK;
-    static final Color ARROW_KEY_LINE_COLOR = Color.GREENYELLOW.darker();
-    static final double ARROW_KEY_LINE_STROKE_WIDTH = 3;
-    static final double ARROW_KEY_DISTANCE_RATIO = 0.25;
-    static final double ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO = 8;
-    static final double ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
-    static final double ARROW_PRESS_OPACITY = 0.8;
-    static final long ARROW_PRESS_DURATION = 300;
+    static final double TRANSITION_ANGLE = Math.PI/6;
+    static final double TRANSITION_SIZE = STATE_RADIUS;
+    static final double TRANSITION_HITBOX_WIDTH = STATE_RADIUS * 2.3;
+    static final double TRANSITION_KEY_RADIUS = 8;
+    static final Color TRANSITION_KEY_COLOR = Color.GREENYELLOW;
+    static final Color TRANSITION_KEY_STROKE_COLOR = Color.BLACK;
+    static final Color TRANSITION_KEY_LINE_COLOR = Color.GREENYELLOW.darker();
+    static final double TRANSITION_KEY_LINE_STROKE_WIDTH = 3;
+    static final double TRANSITION_KEY_DISTANCE_RATIO = 0.25;
+    static final double TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO = 8;
+    static final double TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
+    static final double TRANSITION_PRESS_OPACITY = 0.8;
+    static final long TRANSITION_PRESS_DURATION = 300;
+    static final int TRANSITION_SYMBOL_FONT_SIZE = 15;
+    static final String TRANSITION_SYMBOL_FONT_NAME = "Cambria";
+    static final double TRANSITION_DISPLAY_MAX_HEIGHT = 30;
+    static final double TRANSITION_DISPLAY_MAX_WIDTH = 200;
+    static final double TRANSITION_DISPLAY_MARGIN = 20;
+    static final int TRANSITION_DISPLAY_SPACING = 5;
 
     static final double OPTION_RECTANGLE_MINIMIZED_HEIGHT = 10;
     static final double OPTION_RECTANGLE_MINIMIZED_WIDTH = 20;
     static final double OPTION_RECTANGLE_MARGIN = 10;
     static final double OPTION_RECTANGLE_MAXIMIZED_HEIGHT = OPTION_RECTANGLE_MINIMIZED_HEIGHT +
             4 * STATE_RADIUS + 3 * OPTION_RECTANGLE_MARGIN;
-    static final double OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(ARROW_ANGLE)) * STATE_RADIUS +
+    static final double OPTION_RECTANGLE_MAXIMIZED_WIDTH = (6 + Math.cos(TRANSITION_ANGLE)) * STATE_RADIUS +
             4 * OPTION_RECTANGLE_MARGIN;
 
     static final double STATE_OPTION_RECTANGLE_DISTANCE_RATIO = 1.4;
@@ -66,6 +81,8 @@ public class TuringMachineDrawer extends Application {
 
     static final double TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT =
             OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3.0 / 2 + 50;
+    static final Color TRANSITION_OPTION_RECTANGLE_SELECTED_FILL_COLOR = Color.LIGHTGRAY;
+    static final Color TRANSITION_OPTION_RECTANGLE_UNSELECTED_FILL_COLOR = Color.WHITE;
 
     static final double TAPE_WIDTH_RATIO = 4.0/5;
     static final double TAPE_HOBX_ARROW_HEIGHT = 80;
@@ -93,7 +110,7 @@ public class TuringMachineDrawer extends Application {
     static final double TAPE_CELL_HEAD_STROKE_WIDTH = 3;
 
     static final int OPTION_RECTANGLE_SYMBOL_SIZE = 34;
-    static final int OPTION_RECTANGLE_SYMBOL_SPACING = 15;
+    static final int OPTION_RECTANGLE_SYMBOL_SPACING = 8;
     static final int OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
     static final String OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
@@ -101,8 +118,8 @@ public class TuringMachineDrawer extends Application {
     static final double OPTION_RECTANGLE_HEAD_SPACING = 15;
     static final int OPTION_RECTANGLE_HEAD_SIZE = 32;
 
-    static final int TAPE_TAPE_OPTION_RECTANGLE_SPACING = 15;
-    static final int TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH = 30;
+    static final int TAPE_OPTION_RECTANGLE_SPACING = 15;
+    static final int TAPE_OPTION_RECTANGLE_ICON_WIDTH = 30;
 
     boolean animating;
 
@@ -358,14 +375,16 @@ public class TuringMachineDrawer extends Application {
     }
 
     void editHeadColor(Tape tape, int head, Color color2) {
-        this.headsColors.put(color2, new Pair<>(tape, head));
         graphPane.editHeadColor(tape, head, color2);
         tapesPane.editHeadColor(tape, head, color2);
+        this.headsColors.put(color2, new Pair<>(tape, head));
     }
 
     Pair<Tape, Integer> getHead(Color color){
         return headsColors.getV(color);
     }
+
+    Color getColorOfHead(Tape tape, int head) { return headsColors.getK(new Pair<>(tape, head)); }
 
     void removeHead(Tape tape, int head, boolean doConfirm){
         if(doConfirm){

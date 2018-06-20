@@ -1,8 +1,8 @@
 package turingmachines;
 
-enum Direction {
-    TOP,
-    BOTTOM,
+public enum Direction {
+    UP,
+    DOWN,
     LEFT,
     RIGHT
 }

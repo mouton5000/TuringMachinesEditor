@@ -1,10 +1,10 @@
 package turingmachines;
 
-class MoveAction extends Action{
+public class MoveAction extends Action{
 
     private Direction direction;
 
-    MoveAction(Tape tape, int head, Direction direction) {
+    public MoveAction(Tape tape, int head, Direction direction) {
         super(tape, head);
         this.direction = direction;
     }
@@ -12,5 +12,15 @@ class MoveAction extends Action{
     @Override
     void doAction(boolean log) {
         tape.moveHead(head, direction, log);
+    }
+
+    @Override
+    ActionType getType() {
+        return ActionType.MOVE;
+    }
+
+    @Override
+    Object value() {
+        return direction;
     }
 }

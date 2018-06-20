@@ -30,6 +30,10 @@ public class TuringMachine {
 
     public static final String SUBSCRIBER_MSG_ADD_TRANSITION = "TMAddTransition";
     public static final String SUBSCRIBER_MSG_REMOVE_TRANSITION = "TMRemoveTransition";
+    public static final String SUBSCRIBER_MSG_ADD_READ_SYMBOL = "TMAddReadSymbol";
+    public static final String SUBSCRIBER_MSG_REMOVE_READ_SYMBOL = "TMRemoveReadSymbol";
+    public static final String SUBSCRIBER_MSG_ADD_ACTION = "TMAddAction";
+    public static final String SUBSCRIBER_MSG_REMOVE_ACTION = "TMRemoveAction";
 
     public static final String SUBSCRIBER_MSG_ADD_TAPE = "TMHeadAddTape";
     public static final String SUBSCRIBER_MSG_REMOVE_TAPE = "TMRemoveTape";
@@ -173,6 +177,10 @@ public class TuringMachine {
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE, this, tape);
     }
 
+    public Iterator<Tape> getTapes() {
+        return tapes.iterator();
+    }
+
     public void addSymbol(String symbol){
         symbols.add(symbol);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL, this, symbol);
@@ -185,6 +193,14 @@ public class TuringMachine {
 
     public List<String> getSymbols(){
         return symbols;
+    }
+
+    void removeHeadFromTransitions(Tape tape, int head) {
+        for(List<Transition> transitions: this.outputTransitions)
+            for(Transition transition: transitions) {
+                transition.removeAllReadSymbols(tape, head);
+                transition.removeAllActions(tape, head);
+            }
     }
 
     public void setFinalState(int state){
@@ -626,7 +642,7 @@ public class TuringMachine {
 
         Transition t2 = t.addTransition(a, a);
         t2.addReadSymbols(tape1, 0, "1");
-        t2.addAction(new MoveAction(tape1, 0, Direction.TOP));
+        t2.addAction(new MoveAction(tape1, 0, Direction.UP));
 
         Transition t3 = t.addTransition(a, n);
         t3.addReadSymbols(tape1, 0, "2");

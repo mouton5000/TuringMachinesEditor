@@ -120,7 +120,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             int column = optionRectangle.currentColumn;
 
             String symbol = label.getText();
-            symbol = symbol.equals("\u2205")?null:symbol;
+            symbol = symbol.equals(TuringMachineDrawer.BLANK_SYMBOL)?null:symbol;
             optionRectangle.tapePane.tapeBorderPane.tape.writeInput(line,column, symbol);
 
             mouseEvent.consume();

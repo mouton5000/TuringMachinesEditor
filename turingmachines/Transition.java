@@ -33,41 +33,59 @@ public class Transition {
         return actions.iterator();
     }
 
-    void addAction(Action action){
+    public void addAction(Action action){
         actions.add(action);
+
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_ACTION,
+                this.machine, this, action.tape, action.head, action.getType(), action.value());
     }
 
-    void setAction(int i, Action action){
-        actions.set(i, action);
-    }
-
-    void removeAction(int i){
+    public void removeAction(int i){
+        if(i < 0)
+            return;
         actions.remove(i);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION, this.machine, this, i);
+    }
+
+    void removeAllActions(Tape tape, int head) {
+        for(int i = getNbActions() - 1; i >= 0; i--){
+            Action action = actions.get(i);
+            if(action.tape == tape && action.head == head)
+                removeAction(i);
+        }
+    }
+
+    public int getNbActions() {
+        return actions.size();
     }
 
     Iterator<Map.Entry<Tape, List<Set<String>>>> getReadSymbols(){
         return readSymbols.entrySet().iterator();
     }
 
-    Set<String> getReadSymbols(Tape tape, int head){
-        List<Set<java.lang.String>> list = this.readSymbols.get(tape);
+
+    public Iterator<String> getReadSymbols(Tape tape, int head) {
+        List<Set<String>> list = this.readSymbols.get(tape);
         if(list == null)
-            return new HashSet<>();
-
+            return new HashSet<String>().iterator();
         if(list.size() <= head)
-            return new HashSet<>();
-
-        return list.get(head);
+            return new HashSet<String>().iterator();
+        return readSymbols.get(tape).get(head).iterator();
     }
 
-    void addReadSymbols(Tape tape, int head, String... readSymbols){
+    public void addReadSymbols(Tape tape, int head, String... readSymbols){
         List<Set<String>> list = this.readSymbols.computeIfAbsent(tape, k -> new ArrayList<>());
         while(list.size() <= head)
             list.add(new HashSet<>());
-        list.get(head).addAll(Arrays.asList(readSymbols));
+
+        Set<String> set = list.get(head);
+        for(String s : readSymbols)
+            if(set.add(s))
+                Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL,
+                        this.machine, this, tape, head, s);
     }
 
-    void removeReadSymbol(Tape tape, int head, String... readSymbols){
+    public void removeReadSymbols(Tape tape, int head, String... readSymbols){
         List<Set<String>> list = this.readSymbols.get(tape);
         if(list == null)
             return;
@@ -75,7 +93,26 @@ public class Transition {
         if(list.size() <= head)
             return;
 
-        list.get(head).removeAll(Arrays.asList(readSymbols));
+        Set<String> set = list.get(head);
+
+        for(String s : readSymbols)
+            if(set.remove(s))
+                Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
+                        this.machine, this, tape, head, s);
+    }
+
+    void removeAllReadSymbols(Tape tape, int head) {
+        List<Set<String>> list = this.readSymbols.get(tape);
+        if(list == null)
+            return;
+
+        if(list.size() <= head)
+            return;
+
+        Set<String> readSymbols = list.remove(head);
+        for(String s : readSymbols)
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
+                    this.machine, this, tape, head, s);
     }
 
     boolean isCurrentlyValid(){
@@ -104,5 +141,6 @@ public class Transition {
     public String toString() {
         return this.machine.getStateName(input) + " --> " + this.machine.getStateName(output);
     }
+
 }
 

@@ -112,7 +112,7 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
         + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2);
 
         {
-            CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, "\u2205");
+            CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
             label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
                     TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
             label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);

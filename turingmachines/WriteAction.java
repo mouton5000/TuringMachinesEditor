@@ -1,10 +1,10 @@
 package turingmachines;
 
-class WriteAction extends Action{
+public class WriteAction extends Action{
 
     private String symbol;
 
-    WriteAction(Tape tape, int head, String symbol) {
+    public WriteAction(Tape tape, int head, String symbol) {
         super(tape, head);
         this.symbol = symbol;
     }
@@ -12,5 +12,15 @@ class WriteAction extends Action{
     @Override
     void doAction(boolean log) {
         tape.write(head, symbol, log);
+    }
+
+    @Override
+    ActionType getType() {
+        return ActionType.WRITE;
+    }
+
+    @Override
+    Object value() {
+        return symbol;
     }
 }

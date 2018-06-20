@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Separator;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -134,6 +135,7 @@ class TapeHeadMenu extends HBox {
     void openHeadOptionRectangle(int head) {
         headOptionRectangle.setHead(head);
         headOptionRectangle.setVisible(true);
+        this.getChildren().remove(headOptionRectangle);
         this.getChildren().add(head + 2, headOptionRectangle);
         headOptionRectangle.maximize();
     }
@@ -166,7 +168,14 @@ class HeadMenuSelect extends Rectangle {
     }
 
     int getHead(){
-        return ((TapeHeadMenu)this.getParent()).getChildren().indexOf(this) - 1;
+        int head = 0;
+        for(Node child : this.getParent().getChildrenUnmodifiable()) {
+            if (child == this)
+                return head;
+            if(child instanceof HeadMenuSelect)
+                head++;
+        }
+        return -1;
     }
 
     void startTimeline(){

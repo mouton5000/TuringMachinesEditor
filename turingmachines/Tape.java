@@ -88,6 +88,7 @@ public class Tape{
     }
 
     public void removeHead(int head){
+        machine.removeHeadFromTransitions(this, head);
         nbHeads--;
         initialHeadsColumn.remove(head);
         initialHeadsLine.remove(head);
@@ -203,14 +204,14 @@ public class Tape{
         Integer line = headsLine.get(head);
 
         switch (direction){
-            case BOTTOM:
+            case DOWN:
                 if(!line.equals(tapeBottomBound)) {
                     headsLine.set(head, line - 1);
                     if(log)
                         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head, line - 1, column);
                 }
                 break;
-            case TOP:
+            case UP:
                 if(!line.equals(tapeTopBound)) {
                     headsLine.set(head, line + 1);
                     if(log)

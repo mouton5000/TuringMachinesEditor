@@ -1,5 +1,6 @@
 package gui;
 
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -13,10 +14,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
+import util.Pair;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by dimitri.watel on 06/06/18.
@@ -25,6 +25,7 @@ class TransitionOptionRectangle extends OptionRectangle {
 
     private final ReadIcon readIcon;
     private final ActionsIcon actionsIcon;
+    private final ActionDisplay actionsDisplay;
     private boolean readMenuSelected;
 
     TransitionArrowGroup currentTransitionArrowGroup;
@@ -33,10 +34,13 @@ class TransitionOptionRectangle extends OptionRectangle {
     private HeadOptionsGroup headOptionsGroup;
     private ReadSymbolMenu readSymbolMenu;
     private ActionsMenu actionsMenu;
+    private TransitionOptionRectangleSymbolsDisplay transitionOptionRectangleSymbolsDisplay;
 
     private VBox vbox;
 
     private Color currentColor;
+    Tape currentTape;
+    int currentHead;
 
     TransitionOptionRectangle(TuringMachineDrawer drawer, GraphPane graphPane) {
         super(drawer, drawer.graphPaneMouseHandler);
@@ -61,20 +65,18 @@ class TransitionOptionRectangle extends OptionRectangle {
 
         headOptionsGroup = new HeadOptionsGroup(this);
         readSymbolMenu = new ReadSymbolMenu(this);
+        transitionOptionRectangleSymbolsDisplay = new TransitionOptionRectangleSymbolsDisplay(this.drawer, this);
         actionsMenu = new ActionsMenu(this);
-
-        headOptionsGroup.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
-        readSymbolMenu.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
-        actionsMenu.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+        actionsDisplay = new ActionDisplay(this.drawer, this);
 
         vbox.getChildren().addAll(
                 iconsHBox, new Separator(),
                 headOptionsGroup, new Separator(),
-                readSymbolMenu);
+                readSymbolMenu, new Separator(), transitionOptionRectangleSymbolsDisplay);
 
         vbox.setLayoutX(- getMaximizedWidth() / 2);
         vbox.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-            - getMaximizedHeight());
+                - getMaximizedHeight());
 
         readMenuSelected = true;
         readIcon.setSelected(true);
@@ -91,7 +93,7 @@ class TransitionOptionRectangle extends OptionRectangle {
 
     void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
 
-        if(transitionArrowGroup == null && this.currentTransitionArrowGroup != null){
+        if(this.currentTransitionArrowGroup != null){
             this.layoutXProperty().unbind();
             this.layoutYProperty().unbind();
         }
@@ -101,8 +103,13 @@ class TransitionOptionRectangle extends OptionRectangle {
         if(transitionArrowGroup == null)
             return;
 
+        chooseHead(currentTape, currentHead);
+
         this.layoutXProperty().bind(transitionArrowGroup.centerXProperty());
         this.layoutYProperty().bind(transitionArrowGroup.centerYProperty());
+
+        transitionOptionRectangleSymbolsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
+        actionsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
     }
 
     @Override
@@ -114,10 +121,14 @@ class TransitionOptionRectangle extends OptionRectangle {
         if(readMenuSelected)
             return;
         readMenuSelected = true;
-        vbox.getChildren().add(readSymbolMenu);
+
         readIcon.setSelected(true);
-        vbox.getChildren().remove(actionsMenu);
         actionsIcon.setSelected(false);
+
+        vbox.getChildren().remove(4);
+        vbox.getChildren().add(4, readSymbolMenu);
+        vbox.getChildren().remove(6);
+        vbox.getChildren().add(6, transitionOptionRectangleSymbolsDisplay);
     }
 
     void selectActionsMenu(){
@@ -125,50 +136,74 @@ class TransitionOptionRectangle extends OptionRectangle {
             return;
         readMenuSelected = false;
         readIcon.setSelected(false);
-        vbox.getChildren().remove(readSymbolMenu);
         actionsIcon.setSelected(true);
-        vbox.getChildren().add(actionsMenu);
+
+        vbox.getChildren().remove(4);
+        vbox.getChildren().add(4, actionsMenu);
+        vbox.getChildren().remove(6);
+        vbox.getChildren().add(6, actionsDisplay);
     }
 
     void addTape(Tape tape){
         headOptionsGroup.addTape(tape);
+        transitionOptionRectangleSymbolsDisplay.addTape(tape);
     }
 
     void removeTape(Tape tape){
         headOptionsGroup.removeTape(tape);
+        transitionOptionRectangleSymbolsDisplay.removeTape(tape);
     }
 
     void addHead(Tape tape, Color color) {
         headOptionsGroup.addHead(tape, color);
+        transitionOptionRectangleSymbolsDisplay.addHead(tape, color);
+        if(currentColor == null){
+            chooseHead(tape, tape.getNbHeads() - 1);
+        }
     }
 
     void removeHead(Tape tape, int head){
         Color color = headOptionsGroup.removeHead(tape, head);
+        transitionOptionRectangleSymbolsDisplay.removeHead(tape, head);
         if(currentColor == color){
-            color = headOptionsGroup.getHeadColor();
-            chooseHead(color);
+            Pair<Tape, Integer> pair = headOptionsGroup.getArbitraryHead();
+            if(pair != null)
+                chooseHead(pair.first, pair.second);
+            else
+                chooseHead(null, 0);
         }
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
         headOptionsGroup.editHeadColor(tape, head, color);
+        if(tape == currentTape && head == currentHead)
+            chooseHead(tape, head);
+        transitionOptionRectangleSymbolsDisplay.editHeadColor(tape, head, color);
+        actionsDisplay.editHeadColor(tape, head, color);
     }
 
-    void chooseHead(Color color){
-        System.out.println(color);
-        if(currentColor == null && color != null){
+    void chooseHead(Tape tape, int head){
+
+        currentTape = tape;
+        currentHead = head;
+
+        if(tape == null){
+            readSymbolMenu.setVisible(false);
+            actionsMenu.setVisible(false);
+            currentColor = null;
+            return;
+        }
+
+        headOptionsGroup.chooseHead(tape, head);
+        Color color = headOptionsGroup.getColor(tape, head);
+
+        if(currentColor == null){
             readSymbolMenu.setVisible(true);
             actionsMenu.setVisible(true);
         }
-        else if(color == null){
-            readSymbolMenu.setVisible(false);
-            actionsMenu.setVisible(false);
-        }
         currentColor = color;
-        if(color != null){
-            readSymbolMenu.changeColor(color);
-            actionsMenu.changeColor(color);
-        }
+        readSymbolMenu.changeColor(tape, head, color);
+        actionsMenu.changeColor(color);
     }
 
     void addSymbol(String symbol) {
@@ -179,6 +214,24 @@ class TransitionOptionRectangle extends OptionRectangle {
     void removeSymbol(String symbol) {
         readSymbolMenu.removeSymbol(symbol);
         actionsMenu.removeSymbol(symbol);
+    }
+
+    void addReadSymbol(Tape tape, int head, String symbol) {
+        if(currentTape == tape && currentHead == head)
+            readSymbolMenu.addReadSymbol(symbol);
+    }
+
+    void removeReadSymbol(Tape tape, int head, String symbol) {
+        if(currentTape == tape && currentHead == head)
+            readSymbolMenu.removeReadSymbol(symbol);
+    }
+
+    void addAction(Tape tape, int head, String actionSymbol) {
+        actionsDisplay.addAction(tape, head, actionSymbol);
+    }
+
+    void removeAction(int index){
+        actionsDisplay.removeAction(index);
     }
 }
 
@@ -220,6 +273,8 @@ class HeadOptionsGroup extends HBox{
     private double offsetX;
     private Map<Tape, TransitionOptionRectangleTapeHBox> tapes;
 
+    private TransitionOptionRectangleTapeHBox selected;
+
     HeadOptionsGroup(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
         this.tapes = new HashMap<>();
@@ -229,16 +284,23 @@ class HeadOptionsGroup extends HBox{
         this.setAlignment(Pos.CENTER_LEFT);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
         this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
         this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
     }
 
     void addTape(Tape tape){
-        TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox = new TransitionOptionRectangleTapeHBox(optionRectangle);
+        TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox =
+                new TransitionOptionRectangleTapeHBox(optionRectangle, tape);
         tapes.put(tape, transitionOptionRectangleTapeHBox);
-        if(this.getChildren().size() != 0)
-            this.getChildren().add(new Separator(Orientation.VERTICAL));
+        if(this.getChildren().size() != 0) {
+            Separator separator = new Separator(Orientation.VERTICAL);
+            separator.setTranslateX(-offsetX);
+            this.getChildren().add(separator);
+        }
+
+        transitionOptionRectangleTapeHBox.setTranslateX(-offsetX);
         this.getChildren().add(transitionOptionRectangleTapeHBox);
         transitionOptionRectangleTapeHBox.setTranslateX(-offsetX);
     }
@@ -272,16 +334,29 @@ class HeadOptionsGroup extends HBox{
         transitionOptionRectangleTapeHBox.editHeadColor(head, color);
     }
 
-    Color getHeadColor() {
+    Pair<Tape, Integer> getArbitraryHead() {
         if(tapes.isEmpty())
             return null;
-        for(TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox : tapes.values()){
-            if(transitionOptionRectangleTapeHBox.getChildren().size() == 0)
+        for(Tape tape : tapes.keySet()){
+            if(tape.getNbHeads() == 0)
                 continue;
-            return (Color) ((TransitionOptionRectangleChooseHead)
-                    transitionOptionRectangleTapeHBox.getChildren().remove(0)).getStroke();
+            return new Pair<>(tape, 0);
         }
         return null;
+    }
+
+    void chooseHead(Tape tape, int head) {
+
+        if(selected != null)
+            selected.unchoose();
+
+        TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox = tapes.get(tape);
+        selected = transitionOptionRectangleTapeHBox;
+        transitionOptionRectangleTapeHBox.choose(head);
+    }
+
+    Color getColor(Tape tape, int head) {
+        return tapes.get(tape).getColor(head);
     }
 
     void translate(double dx){
@@ -312,9 +387,12 @@ class HeadOptionsGroup extends HBox{
 class TransitionOptionRectangleTapeHBox extends HBox{
 
     TransitionOptionRectangle optionRectangle;
+    TransitionOptionRectangleChooseHead selected;
+    Tape tape;
 
-    TransitionOptionRectangleTapeHBox(TransitionOptionRectangle optionRectangle) {
+    TransitionOptionRectangleTapeHBox(TransitionOptionRectangle optionRectangle, Tape tape) {
         this.optionRectangle = optionRectangle;
+        this.tape = tape;
 
         this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
@@ -324,7 +402,7 @@ class TransitionOptionRectangleTapeHBox extends HBox{
 
     void addHead(Color color) {
         TransitionOptionRectangleChooseHead headRectangle = new TransitionOptionRectangleChooseHead(
-                optionRectangle,
+                optionRectangle, this,
                 0, 0,
                 TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE,
                 TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
@@ -341,16 +419,40 @@ class TransitionOptionRectangleTapeHBox extends HBox{
     void editHeadColor(int head, Color color) {
         ((TransitionOptionRectangleChooseHead) this.getChildren().get(head)).setStroke(color);
     }
+
+    void choose(int head) {
+        selected = (TransitionOptionRectangleChooseHead) this.getChildren().get(head);
+        selected.setFill(TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_SELECTED_FILL_COLOR);
+    }
+
+    void unchoose() {
+        if(selected == null)
+            return;
+
+        selected.setFill(TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_UNSELECTED_FILL_COLOR);
+        selected = null;
+    }
+
+    Color getColor(int head) {
+        return (Color) ((TransitionOptionRectangleChooseHead)this.getChildren().get(head)).getStroke();
+    }
 }
 
 class TransitionOptionRectangleChooseHead extends Rectangle{
     TransitionOptionRectangle optionRectangle;
+    TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox;
 
     TransitionOptionRectangleChooseHead(TransitionOptionRectangle optionRectangle,
-                                  double v, double v1, double v2, double v3) {
+                                        TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox,
+                                        double v, double v1, double v2, double v3) {
         super(v, v1, v2, v3);
         this.optionRectangle = optionRectangle;
+        this.transitionOptionRectangleTapeHBox = transitionOptionRectangleTapeHBox;
         this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+
+    int getHead() {
+        return this.getParent().getChildrenUnmodifiable().indexOf(this);
     }
 }
 
@@ -365,24 +467,14 @@ class ReadSymbolMenu extends HBox{
         this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
         this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
         this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
 
-        {
-            TransitionOptionRectangleChooseSymbolOptionLabel label =
-                    new TransitionOptionRectangleChooseSymbolOptionLabel(optionRectangle, "\u2205");
-            label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
-                    TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-            label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
-
-            label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-            label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-
-            this.getChildren().add(label);
-        }
+        ChooseSymbolOptionLabel label =
+                new ChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
+        this.getChildren().add(label);
     }
 
     void translate(double dx){
@@ -404,50 +496,231 @@ class ReadSymbolMenu extends HBox{
     }
 
     void addSymbol(String symbol){
-        TransitionOptionRectangleChooseSymbolOptionLabel label =
-                new TransitionOptionRectangleChooseSymbolOptionLabel(optionRectangle, symbol);
-        label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
-                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
-
-        label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-        label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-
+        ChooseSymbolOptionLabel label =
+                new ChooseSymbolOptionLabel(optionRectangle, symbol);
+        label.setTranslateX(-offsetX);
         this.getChildren().add(label);
     }
 
-    void changeColor(Color color) {
+    void changeColor(Tape tape, int head, Color color) {
+
+        Set<String> selectedSymbols = new HashSet<>();
+
+        if(optionRectangle.currentTransitionArrowGroup != null) {
+            selectedSymbols = optionRectangle.drawer.graphPane.getReadSymbols(
+                    optionRectangle.currentTransitionArrowGroup, tape, head);
+        }
+
         for(Node child : this.getChildren()){
-            TransitionOptionRectangleChooseSymbolOptionLabel label =
-                    (TransitionOptionRectangleChooseSymbolOptionLabel) child;
+            ChooseSymbolOptionLabel label =
+                    (ChooseSymbolOptionLabel) child;
             label.setTextFill(color);
+            if(selectedSymbols.contains(label.getText()))
+                label.setSelected();
+            else
+                label.setUnselected();
         }
     }
 
     void removeSymbol(String symbol) {
         Iterator<Node> it = this.getChildren().iterator();
         while(it.hasNext()){
-            TransitionOptionRectangleChooseSymbolOptionLabel label =
-                    (TransitionOptionRectangleChooseSymbolOptionLabel) it.next();
+            ChooseSymbolOptionLabel label =
+                    (ChooseSymbolOptionLabel) it.next();
             if(label.getText().equals(symbol))
                 it.remove();
         }
     }
-}
 
-class TransitionOptionRectangleChooseSymbolOptionLabel extends Label{
-    TransitionOptionRectangle optionRectangle;
+    void addReadSymbol(String symbol) {
+        for(Node child : this.getChildren()){
+            ChooseSymbolOptionLabel label =
+                    (ChooseSymbolOptionLabel) child;
+            if(label.getText().equals(symbol)) {
+                label.setSelected();
+                return;
+            }
+        }
+    }
 
-    TransitionOptionRectangleChooseSymbolOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
-        super(s);
-        this.optionRectangle = optionRectangle;
-
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+    void removeReadSymbol(String symbol) {
+        for(Node child : this.getChildren()){
+            ChooseSymbolOptionLabel label =
+                    (ChooseSymbolOptionLabel) child;
+            if(label.getText().equals(symbol)) {
+                label.setUnselected();
+                return;
+            }
+        }
     }
 }
 
+class ChooseSymbolOptionLabel extends Label{
+
+
+    private static final Background SELECTED_BACKGROUND = new Background(
+            new BackgroundFill(TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_SELECTED_FILL_COLOR,
+                    CornerRadii.EMPTY, Insets.EMPTY));
+    private static final Background UNSELECTED_BACKGROUND = new Background(
+            new BackgroundFill(TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_UNSELECTED_FILL_COLOR,
+                    CornerRadii.EMPTY, Insets.EMPTY));
+
+    TransitionOptionRectangle optionRectangle;
+
+    boolean selected = false;
+
+    ChooseSymbolOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
+        super(s);
+        this.optionRectangle = optionRectangle;
+
+        this.setBackground(UNSELECTED_BACKGROUND);
+        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+
+        this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setAlignment(Pos.CENTER);
+    }
+
+    void setSelected(){
+        selected = true;
+        this.setBackground(SELECTED_BACKGROUND);
+    }
+
+    void setUnselected(){
+        selected = false;
+        this.setBackground(UNSELECTED_BACKGROUND);
+    }
+}
+
+class TransitionOptionRectangleSymbolsDisplay extends HBox {
+    TuringMachineDrawer drawer;
+    TransitionOptionRectangle optionRectangle;
+
+    private Map<Tape, TapeSymbolsDisplay> tapes;
+    private double offsetX;
+
+    TransitionOptionRectangleSymbolsDisplay(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+        this.drawer = drawer;
+        this.optionRectangle = optionRectangle;
+        this.tapes = new HashMap<>();
+
+        this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setAlignment(Pos.CENTER_LEFT);
+        this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+        this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
+
+
+        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+
+    void addTape(Tape tape){
+        TapeSymbolsDisplay transitionSymbolsLabels =
+                new TapeSymbolsDisplay(tape);
+        transitionSymbolsLabels.managedProperty().bind(transitionSymbolsLabels.visibleProperty());
+        tapes.put(tape, transitionSymbolsLabels);
+        transitionSymbolsLabels.setTranslateX(-offsetX);
+        this.getChildren().add(transitionSymbolsLabels);
+    }
+
+    void removeTape(Tape tape){
+        TapeSymbolsDisplay transitionSymbolsLabels = tapes.remove(tape);
+        this.getChildren().remove(transitionSymbolsLabels);
+    }
+
+    void addHead(Tape tape, Color color){
+        TapeSymbolsDisplay transitionSymbolsLabels = tapes.get(tape);
+        transitionSymbolsLabels.addHead(color);
+        if(optionRectangle.currentTransitionArrowGroup != null)
+            transitionSymbolsLabels.setCurrentTransitionArrowGroup(optionRectangle.currentTransitionArrowGroup);
+    }
+
+    void editHeadColor(Tape tape, int head, Color color){
+        TapeSymbolsDisplay transitionSymbolsLabels = tapes.get(tape);
+        transitionSymbolsLabels.editHeadColor(head, color);
+    }
+
+    void removeHead(Tape tape, int head){
+        TapeSymbolsDisplay transitionSymbolsLabels = tapes.get(tape);
+        transitionSymbolsLabels.removeHead(head);
+    }
+
+    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+        for(TapeSymbolsDisplay tapeSymbolsDisplay: tapes.values())
+            tapeSymbolsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
+    }
+
+    void translate(double dx){
+        if(dx > offsetX)
+            dx = offsetX;
+
+        if(dx == 0)
+            return;
+
+        offsetX -= dx;
+        for(Node child: this.getChildren())
+            child.setTranslateX(child.getTranslateX() + dx);
+    }
+}
+
+class TapeSymbolsDisplay extends HBox {
+
+    Tape tape;
+
+    TapeSymbolsDisplay(Tape tape) {
+        this.tape = tape;
+        this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+    }
+
+    void addHead(Color color){
+        HeadSymbolsLabelDisplay transitionSymbolLabel =
+                new HeadSymbolsLabelDisplay(color);
+        this.getChildren().add(transitionSymbolLabel);
+    }
+
+
+    void editHeadColor(int head, Color color) {
+        HeadSymbolsLabelDisplay transitionSymbolLabel =
+                (HeadSymbolsLabelDisplay) this.getChildren().get(head);
+        transitionSymbolLabel.setTextFill(color);
+    }
+
+    void removeHead(int head){
+        this.getChildren().remove(head);
+    }
+
+    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+        int head = 0;
+        for(Node child : this.getChildren()){
+            HeadSymbolsLabelDisplay headSymbolsLabelDisplay = (HeadSymbolsLabelDisplay) child;
+            ObservableValue<String> property = transitionArrowGroup.getSymbolDisplayTextProperty(tape, head);
+            headSymbolsLabelDisplay.textProperty().bind(property);
+            head++;
+        }
+    }
+}
+
+class HeadSymbolsLabelDisplay extends Label {
+
+    HeadSymbolsLabelDisplay(Color color) {
+        this.setTextFill(color);
+
+        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+
+        this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setAlignment(Pos.CENTER);
+    }
+}
 
 class ActionsIcon extends Group{
 
@@ -481,9 +754,9 @@ class ActionsIcon extends Group{
     }
 }
 
-
 class ActionsMenu extends HBox {
     TransitionOptionRectangle optionRectangle;
+    RemoveActionIcon removeActionIcon;
     private double offsetX;
 
     ActionsMenu(TransitionOptionRectangle optionRectangle) {
@@ -493,28 +766,183 @@ class ActionsMenu extends HBox {
         this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
         this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
         this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
 
-        String directions[] = {"\u21D0", "\u21D2", "\u21D3", "\u21D1"} ;
-        for(String direction : directions) {
-            TransitionOptionRectangleChooseActionOptionLabel label =
-                    new TransitionOptionRectangleChooseActionOptionLabel(optionRectangle, direction);
-            label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
-                    TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-            label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        removeActionIcon = new RemoveActionIcon(optionRectangle);
+        this.getChildren().add(removeActionIcon);
 
-            label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-            label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        String directions[] = {TuringMachineDrawer.LEFT_SYMBOL,
+                TuringMachineDrawer.RIGHT_SYMBOL,
+                TuringMachineDrawer.DOWN_SYMBOL,
+                TuringMachineDrawer.UP_SYMBOL
+        } ;
+        for(String direction : directions) {
+            ChooseActionOptionLabel label =
+                    new ChooseActionOptionLabel(optionRectangle, direction);
 
             this.getChildren().add(label);
         }
     }
 
     void translate(double dx){
+        if(dx > offsetX)
+            dx = offsetX;
+
+        int nbSymbols = this.getChildren().size() - 1;
+        if(dx < offsetX - (nbSymbols - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING +
+                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE)
+                - TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING
+                - removeActionIcon.getBoundsInLocal().getWidth())
+            dx = offsetX - (nbSymbols - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING +
+                    TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE)
+                    - TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING
+                    - removeActionIcon.getBoundsInLocal().getWidth();
+
+        if(dx == 0)
+            return;
+
+        offsetX -= dx;
+        for(Node child: this.getChildren())
+            child.setTranslateX(child.getTranslateX() + dx);
+    }
+
+    void addSymbol(String symbol){
+        ChooseActionOptionLabel label =
+                new ChooseActionOptionLabel(optionRectangle, symbol);
+
+
+        label.setTranslateX(-offsetX);
+        this.getChildren().add(label);
+    }
+
+    void changeColor(Color color) {
+        for(Node child : this.getChildren()){
+            if(!(child instanceof ChooseActionOptionLabel))
+                continue;
+            ChooseActionOptionLabel label =
+                    (ChooseActionOptionLabel) child;
+            label.setTextFill(color);
+        }
+    }
+
+    void removeSymbol(String symbol) {
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            Node child = it.next();
+            if(!(child instanceof ChooseActionOptionLabel))
+                continue;
+            ChooseActionOptionLabel label =
+                    (ChooseActionOptionLabel) child;
+            if(label.getText().equals(symbol))
+                it.remove();
+        }
+    }
+}
+
+class ChooseActionOptionLabel extends Label{
+    TransitionOptionRectangle optionRectangle;
+
+    ChooseActionOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
+        super(s);
+        this.optionRectangle = optionRectangle;
+
+        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+
+        this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+}
+
+class RemoveActionIcon extends ImageView{
+
+    TransitionOptionRectangle optionRectangle;
+
+    RemoveActionIcon(TransitionOptionRectangle optionRectangle) {
+        super("./images/remove_action.png");
+        this.optionRectangle = optionRectangle;
+
+        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+}
+
+class ActionDisplay extends HBox{
+
+    TuringMachineDrawer drawer;
+    TransitionOptionRectangle optionRectangle;
+    private double offsetX;
+
+    ActionDisplay(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+        this.drawer = drawer;
+        this.optionRectangle = optionRectangle;
+        this.offsetX = 0;
+
+        this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        this.setAlignment(Pos.CENTER_LEFT);
+        this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+
+        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+    }
+
+    void addAction(Tape tape, int head, String actionSymbol) {
+        addAction(drawer.getColorOfHead(tape, head), actionSymbol);
+    }
+
+    private void addAction(Color color, String actionSymbol){
+        Label label = new Label(actionSymbol);
+        label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+        label.setTextFill(color);
+
+        label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+
+        label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+        label.setAlignment(Pos.CENTER);
+
+        label.setTranslateX(-offsetX);
+
+        System.out.println(color);
+
+        this.getChildren().add(label);
+    }
+
+    void removeAction(int index){
+        this.getChildren().remove(index);
+    }
+
+    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+        this.getChildren().clear();
+        for(Pair<String, Color> pair: transitionArrowGroup.getActionsDisplay()){
+            this.addAction(pair.second, pair.first);
+        }
+    }
+
+    public void editHeadColor(Tape tape, int head, Color color) {
+        Color previousColor = drawer.getColorOfHead(tape, head);
+
+        for(Node child: this.getChildren()){
+            Label label = (Label) child;
+            if(label.getTextFill().equals(previousColor))
+                label.setTextFill(color);
+        }
+    }
+
+    void translate(double dx) {
+
         if(dx > offsetX)
             dx = offsetX;
 
@@ -530,49 +958,5 @@ class ActionsMenu extends HBox {
         offsetX -= dx;
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
-    }
-
-    void addSymbol(String symbol){
-        TransitionOptionRectangleChooseActionOptionLabel label =
-                new TransitionOptionRectangleChooseActionOptionLabel(optionRectangle, symbol);
-        label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
-                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
-
-        label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-        label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-
-        this.getChildren().add(label);
-    }
-
-    void changeColor(Color color) {
-        for(Node child : this.getChildren()){
-            TransitionOptionRectangleChooseActionOptionLabel label =
-                    (TransitionOptionRectangleChooseActionOptionLabel) child;
-            label.setTextFill(color);
-        }
-    }
-
-    void removeSymbol(String symbol) {
-        Iterator<Node> it = this.getChildren().iterator();
-        while(it.hasNext()){
-            TransitionOptionRectangleChooseActionOptionLabel label =
-                    (TransitionOptionRectangleChooseActionOptionLabel) it.next();
-            if(label.getText().equals(symbol))
-                it.remove();
-        }
-    }
-}
-
-class TransitionOptionRectangleChooseActionOptionLabel extends Label{
-    TransitionOptionRectangle optionRectangle;
-
-    TransitionOptionRectangleChooseActionOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
-        super(s);
-        this.optionRectangle = optionRectangle;
-
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
     }
 }

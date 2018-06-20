@@ -1,6 +1,6 @@
 package turingmachines;
 
-abstract class Action {
+public abstract class Action {
     Tape tape;
     int head;
 
@@ -10,6 +10,8 @@ abstract class Action {
     }
 
     abstract void doAction(boolean log);
+    abstract ActionType getType();
+    abstract Object value();
 }
 
 

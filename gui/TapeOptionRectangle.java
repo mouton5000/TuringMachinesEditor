@@ -71,40 +71,40 @@ class TapeOptionRectangle extends OptionRectangle{
         inf_line_bottom_icon_gray = new ImageView("./images/inf_line_bottom_gray.png");
         inf_line_top_icon_gray = new ImageView("./images/inf_line_top_gray.png");
 
-        add_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        add_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        add_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        add_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        add_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
 
-        remove_columns_left_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_columns_right_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_lines_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_lines_top_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        remove_columns_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        remove_columns_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        remove_lines_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        remove_lines_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
 
-        inf_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        inf_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        inf_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        inf_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        inf_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
 
-        double left2X = - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double leftX = - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double right2X = TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
-                + TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double rightX = TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING / 2
-                + TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double left2X = - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double leftX = - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double right2X = TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
+                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double rightX = TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING / 2
+                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
 
         double topY = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
         double bottomY = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
 
         add_column_left_icon.setLayoutX(left2X);
         add_column_left_icon.setLayoutY(bottomY);
@@ -155,32 +155,32 @@ class TapeOptionRectangle extends OptionRectangle{
         inf_line_top_icon_gray.setLayoutY(topY);
 
         Line leftLine = new Line(
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                        - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                        - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
         );
 
         Line rightLine = new Line(
-                TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                + TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                        + TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                        + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                         - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
         );
 
         Line centerLine = new Line(
-                - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                        - TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                        - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_SPACING
-                        + TuringMachineDrawer.TAPE_TAPE_OPTION_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
+                        + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                         - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2
         );

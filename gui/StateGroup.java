@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 class StateGroup extends Group{
@@ -59,18 +60,20 @@ class StateGroup extends Group{
         initLine2 = new Line();
         initLine1.setStartX(-TuringMachineDrawer.STATE_RADIUS);
         initLine2.setStartX(-TuringMachineDrawer.STATE_RADIUS);
-        initLine1.setEndX(-(1 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) *
+        initLine1.setEndX(-(1 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initLine2.setEndX(-(1 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) *
+        initLine2.setEndX(-(1 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initLine1.setEndY(-Math.sin(TuringMachineDrawer.ARROW_ANGLE) *
+        initLine1.setEndY(-Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initLine2.setEndY(Math.sin(TuringMachineDrawer.ARROW_ANGLE) *
+        initLine2.setEndY(Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
         initLine1.setVisible(false);
         initLine2.setVisible(false);
 
         label = new Label(name);
+        label.setFont(Font.font(TuringMachineDrawer.STATE_SYMBOL_FONT_NAME,
+                TuringMachineDrawer.STATE_SYMBOL_FONT_SIZE));
         label.setMinWidth(TuringMachineDrawer.STATE_RADIUS * 2);
         label.setMaxWidth(TuringMachineDrawer.STATE_RADIUS * 2);
         label.setMinHeight(TuringMachineDrawer.STATE_RADIUS * 2);

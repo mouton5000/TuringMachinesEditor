@@ -7,6 +7,7 @@ import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -14,7 +15,11 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeType;
 import javafx.util.Duration;
+import turingmachines.Tape;
+import util.Pair;
 import util.Vector;
+
+import java.util.List;
 
 public class TransitionArrowGroup extends Group {
     final TuringMachineDrawer drawer;
@@ -31,6 +36,8 @@ public class TransitionArrowGroup extends Group {
     private Line control1Line;
     private Line control2Line;
 
+    private TransitionDisplay transitionDisplay;
+
     private DoubleProperty centerX;
     private DoubleProperty centerY;
 
@@ -42,6 +49,8 @@ public class TransitionArrowGroup extends Group {
         this.input = input;
         this.output = output;
 
+        this.transitionDisplay = new TransitionDisplay(drawer);
+
         this.animating = false;
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
@@ -50,24 +59,24 @@ public class TransitionArrowGroup extends Group {
         this.centerY = new SimpleDoubleProperty();
 
         invisibleLine = new TransitionArrowInvisibleLine(this.drawer, this);
-        invisibleLine.setStrokeWidth(TuringMachineDrawer.ARROW_HITBOX_WIDTH);
+        invisibleLine.setStrokeWidth(TuringMachineDrawer.TRANSITION_HITBOX_WIDTH);
         invisibleLine.setStroke(Color.BLACK);
         invisibleLine.setOpacity(0);
         invisibleLine.setStrokeType(StrokeType.CENTERED);
 
-        control1Key = new TransitionArrowControl1KeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
-        control2Key = new TransitionArrowControl2KeyCircle(this, TuringMachineDrawer.ARROW_KEY_RADIUS);
+        control1Key = new TransitionArrowControl1KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
+        control2Key = new TransitionArrowControl2KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
         control1Line = new Line();
         control2Line = new Line();
 
-        control1Key.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
-        control2Key.setFill(TuringMachineDrawer.ARROW_KEY_COLOR);
-        control1Key.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
-        control2Key.setStroke(TuringMachineDrawer.ARROW_KEY_STROKE_COLOR);
-        control1Line.setStroke(TuringMachineDrawer.ARROW_KEY_LINE_COLOR);
-        control2Line.setStroke(TuringMachineDrawer.ARROW_KEY_LINE_COLOR);
-        control1Line.setStrokeWidth(TuringMachineDrawer.ARROW_KEY_LINE_STROKE_WIDTH);
-        control2Line.setStrokeWidth(TuringMachineDrawer.ARROW_KEY_LINE_STROKE_WIDTH);
+        control1Key.setFill(TuringMachineDrawer.TRANSITION_KEY_COLOR);
+        control2Key.setFill(TuringMachineDrawer.TRANSITION_KEY_COLOR);
+        control1Key.setStroke(TuringMachineDrawer.TRANSITION_KEY_STROKE_COLOR);
+        control2Key.setStroke(TuringMachineDrawer.TRANSITION_KEY_STROKE_COLOR);
+        control1Line.setStroke(TuringMachineDrawer.TRANSITION_KEY_LINE_COLOR);
+        control2Line.setStroke(TuringMachineDrawer.TRANSITION_KEY_LINE_COLOR);
+        control1Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
+        control2Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
 
         control1Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
         control2Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
@@ -78,7 +87,7 @@ public class TransitionArrowGroup extends Group {
         arrowLine1 = new Line();
         arrowLine2 = new Line();
 
-        this.getChildren().addAll(centerLine, arrowLine1, arrowLine2, invisibleLine, control1Line, control2Line,
+        this.getChildren().addAll(centerLine, arrowLine1, arrowLine2, transitionDisplay, invisibleLine, control1Line, control2Line,
                 control1Key, control2Key);
 
         ChangeListener<Number> inputXChangeListener = (obs, oldVal, newVal) -> {
@@ -114,24 +123,28 @@ public class TransitionArrowGroup extends Group {
             invisibleLine.setStartX(nv);
             control1Line.setStartX(nv);
             centerX.setValue(getCenterX());
+            replaceDisplay();
         });
         centerLine.startYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartY(nv);
             control1Line.setStartY(nv);
             centerY.setValue(getCenterY());
+            replaceDisplay();
         });
         centerLine.endXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndX(nv);
             control2Line.setStartX(nv);
             centerX.setValue(getCenterX());
+            replaceDisplay();
         });
         centerLine.endYProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setEndY(nv);
             control2Line.setStartY(nv);
             centerY.setValue(getCenterY());
+            replaceDisplay();
         });
         centerLine.controlX1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
@@ -139,6 +152,7 @@ public class TransitionArrowGroup extends Group {
             control1Key.setCenterX(nv);
             control1Line.setEndX(nv);
             centerX.setValue(getCenterX());
+            replaceDisplay();
         });
         centerLine.controlY1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
@@ -146,6 +160,7 @@ public class TransitionArrowGroup extends Group {
             control1Key.setCenterY(nv);
             control1Line.setEndY(nv);
             centerY.setValue(getCenterY());
+            replaceDisplay();
         });
         centerLine.controlX2Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
@@ -153,6 +168,7 @@ public class TransitionArrowGroup extends Group {
             control2Key.setCenterX(nv);
             control2Line.setEndX(nv);
             centerX.setValue(getCenterX());
+            replaceDisplay();
             setArrow();
         });
         centerLine.controlY2Property().addListener((obs, oldVal, newVal) -> {
@@ -161,6 +177,7 @@ public class TransitionArrowGroup extends Group {
             control2Key.setCenterY(nv);
             control2Line.setEndY(nv);
             centerY.setValue(getCenterY());
+            replaceDisplay();
             setArrow();
         });
 
@@ -198,7 +215,7 @@ public class TransitionArrowGroup extends Group {
         v2.diffIP(w);
 
         dist -= 2 * TuringMachineDrawer.STATE_RADIUS;
-        w.multIP(dist * TuringMachineDrawer.ARROW_KEY_DISTANCE_RATIO / TuringMachineDrawer.STATE_RADIUS);
+        w.multIP(dist * TuringMachineDrawer.TRANSITION_KEY_DISTANCE_RATIO / TuringMachineDrawer.STATE_RADIUS);
 
         centerLine.setStartX(v1.x);
         centerLine.setStartY(v1.y);
@@ -215,9 +232,9 @@ public class TransitionArrowGroup extends Group {
                 input.getLayoutY() + input.getTranslateY());
 
         Vector w = new Vector(0, TuringMachineDrawer.STATE_RADIUS);
-        w.rotateIP(TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE);
+        w.rotateIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE);
         v1.addIP(w);
-        w.multIP(TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
+        w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
 
         centerLine.setStartX(v1.x);
         centerLine.setStartY(v1.y);
@@ -226,14 +243,37 @@ public class TransitionArrowGroup extends Group {
 
         v1.set(input.getLayoutX(), input.getLayoutY());
         w.set(0, TuringMachineDrawer.STATE_RADIUS);
-        w.rotateIP(-TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_ANGLE);
+        w.rotateIP(-TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE);
         v1.addIP(w);
-        w.multIP(TuringMachineDrawer.ARROW_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
+        w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
 
         centerLine.setEndX(v1.x);
         centerLine.setEndY(v1.y);
         centerLine.setControlX2(v1.x + w.x);
         centerLine.setControlY2(v1.y + w.y);
+    }
+
+    private void replaceDisplay(){
+        Vector vc =
+                new Vector(centerX.getValue() - transitionDisplay.getMaxWidth() / 2,
+                        centerY.getValue() - transitionDisplay.getMaxHeight() / 2
+                );
+
+        double angle = getAngle();
+        Vector n = new Vector(1, 0);
+        n.rotateIP(angle + Math.PI / 2);
+
+        n.multIP(TuringMachineDrawer.TRANSITION_DISPLAY_MARGIN);
+
+        vc.addIP(n);
+
+        transitionDisplay.setLayoutX(vc.x);
+        transitionDisplay.setLayoutY(vc.y);
+
+        if(angle > Math.PI / 2 || angle < -Math.PI / 2){
+            angle -= Math.PI;
+        }
+        transitionDisplay.setRotate(angle * 360 / (2 * Math.PI));
     }
 
     void setSelected(boolean visible){
@@ -298,15 +338,15 @@ public class TransitionArrowGroup extends Group {
 
         v1.diffIP(v2);
         v1.normalizeIP();
-        v1.multIP(TuringMachineDrawer.ARROW_SIZE);
+        v1.multIP(TuringMachineDrawer.TRANSITION_SIZE);
 
-        v1.rotateIP(TuringMachineDrawer.ARROW_ANGLE);
+        v1.rotateIP(TuringMachineDrawer.TRANSITION_ANGLE);
         arrowLine1.setStartX(v1.x + v2.x);
         arrowLine1.setStartY(v1.y + v2.y);
         arrowLine1.setEndX(v2.x);
         arrowLine1.setEndY(v2.y);
 
-        v1.rotateIP(-2 * TuringMachineDrawer.ARROW_ANGLE);
+        v1.rotateIP(-2 * TuringMachineDrawer.TRANSITION_ANGLE);
         arrowLine2.setStartX(v1.x + v2.x);
         arrowLine2.setStartY(v1.y + v2.y);
         arrowLine2.setEndX(v2.x);
@@ -319,6 +359,15 @@ public class TransitionArrowGroup extends Group {
 
     double getCenterY() {
         return tPointY(0.5);
+    }
+
+    double getAngle() {
+        Vector v1 = new Vector(centerLine.getStartX(), centerLine.getStartY());
+        Vector v2 = new Vector(centerLine.getEndX(), centerLine.getEndY());
+        v2.diffIP(v1);
+        v1.set(1, 0);
+
+        return v2.angle(v1);
     }
 
     private double tPointX(double t){
@@ -356,14 +405,52 @@ public class TransitionArrowGroup extends Group {
         return y1223 + (y2334 - y1223) * t;
     }
 
+
+
+    void addTape(Tape tape) {
+        transitionDisplay.addTape(tape);
+    }
+
+    void removeTape(Tape tape) {
+        transitionDisplay.removeTape(tape);
+    }
+
+    void addHead(Tape tape, Color color) {
+        transitionDisplay.addHead(tape, color);
+    }
+
+    void editHeadColor(Tape tape, int head, Color color) {
+        transitionDisplay.editHeadColor(tape, head, color);
+    }
+
+    void removeHead(Tape tape, int head) {
+        transitionDisplay.removeHead(tape, head);
+    }
+
+    void addReadSymbol(Tape tape, int head, String symbol) {
+        transitionDisplay.addReadSymbol(tape, head, symbol);
+    }
+
+    void removeReadSymbol(Tape tape, int head, String symbol) {
+        transitionDisplay.removeReadSymbol(tape, head, symbol);
+    }
+
+    void addAction(Tape tape, int head, String actionSymbol) {
+        transitionDisplay.addAction(tape, head, actionSymbol);
+    }
+
+    void removeAction(int index){
+        transitionDisplay.removeAction(index);
+    }
+
     void startTimeline(){
         this.animating = true;
         timeline.getKeyFrames().clear();
         KeyValue kOpacity = new KeyValue(this.invisibleLine.opacityProperty(),
-                TuringMachineDrawer.ARROW_PRESS_OPACITY,
+                TuringMachineDrawer.TRANSITION_PRESS_OPACITY,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.ARROW_PRESS_DURATION),
+                new KeyFrame(Duration.millis(TuringMachineDrawer.TRANSITION_PRESS_DURATION),
                         kOpacity)
         );
 
@@ -375,6 +462,14 @@ public class TransitionArrowGroup extends Group {
         this.invisibleLine.setOpacity(0);
         this.animating = false;
     }
+
+    ObservableValue<String> getSymbolDisplayTextProperty(Tape tape, int head) {
+        return transitionDisplay.getSymbolDisplayTextProperty(tape, head);
+    }
+
+    List<Pair<String, Color>> getActionsDisplay() {
+        return transitionDisplay.getActionsDisplay();
+    }
 }
 
 class TransitionArrowInvisibleLine extends CubicCurve{
@@ -385,6 +480,7 @@ class TransitionArrowInvisibleLine extends CubicCurve{
         this.transitionArrowGroup = transitionArrowGroup;
 
         this.setOnMousePressed(drawer.graphPaneMouseHandler);
+        this.setOnMouseDragged(drawer.graphPaneMouseHandler);
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
     }
 }

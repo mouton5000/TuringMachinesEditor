@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -9,14 +8,13 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import turingmachines.Tape;
-import turingmachines.Transition;
-import turingmachines.TuringMachine;
+import turingmachines.*;
 import util.BidirMap;
 import util.Subscriber;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Created by dimitri.watel on 18/06/18.
@@ -31,7 +29,7 @@ public class GraphPane extends Pane {
     private double graphOffsetY;
 
     private BidirMap<StateGroup, Integer> stateGroupToState;
-    private Map<Group, Transition> arrowGroupToTransition;
+    private BidirMap<TransitionArrowGroup, Transition> arrowGroupToTransition;
 
     private char currentDefaultStateChar;
 
@@ -71,7 +69,7 @@ public class GraphPane extends Pane {
         });
 
         stateGroupToState = new BidirMap<>();
-        arrowGroupToTransition = new HashMap<Group, Transition>();
+        arrowGroupToTransition = new BidirMap<>();
 
         graphOffsetX = 0;
         graphOffsetY = 0;
@@ -90,6 +88,37 @@ public class GraphPane extends Pane {
                     case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
                         Transition transition = (Transition) parameters[1];
                         addTransitionFromMachine(transition);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        String symbol = (String)parameters[4];
+                        addReadSymbolFromMachine(transition, tape, head, symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        String symbol = (String)parameters[4];
+                        removeReadSymbolFromMachine(transition, tape, head, symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_ACTION:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        ActionType type = (ActionType) parameters[4];
+                        Object value = parameters[5];
+                        addActionFromMachine(transition, tape, head, type, value);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION:{
+                        Transition transition = (Transition) parameters[1];
+                        Integer index = (Integer) parameters[2];
+                        removeActionFromMachine(transition, index);
                     }
                     break;
                     case TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE:{
@@ -128,6 +157,10 @@ public class GraphPane extends Pane {
 
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_ACTION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE);
@@ -189,34 +222,32 @@ public class GraphPane extends Pane {
         drawer.machine.addTransition(input, output);
     }
 
-    void addTransitionFromMachine(Transition transition){
+    private void addTransitionFromMachine(Transition transition){
         Integer input = transition.getInput();
         Integer output = transition.getOutput();
 
         StateGroup start = stateGroupToState.getK(input);
         StateGroup end = stateGroupToState.getK(output);
 
-        TransitionArrowGroup arrow = new TransitionArrowGroup(this.drawer, start, end);
+        TransitionArrowGroup transitionArrowGroup = new TransitionArrowGroup(this.drawer, start, end);
         if(nextControl1X != null)
-            arrow.setControl1(nextControl1X, nextControl1Y);
+            transitionArrowGroup.setControl1(nextControl1X, nextControl1Y);
         if(nextControl2X != null)
-            arrow.setControl2(nextControl2X, nextControl2Y);
+            transitionArrowGroup.setControl2(nextControl2X, nextControl2Y);
 
-        arrowGroupToTransition.put(arrow, transition);
-        this.getChildren().add(arrow);
-        arrow.toBack();
-    }
+        arrowGroupToTransition.put(transitionArrowGroup, transition);
+        this.getChildren().add(transitionArrowGroup);
+        transitionArrowGroup.toBack();
 
-    void translate(double dx, double dy) {
-        for(Node child : getChildren()) {
-            if(child instanceof StateGroup) {
-                child.setLayoutX(child.getLayoutX() + dx);
-                child.setLayoutY(child.getLayoutY() + dy);
-            }
+        Iterator<Tape> it = drawer.machine.getTapes();
+
+        while(it.hasNext()){
+            Tape tape = it.next();
+            transitionArrowGroup.addTape(tape);
+
+            for(int head = 0; head < tape.getNbHeads(); head++)
+                transitionArrowGroup.addHead(tape, drawer.getColorOfHead(tape, head));
         }
-
-        graphOffsetX = (graphOffsetX + dx) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
-        graphOffsetY = (graphOffsetY + dy) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
     }
 
     void toggleFinal(StateGroup stateGroup){
@@ -262,6 +293,170 @@ public class GraphPane extends Pane {
         stateGroup.setInitial(isInitial);
     }
 
+    void addReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+        transition.addReadSymbols(tape, head, symbol);
+    }
+
+    void removeReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+        transition.removeReadSymbols(tape, head, symbol);
+    }
+
+    private void addReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+        TransitionArrowGroup arrow = arrowGroupToTransition.getK(transition);
+        if(symbol == null)
+            symbol = TuringMachineDrawer.BLANK_SYMBOL;
+        arrow.addReadSymbol(tape, head, symbol);
+
+        if(transitionOptionRectangle.currentTransitionArrowGroup == arrow)
+            transitionOptionRectangle.addReadSymbol(tape, head, symbol);
+    }
+
+    private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+        TransitionArrowGroup arrow = arrowGroupToTransition.getK(transition);
+        if(symbol == null)
+            symbol = TuringMachineDrawer.BLANK_SYMBOL;
+        arrow.removeReadSymbol(tape, head, symbol);
+        if(transitionOptionRectangle.currentTransitionArrowGroup == arrow)
+            transitionOptionRectangle.removeReadSymbol(tape, head, symbol);
+    }
+
+    void addAction(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String actionSymbol) {
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+
+        Action action;
+        switch (actionSymbol){
+            case TuringMachineDrawer.LEFT_SYMBOL:
+                action = new MoveAction(tape, head, Direction.LEFT);
+                break;
+            case TuringMachineDrawer.RIGHT_SYMBOL:
+                action = new MoveAction(tape, head, Direction.RIGHT);
+                break;
+            case TuringMachineDrawer.DOWN_SYMBOL:
+                action = new MoveAction(tape, head, Direction.DOWN);
+                break;
+            case TuringMachineDrawer.UP_SYMBOL:
+                action = new MoveAction(tape, head, Direction.UP);
+                break;
+            default:
+                action = new WriteAction(tape, head, actionSymbol);
+                break;
+        }
+
+        transition.addAction(action);
+    }
+
+    void removeAction(TransitionArrowGroup transitionArrowGroup){
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+        transition.removeAction(transition.getNbActions() - 1);
+    }
+
+    void addActionFromMachine(Transition transition, Tape tape, int head, ActionType type, Object value){
+        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+
+        String actionSymbol = null;
+        switch (type){
+
+            case MOVE:
+                Direction direction = (Direction)value;
+                switch (direction){
+                    case LEFT:
+                        actionSymbol = TuringMachineDrawer.LEFT_SYMBOL;
+                        break;
+                    case RIGHT:
+                        actionSymbol = TuringMachineDrawer.RIGHT_SYMBOL;
+                        break;
+                    case DOWN:
+                        actionSymbol = TuringMachineDrawer.DOWN_SYMBOL;
+                        break;
+                    case UP:
+                        actionSymbol = TuringMachineDrawer.UP_SYMBOL;
+                        break;
+                }
+                break;
+            case WRITE:
+                actionSymbol = (String)value;
+                break;
+        }
+
+        transitionArrowGroup.addAction(tape, head, actionSymbol);
+
+        if(transitionOptionRectangle.currentTransitionArrowGroup == transitionArrowGroup)
+            transitionOptionRectangle.addAction(tape, head, actionSymbol);
+    }
+
+    void removeActionFromMachine(Transition transition, int index){
+        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+        transitionArrowGroup.removeAction(index);
+
+        if(transitionOptionRectangle.currentTransitionArrowGroup == transitionArrowGroup)
+            transitionOptionRectangle.removeAction(index);
+    }
+
+    void addSymbol(String symbol) {
+        this.transitionOptionRectangle.addSymbol(symbol);
+    }
+
+    void removeSymbol(String symbol) {
+        this.transitionOptionRectangle.removeSymbol(symbol);
+    }
+
+    void addTape(Tape tape) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.addTape(tape);
+        this.transitionOptionRectangle.addTape(tape);
+    }
+
+    void removeTape(Tape tape) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.removeTape(tape);
+        this.transitionOptionRectangle.removeTape(tape);
+    }
+
+    void addHead(Tape tape, Color color) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.addHead(tape, color);
+        this.transitionOptionRectangle.addHead(tape, color);
+    }
+
+    void editHeadColor(Tape tape, int head, Color color) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.editHeadColor(tape, head, color);
+        this.transitionOptionRectangle.editHeadColor(tape, head, color);
+    }
+
+    void removeHead(Tape tape, int head) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.removeHead(tape, head);
+        this.transitionOptionRectangle.removeHead(tape, head);
+    }
+
+    Set<String> getReadSymbols(TransitionArrowGroup transitionArrowGroup, Tape tape, int head) {
+        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+
+        Iterator<String> it =  transition.getReadSymbols(tape, head);
+        Set<String> set = new HashSet<>();
+        while(it.hasNext()){
+            String symbol = it.next();
+            symbol = (symbol == null)?TuringMachineDrawer.BLANK_SYMBOL:symbol;
+            set.add(symbol);
+        }
+        return set;
+    }
+
+    void translate(double dx, double dy) {
+        for(Node child : getChildren()) {
+            if(child instanceof StateGroup) {
+                child.setLayoutX(child.getLayoutX() + dx);
+                child.setLayoutY(child.getLayoutY() + dy);
+            }
+        }
+
+        graphOffsetX = (graphOffsetX + dx) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
+        graphOffsetY = (graphOffsetY + dy) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
+    }
+
 
     void openStateOptionRectangle(StateGroup stateGroup){
         stateOptionRectangle.setCurrentState(null);
@@ -294,32 +489,4 @@ public class GraphPane extends Pane {
         transitionOptionRectangle.minimize(true);
     }
 
-
-    void addSymbol(String symbol) {
-        this.transitionOptionRectangle.addSymbol(symbol);
-    }
-
-    void removeSymbol(String symbol) {
-        this.transitionOptionRectangle.removeSymbol(symbol);
-    }
-
-    void addTape(Tape tape) {
-        this.transitionOptionRectangle.addTape(tape);
-    }
-
-    void removeTape(Tape tape) {
-        this.transitionOptionRectangle.removeTape(tape);
-    }
-
-    void addHead(Tape tape, Color color) {
-        this.transitionOptionRectangle.addHead(tape, color);
-    }
-
-    void editHeadColor(Tape tape, Integer head, Color color) {
-        this.transitionOptionRectangle.editHeadColor(tape, head, color);
-    }
-
-    void removeHead(Tape tape, int head) {
-        this.transitionOptionRectangle.removeHead(tape, head);
-    }
 }

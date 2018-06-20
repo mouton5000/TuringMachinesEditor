@@ -56,7 +56,7 @@ class StateOptionRectangle extends OptionRectangle{
 
         initialStateOption.setLayoutX(
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                        + (5 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) * TuringMachineDrawer.STATE_RADIUS
+                        + (5 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) * TuringMachineDrawer.STATE_RADIUS
                         + 3 * TuringMachineDrawer.OPTION_RECTANGLE_MARGIN);
         initialStateOption.setLayoutY(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
@@ -165,13 +165,13 @@ class InitialStateOption extends Group{
 
         initialStateOptionLine1.setStartX(-TuringMachineDrawer.STATE_RADIUS);
         initialStateOptionLine2.setStartX(-TuringMachineDrawer.STATE_RADIUS);
-        initialStateOptionLine1.setEndX(-(1 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) *
+        initialStateOptionLine1.setEndX(-(1 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initialStateOptionLine2.setEndX(-(1 + Math.cos(TuringMachineDrawer.ARROW_ANGLE)) *
+        initialStateOptionLine2.setEndX(-(1 + Math.cos(TuringMachineDrawer.TRANSITION_ANGLE)) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initialStateOptionLine1.setEndY(-Math.sin(TuringMachineDrawer.ARROW_ANGLE) *
+        initialStateOptionLine1.setEndY(-Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
-        initialStateOptionLine2.setEndY(Math.sin(TuringMachineDrawer.ARROW_ANGLE) *
+        initialStateOptionLine2.setEndY(Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
 
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);

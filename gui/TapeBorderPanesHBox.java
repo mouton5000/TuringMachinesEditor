@@ -900,7 +900,7 @@ class TapePane extends Pane {
         if(line == null || column == null)
             return;
 
-        animatedRectangle.toFront();
+        animatedRectangle.toBack();
         animatedRectangle.setLayoutX(tapeBorderPane.getXOf(column)  - TuringMachineDrawer.TAPE_CELL_WIDTH / 2);
         animatedRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2);
         animatedRectangle.setVisible(true);

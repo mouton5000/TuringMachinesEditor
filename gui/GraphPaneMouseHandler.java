@@ -5,7 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
+import turingmachines.Tape;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -49,7 +49,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         if(source instanceof GraphPane
                 || source instanceof HeadOptionsGroup
                 || source instanceof ReadSymbolMenu
-                || source instanceof ActionsMenu) {
+                || source instanceof ActionsMenu
+                || source instanceof TransitionOptionRectangleSymbolsDisplay
+                || source instanceof ActionDisplay) {
             dragX = x;
             dragY = y;
             mouseEvent.consume();
@@ -90,8 +92,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 || source instanceof ReadIcon
                 || source instanceof ActionsIcon
                 || source instanceof TransitionOptionRectangleChooseHead
-                || source instanceof TransitionOptionRectangleChooseActionOptionLabel
-                || source instanceof TransitionOptionRectangleChooseSymbolOptionLabel)
+                || source instanceof ChooseActionOptionLabel
+                || source instanceof ChooseSymbolOptionLabel
+                || source instanceof RemoveActionIcon)
                 && drawer.graphPane.transitionOptionRectangle.isMaximized())
             drawer.graphPane.closeTransitionOptionRectangle();
         else if(source instanceof Pane) {
@@ -169,9 +172,47 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         else if(source instanceof TransitionOptionRectangleChooseHead){
             TransitionOptionRectangleChooseHead transitionOptionRectangleChooseHead =
                     (TransitionOptionRectangleChooseHead) source;
-            transitionOptionRectangleChooseHead.optionRectangle.chooseHead(
-                    (Color) transitionOptionRectangleChooseHead.getStroke()
-            );
+            Tape tape = transitionOptionRectangleChooseHead.transitionOptionRectangleTapeHBox.tape;
+            int head  = transitionOptionRectangleChooseHead.getHead();
+            transitionOptionRectangleChooseHead.optionRectangle.chooseHead(tape, head);
+            mouseEvent.consume();
+        }
+        else if(source instanceof ChooseSymbolOptionLabel){
+            ChooseSymbolOptionLabel chooseSymbolOptionLabel = (ChooseSymbolOptionLabel) source;
+            TransitionOptionRectangle optionRectangle = chooseSymbolOptionLabel.optionRectangle;
+
+            String symbol = (chooseSymbolOptionLabel.getText().equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                    null:chooseSymbolOptionLabel.getText();
+
+            if(optionRectangle.currentTape != null) {
+                if(chooseSymbolOptionLabel.selected)
+                    drawer.graphPane.removeReadSymbol(optionRectangle.currentTransitionArrowGroup,
+                            optionRectangle.currentTape, optionRectangle.currentHead, symbol);
+                else
+                    drawer.graphPane.addReadSymbol(optionRectangle.currentTransitionArrowGroup,
+                            optionRectangle.currentTape, optionRectangle.currentHead, symbol);
+            }
+
+            mouseEvent.consume();
+        }
+        else if(source instanceof ChooseActionOptionLabel){
+            ChooseActionOptionLabel chooseActionOptionLabel = (ChooseActionOptionLabel) source;
+            TransitionOptionRectangle optionRectangle = chooseActionOptionLabel.optionRectangle;
+
+            String actionSymbol = (chooseActionOptionLabel.getText().equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                    null:chooseActionOptionLabel.getText();
+
+            if(optionRectangle.currentTape != null)
+                drawer.graphPane.addAction(optionRectangle.currentTransitionArrowGroup,
+                        optionRectangle.currentTape, optionRectangle.currentHead, actionSymbol);
+            mouseEvent.consume();
+        }
+        else if(source instanceof RemoveActionIcon){
+            RemoveActionIcon removeActionIcon = (RemoveActionIcon) source;
+            TransitionOptionRectangle optionRectangle = removeActionIcon.optionRectangle;
+
+            if(optionRectangle.currentTape != null)
+                drawer.graphPane.removeAction(optionRectangle.currentTransitionArrowGroup);
             mouseEvent.consume();
         }
         else if(source instanceof OptionRectangle)
@@ -221,6 +262,11 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             drawer.graphPane.moveStateGroup(stateGroup, stateGroup.getLayoutX() + x, stateGroup.getLayoutY() + y);
             mouseEvent.consume();
         }
+        else if(source instanceof TransitionArrowInvisibleLine) {
+            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
+            transitionArrowGroup.stopTimeline();
+            select(transitionArrowGroup);
+        }
         else if(source instanceof StateOptionRectangle)
             mouseEvent.consume();
         else if(source instanceof TransitionOptionRectangle)
@@ -250,6 +296,26 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 dragX = x;
             else {
                 ActionsMenu group = (ActionsMenu) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof TransitionOptionRectangleSymbolsDisplay){
+            if(dragX == null)
+                dragX = x;
+            else {
+                TransitionOptionRectangleSymbolsDisplay group = (TransitionOptionRectangleSymbolsDisplay) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof ActionDisplay){
+            if(dragX == null)
+                dragX = x;
+            else {
+                ActionDisplay group = (ActionDisplay) source;
                 group.translate(x - dragX);
                 dragX = x;
             }
