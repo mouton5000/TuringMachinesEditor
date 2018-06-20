@@ -389,23 +389,26 @@ public class TuringMachine {
         for(Transition transition : transitions){
             List<List<List<Object>>> allSymbolsOfTransition = new ArrayList<>();
 
-            Iterator<ReadSymbol> readSymbolIt = transition.getReadSymbols();
+            Iterator<Map.Entry<Tape, List<Set<String>>>> readSymbolIt = transition.getReadSymbols();
             while(readSymbolIt.hasNext()){
-                ReadSymbol readSymbol = readSymbolIt.next();
-                Tape tape = readSymbol.getTape();
-                Integer head = readSymbol.getHead();
+                Map.Entry<Tape, List<Set<String>>> readSymbol = readSymbolIt.next();
+                Tape tape = readSymbol.getKey();
 
-                Iterator<String> symbolsIt = readSymbol.getSymbols();
-                List<List<Object>> readSymbolList = new LinkedList<>();
-                while(symbolsIt.hasNext()){
-                    String symbol = symbolsIt.next();
-                    List<Object> l = new LinkedList<>();
-                    l.add(tape);
-                    l.add(head);
-                    l.add(symbol);
-                    readSymbolList.add(l);
+                int head = 0;
+                for(Set<String> symbols : readSymbol.getValue()){
+                    if(symbols.isEmpty())
+                        continue;
+                    List<List<Object>> readSymbolList = new LinkedList<>();
+                    for(String symbol : symbols) {
+                        List<Object> l = new LinkedList<>();
+                        l.add(tape);
+                        l.add(head);
+                        l.add(symbol);
+                        readSymbolList.add(l);
+                    }
+                    allSymbolsOfTransition.add(readSymbolList);
+                    head++;
                 }
-                allSymbolsOfTransition.add(readSymbolList);
             }
 
             List<Integer> allSymbolsOfTransitionIndexes = new ArrayList<>();
@@ -418,8 +421,9 @@ public class TuringMachine {
                 for(int i = 0; i < allSymbolsOfTransition.size(); i++){
                     current.add(allSymbolsOfTransition.get(i).get(allSymbolsOfTransitionIndexes.get(i)));
                 }
-                if(!allSymbols.add(current))
+                if(!allSymbols.add(current)) {
                     return false;
+                }
 
                 currentIndex = allSymbolsOfTransition.size() - 1;
                 allSymbolsOfTransitionIndexes.set(currentIndex, allSymbolsOfTransitionIndexes.get(currentIndex) + 1);
@@ -476,7 +480,8 @@ public class TuringMachine {
         t.addSymbol("0");
         t.addSymbol("1");
 
-        Tape tape1 = t.getTape(0);
+        Tape tape1 = t.addTape();
+        tape1.addHead();
         tape1.addHead();
 
         tape1.writeInput(0, 0, "1");
@@ -492,64 +497,63 @@ public class TuringMachine {
         int y = t.addState("Y");
         int n = t.addState("N");
 
-        t.setInitialState(a);
-
         Transition t1 = t.addTransition(a, a);
-        t1.addReadSymbol(new ReadSymbol(tape1, 1, "1", "0"));
+        t1.addReadSymbols(tape1, 1, "1", "0");
         t1.addAction(new MoveAction(tape1, 1, Direction.RIGHT));
 
         Transition t2 = t.addTransition(a, b);
-        t2.addReadSymbol(new ReadSymbol(tape1, 1, (String)null, "0"));
+        t2.addReadSymbols(tape1, 1, (String)null);
         t2.addAction(new MoveAction(tape1, 1, Direction.LEFT));
 
         Transition t3 = t.addTransition(b, b);
-        t3.addReadSymbol(new ReadSymbol(tape1, 0, "1"));
-        t3.addReadSymbol(new ReadSymbol(tape1, 1, "1"));
+        t3.addReadSymbols(tape1, 0, "1");
+        t3.addReadSymbols(tape1, 1, "1");
         t3.addAction(new WriteAction(tape1, 0, null));
         t3.addAction(new WriteAction(tape1, 1, null));
         t3.addAction(new MoveAction(tape1, 0, Direction.RIGHT));
         t3.addAction(new MoveAction(tape1, 1, Direction.LEFT));
 
         Transition t4 = t.addTransition(b, b);
-        t4.addReadSymbol(new ReadSymbol(tape1, 0, "0"));
-        t4.addReadSymbol(new ReadSymbol(tape1, 1, "0"));
+        t4.addReadSymbols(tape1, 0, "0");
+        t4.addReadSymbols(tape1, 1, "0");
         t4.addAction(new WriteAction(tape1, 0, null));
         t4.addAction(new WriteAction(tape1, 1, null));
         t4.addAction(new MoveAction(tape1, 0, Direction.RIGHT));
         t4.addAction(new MoveAction(tape1, 1, Direction.LEFT));
 
         Transition t5 = t.addTransition(b, n);
-        t5.addReadSymbol(new ReadSymbol(tape1, 0, "0"));
-        t5.addReadSymbol(new ReadSymbol(tape1, 1, "1"));
+        t5.addReadSymbols(tape1, 0, "0");
+        t5.addReadSymbols(tape1, 1, "1");
 
         Transition t6 = t.addTransition(b, n);
-        t6.addReadSymbol(new ReadSymbol(tape1, 0, "1"));
-        t6.addReadSymbol(new ReadSymbol(tape1, 1, "0"));
+        t6.addReadSymbols(tape1, 0, "1");
+        t6.addReadSymbols(tape1, 1, "0");
 
         Transition t7 = t.addTransition(b, n);
-        t7.addReadSymbol(new ReadSymbol(tape1, 0, (String)null));
-        t7.addReadSymbol(new ReadSymbol(tape1, 1, "1"));
+        t7.addReadSymbols(tape1, 0, (String)null);
+        t7.addReadSymbols(tape1, 1, "1");
 
         Transition t8 = t.addTransition(b, n);
-        t8.addReadSymbol(new ReadSymbol(tape1, 0, "1"));
-        t8.addReadSymbol(new ReadSymbol(tape1, 1, (String)null));
+        t8.addReadSymbols(tape1, 0, "1");
+        t8.addReadSymbols(tape1, 1, (String)null);
 
         Transition t9 = t.addTransition(b, n);
-        t9.addReadSymbol(new ReadSymbol(tape1, 0, (String)null));
-        t9.addReadSymbol(new ReadSymbol(tape1, 1, "0"));
+        t9.addReadSymbols(tape1, 0, (String)null);
+        t9.addReadSymbols(tape1, 1, "0");
 
         Transition t10 = t.addTransition(b, n);
-        t10.addReadSymbol(new ReadSymbol(tape1, 0, "0"));
-        t10.addReadSymbol(new ReadSymbol(tape1, 1, (String)null));
+        t10.addReadSymbols(tape1, 0, "0");
+        t10.addReadSymbols(tape1, 1, (String)null);
 
         Transition t11 = t.addTransition(b, y);
-        t11.addReadSymbol(new ReadSymbol(tape1, 0, (String)null));
-        t11.addReadSymbol(new ReadSymbol(tape1, 1, (String)null));
+        t11.addReadSymbols(tape1, 0, (String)null);
+        t11.addReadSymbols(tape1, 1, (String)null);
 
-
+        t.setInitialState(a);
         t.setAcceptingState(y);
         t.setFinalState(n);
         t.reinitDeterministic();
+
         Subscriber s = new Subscriber() {
             @Override
             public void read(String msg, Object... parameters) {
@@ -558,9 +562,9 @@ public class TuringMachine {
                 else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION))
                     System.out.println(parameters[1]);
                 else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED))
-                    System.out.println(parameters[1]);
+                    System.out.println(((Tape)parameters[1]).print());
                 else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE))
-                    System.out.println(parameters[1]);
+                    System.out.println(((Tape)parameters[1]).print());
                 else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START))
                     System.out.println("Explore Start");
                 else if(msg.equals(TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END))
@@ -591,11 +595,13 @@ public class TuringMachine {
         t.addSymbol("1");
         t.addSymbol("2");
 
-        Tape tape1 = t.getTape(0);
+        Tape tape1 = t.addTape();
         tape1.setBottomBound(0);
         tape1.setTopBound(2);
         tape1.setLeftBound(0);
         tape1.setRightBound(2);
+
+        tape1.addHead();
 
         tape1.setInitialHeadColumn(0, 0);
         tape1.setInitialHeadLine(0, 0);
@@ -615,21 +621,20 @@ public class TuringMachine {
         int n = t.addState("N");
 
         Transition t1 = t.addTransition(a, a);
-        t1.addReadSymbol(new ReadSymbol(tape1, 0, "1"));
+        t1.addReadSymbols(tape1, 0, "1");
         t1.addAction(new MoveAction(tape1, 0, Direction.RIGHT));
 
         Transition t2 = t.addTransition(a, a);
-        t2.addReadSymbol(new ReadSymbol(tape1, 0, "1"));
+        t2.addReadSymbols(tape1, 0, "1");
         t2.addAction(new MoveAction(tape1, 0, Direction.TOP));
 
         Transition t3 = t.addTransition(a, n);
-        t3.addReadSymbol(new ReadSymbol(tape1, 0, "2"));
+        t3.addReadSymbols(tape1, 0, "2");
 
         Transition t4 = t.addTransition(a, y);
-        t4.addReadSymbol(new ReadSymbol(tape1, 0, "0"));
+        t4.addReadSymbols(tape1, 0, "0");
 
         t.setInitialState(a);
-        t.setInitialState(y);
         t.setAcceptingState(y);
         t.setFinalState(n);
 
@@ -644,10 +649,10 @@ public class TuringMachine {
                         System.out.println(parameters[1]);
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED:
-                        System.out.println(parameters[1]);
+                        System.out.println(((Tape)parameters[1]).print());
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE:
-                        System.out.println(parameters[1]);
+                        System.out.println(((Tape)parameters[1]).print());
                         break;
                     case TuringMachine.SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START:
                         System.out.println("Explore Start");

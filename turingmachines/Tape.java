@@ -70,7 +70,7 @@ public class Tape{
         return (tapeTopBound + tapeBottomBound) / 2;
     }
 
-    Integer getNbHeads() {
+    public Integer getNbHeads() {
         return nbHeads;
     }
 
@@ -353,8 +353,7 @@ public class Tape{
 
     }
 
-    @Override
-    public String toString() {
+    public String print() {
         if(cells.isEmpty() && nbHeads == 0)
             return "--";
 

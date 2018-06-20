@@ -2,14 +2,12 @@ package turingmachines;
 
 import util.Subscriber;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Transition {
     private Integer input;
     private Integer output;
-    private List<ReadSymbol> readSymbols;
+    private Map<Tape, List<Set<String>>> readSymbols;
     private List<Action> actions;
     private TuringMachine machine;
 
@@ -19,7 +17,7 @@ public class Transition {
         this.input = input;
         this.output = output;
 
-        readSymbols = new ArrayList<>();
+        readSymbols = new HashMap<>();
         actions = new ArrayList<>();
     }
 
@@ -47,28 +45,49 @@ public class Transition {
         actions.remove(i);
     }
 
-    Iterator<ReadSymbol> getReadSymbols(){
-        return readSymbols.iterator();
+    Iterator<Map.Entry<Tape, List<Set<String>>>> getReadSymbols(){
+        return readSymbols.entrySet().iterator();
     }
 
-    void addReadSymbol(ReadSymbol readSymbol){
-        readSymbols.add(readSymbol);
+    Set<String> getReadSymbols(Tape tape, int head){
+        List<Set<java.lang.String>> list = this.readSymbols.get(tape);
+        if(list == null)
+            return new HashSet<>();
+
+        if(list.size() <= head)
+            return new HashSet<>();
+
+        return list.get(head);
     }
 
-    void setReadSymbol(int i, ReadSymbol readSymbol){
-        readSymbols.set(i, readSymbol);
+    void addReadSymbols(Tape tape, int head, String... readSymbols){
+        List<Set<String>> list = this.readSymbols.computeIfAbsent(tape, k -> new ArrayList<>());
+        while(list.size() <= head)
+            list.add(new HashSet<>());
+        list.get(head).addAll(Arrays.asList(readSymbols));
     }
 
-    void removeReadSymbol(int i){
-        readSymbols.remove(i);
+    void removeReadSymbol(Tape tape, int head, String... readSymbols){
+        List<Set<String>> list = this.readSymbols.get(tape);
+        if(list == null)
+            return;
+
+        if(list.size() <= head)
+            return;
+
+        list.get(head).removeAll(Arrays.asList(readSymbols));
     }
 
     boolean isCurrentlyValid(){
-        Iterator<ReadSymbol> readSymbolIt = getReadSymbols();
-
-        while(readSymbolIt.hasNext())
-            if(!readSymbolIt.next().isCurrentlyRead())
-                return false;
+        for(Map.Entry<Tape, List<Set<String>>> entry : readSymbols.entrySet()){
+            Tape tape = entry.getKey();
+            int head = 0;
+            for(Set<String> symbols : entry.getValue()){
+                if(!symbols.isEmpty() && !symbols.contains(tape.read(head)))
+                    return false;
+                head++;
+            }
+        }
         return true;
     }
 
