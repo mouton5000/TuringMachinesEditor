@@ -105,10 +105,7 @@ class TapeHeadMenu extends HBox {
         this.getChildren().add(new RemoveTapeIcon(drawer, this, tape));
 
         this.headOptionRectangle = new HeadOptionRectangle(drawer, this, tape);
-        headOptionRectangle.visibleProperty().addListener((observableValue, oldVal, newVal) ->{
-            if(!newVal)
-                this.getChildren().remove(headOptionRectangle);
-        });
+        headOptionRectangle.managedProperty().bind(headOptionRectangle.visibleProperty());
 
         this.setOnMouseClicked(drawer.tapesMouseHandler);
     }
