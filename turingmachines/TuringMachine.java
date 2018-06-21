@@ -118,9 +118,18 @@ public class TuringMachine {
     }
 
     public void removeState(int state){
+        Set<Transition> transitions = new HashSet<>(outputTransitions.get(state));
+        for(int state2 = 0; state2 < getNbStates(); state2++){
+            for(Transition transition : outputTransitions.get(state2))
+                if(state == transition.getOutput())
+                    transitions.add(transition);
+        }
+        for(Transition transition : transitions)
+            this.removeTransition(transition);
+
+        outputTransitions.remove(state);
         nbStates--;
         statesNames.remove(state);
-        outputTransitions.remove(state);
         finalStates.remove(state);
         acceptingStates.remove(state);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE, this, state);

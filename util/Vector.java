@@ -77,6 +77,10 @@ public class Vector {
         return new Vector(ca * x - sa * y, sa * x + ca * y);
     }
 
+    public double angle(Vector v){
+        return Math.atan2(this.y,this.x) - Math.atan2(v.y,v.x);
+    }
+
     public void set(double x, double y) {
         this.x = x;
         this.y = y;
