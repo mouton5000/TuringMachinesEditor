@@ -17,15 +17,15 @@ import java.util.*;
 class TransitionDisplay extends HBox {
     TuringMachineDrawer drawer;
 
-    TransitionSymbolsDisplay transitionSymbolsDisplay;
-    TransitionActionsDisplay transitionActionsDisplay;
+    TransitionDisplaySymbolsHBox transitionDisplaySymbolsHBox;
+    TransitionDisplayActionsHBox transitionDisplayActionsHBox;
 
     TransitionDisplay(TuringMachineDrawer drawer) {
         this.drawer = drawer;
 
 
-        transitionSymbolsDisplay = new TransitionSymbolsDisplay(drawer);
-        transitionActionsDisplay = new TransitionActionsDisplay(drawer);
+        transitionDisplaySymbolsHBox = new TransitionDisplaySymbolsHBox(drawer);
+        transitionDisplayActionsHBox = new TransitionDisplayActionsHBox(drawer);
 
         this.setAlignment(Pos.CENTER);
         this.setMinWidth(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_WIDTH);
@@ -34,63 +34,63 @@ class TransitionDisplay extends HBox {
         this.setMaxHeight(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_HEIGHT);
         this.setSpacing(TuringMachineDrawer.TRANSITION_DISPLAY_SPACING);
 
-        this.getChildren().addAll(transitionSymbolsDisplay, new Separator(Orientation.VERTICAL),
-                transitionActionsDisplay);
+        this.getChildren().addAll(transitionDisplaySymbolsHBox, new Separator(Orientation.VERTICAL),
+                transitionDisplayActionsHBox);
     }
 
     void addTape(Tape tape){
-        transitionSymbolsDisplay.addTape(tape);
+        transitionDisplaySymbolsHBox.addTape(tape);
     }
 
     void removeTape(Tape tape){
-        transitionSymbolsDisplay.removeTape(tape);
+        transitionDisplaySymbolsHBox.removeTape(tape);
     }
 
     void addHead(Tape tape, Color color){
-        transitionSymbolsDisplay.addHead(tape, color);
+        transitionDisplaySymbolsHBox.addHead(tape, color);
     }
 
     void editHeadColor(Tape tape, int head, Color color){
-        transitionSymbolsDisplay.editHeadColor(tape, head, color);
-        transitionActionsDisplay.editHeadColor(tape, head, color);
+        transitionDisplaySymbolsHBox.editHeadColor(tape, head, color);
+        transitionDisplayActionsHBox.editHeadColor(tape, head, color);
     }
 
     void removeHead(Tape tape, int head){
-        transitionSymbolsDisplay.removeHead(tape, head);
+        transitionDisplaySymbolsHBox.removeHead(tape, head);
     }
 
     void addReadSymbol(Tape tape, int head, String symbol){
-        transitionSymbolsDisplay.addReadSymbol(tape, head, symbol);
+        transitionDisplaySymbolsHBox.addReadSymbol(tape, head, symbol);
     }
 
     void removeReadSymbol(Tape tape, int head, String symbol){
-        transitionSymbolsDisplay.removeReadSymbol(tape, head, symbol);
+        transitionDisplaySymbolsHBox.removeReadSymbol(tape, head, symbol);
     }
 
     void addAction(Tape tape, int head, String actionSymbol) {
-        transitionActionsDisplay.addAction(tape, head, actionSymbol);
+        transitionDisplayActionsHBox.addAction(tape, head, actionSymbol);
     }
 
     void removeAction(int index){
-        transitionActionsDisplay.removeAction(index);
+        transitionDisplayActionsHBox.removeAction(index);
     }
 
     ObservableValue<String> getSymbolDisplayTextProperty(Tape tape, int head) {
-        return transitionSymbolsDisplay.getSymbolDisplayTextProperty(tape, head);
+        return transitionDisplaySymbolsHBox.getSymbolDisplayTextProperty(tape, head);
     }
 
     List<Pair<String, Color>> getActionsDisplay() {
-        return transitionActionsDisplay.getActionsDisplay();
+        return transitionDisplayActionsHBox.getActionsDisplay();
     }
 }
 
-class TransitionSymbolsDisplay extends HBox {
+class TransitionDisplaySymbolsHBox extends HBox {
     TuringMachineDrawer drawer;
 
-    Map<Tape, TapeDisplaySymbolsLabels> tapes;
+    Map<Tape, TransitionDisplaySymbolsByTapeHBox> tapes;
     Label starLabel;
 
-    TransitionSymbolsDisplay(TuringMachineDrawer drawer) {
+    TransitionDisplaySymbolsHBox(TuringMachineDrawer drawer) {
         this.drawer = drawer;
         this.tapes = new HashMap<>();
         this.setSpacing(TuringMachineDrawer.TRANSITION_DISPLAY_SPACING);
@@ -109,53 +109,53 @@ class TransitionSymbolsDisplay extends HBox {
     }
 
     void addTape(Tape tape){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = new TapeDisplaySymbolsLabels(tape);
-        tapeDisplaySymbolsLabels.managedProperty().bind(tapeDisplaySymbolsLabels.visibleProperty());
-        tapes.put(tape, tapeDisplaySymbolsLabels);
-        this.getChildren().add(tapeDisplaySymbolsLabels);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = new TransitionDisplaySymbolsByTapeHBox(tape);
+        transitionDisplaySymbolsByTapeHBox.managedProperty().bind(transitionDisplaySymbolsByTapeHBox.visibleProperty());
+        tapes.put(tape, transitionDisplaySymbolsByTapeHBox);
+        this.getChildren().add(transitionDisplaySymbolsByTapeHBox);
     }
 
     void removeTape(Tape tape){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.remove(tape);
-        this.getChildren().remove(tapeDisplaySymbolsLabels);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.remove(tape);
+        this.getChildren().remove(transitionDisplaySymbolsByTapeHBox);
         if(this.isEmpty())
             starLabel.setVisible(true);
     }
 
     void addHead(Tape tape, Color color){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.get(tape);
-        tapeDisplaySymbolsLabels.addHead(color);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
+        transitionDisplaySymbolsByTapeHBox.addHead(color);
     }
 
     void editHeadColor(Tape tape, int head, Color color){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.get(tape);
-        tapeDisplaySymbolsLabels.editHeadColor(head, color);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
+        transitionDisplaySymbolsByTapeHBox.editHeadColor(head, color);
     }
 
     void removeHead(Tape tape, int head){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.get(tape);
-        tapeDisplaySymbolsLabels.removeHead(head);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
+        transitionDisplaySymbolsByTapeHBox.removeHead(head);
         if(this.isEmpty())
             starLabel.setVisible(true);
     }
 
     void addReadSymbol(Tape tape, int head, String symbol){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.get(tape);
-        tapeDisplaySymbolsLabels.addReadSymbol(head, symbol);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
+        transitionDisplaySymbolsByTapeHBox.addReadSymbol(head, symbol);
         starLabel.setVisible(false);
     }
 
     void removeReadSymbol(Tape tape, int head, String symbol){
-        TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels = tapes.get(tape);
-        tapeDisplaySymbolsLabels.removeReadSymbol(head, symbol);
+        TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
+        transitionDisplaySymbolsByTapeHBox.removeReadSymbol(head, symbol);
 
         if(this.isEmpty())
             starLabel.setVisible(true);
     }
 
     boolean isEmpty(){
-        for(TapeDisplaySymbolsLabels tapeDisplaySymbolsLabels : tapes.values()) {
-            if(!tapeDisplaySymbolsLabels.isEmpty())
+        for(TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox : tapes.values()) {
+            if(!transitionDisplaySymbolsByTapeHBox.isEmpty())
                 return false;
         }
         return true;
@@ -166,25 +166,25 @@ class TransitionSymbolsDisplay extends HBox {
     }
 }
 
-class TapeDisplaySymbolsLabels extends HBox {
+class TransitionDisplaySymbolsByTapeHBox extends HBox {
 
     Tape tape;
 
-    TapeDisplaySymbolsLabels(Tape tape) {
+    TransitionDisplaySymbolsByTapeHBox(Tape tape) {
         this.tape = tape;
         this.setSpacing(TuringMachineDrawer.TRANSITION_DISPLAY_SPACING);
         this.setVisible(false);
     }
 
     void addHead(Color color){
-        HeadDisplaySymbolLabel headDisplaySymbolLabel = new HeadDisplaySymbolLabel(color);
-        this.getChildren().add(headDisplaySymbolLabel);
+        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = new TransitionDisplaySymbolsByHeadHBox(color);
+        this.getChildren().add(transitionDisplaySymbolsByHeadHBox);
     }
 
 
     void editHeadColor(int head, Color color) {
-        HeadDisplaySymbolLabel headDisplaySymbolLabel = (HeadDisplaySymbolLabel) this.getChildren().get(head);
-        headDisplaySymbolLabel.setTextFill(color);
+        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadHBox.setTextFill(color);
     }
 
     void removeHead(int head){
@@ -194,33 +194,33 @@ class TapeDisplaySymbolsLabels extends HBox {
     }
 
     void addReadSymbol(int head, String symbol) {
-        HeadDisplaySymbolLabel headDisplaySymbolLabel = (HeadDisplaySymbolLabel) this.getChildren().get(head);
-        headDisplaySymbolLabel.addReadSymbol(symbol);
+        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadHBox.addReadSymbol(symbol);
         this.setVisible(true);
     }
 
     void removeReadSymbol(int head, String symbol) {
-        HeadDisplaySymbolLabel headDisplaySymbolLabel = (HeadDisplaySymbolLabel) this.getChildren().get(head);
-        headDisplaySymbolLabel.removeReadSymbol(symbol);
+        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadHBox.removeReadSymbol(symbol);
         if(this.isEmpty())
             this.setVisible(false);
     }
 
     boolean isEmpty(){
         for(Node child : this.getChildren()) {
-            HeadDisplaySymbolLabel headDisplaySymbolLabel = (HeadDisplaySymbolLabel) child;
-            if(!headDisplaySymbolLabel.getText().equals(""))
+            TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) child;
+            if(!transitionDisplaySymbolsByHeadHBox.getText().equals(""))
                 return false;
         }
         return true;
     }
 
     ObservableValue<String> getSymbolDisplayTextProperty(int head) {
-        return ((HeadDisplaySymbolLabel)this.getChildren().get(head)).textProperty();
+        return ((TransitionDisplaySymbolsByHeadHBox)this.getChildren().get(head)).textProperty();
     }
 }
 
-class HeadDisplaySymbolLabel extends Label {
+class TransitionDisplaySymbolsByHeadHBox extends Label {
 
     private static Comparator<String> cmp = (s, t1) -> {
         if(s == null && t1 == null)
@@ -234,7 +234,7 @@ class HeadDisplaySymbolLabel extends Label {
 
     private Set<String> symbols;
 
-    HeadDisplaySymbolLabel(Color color) {
+    TransitionDisplaySymbolsByHeadHBox(Color color) {
         this.setText("");
         this.setTextFill(color);
 
@@ -263,12 +263,12 @@ class HeadDisplaySymbolLabel extends Label {
     }
 }
 
-class TransitionActionsDisplay extends HBox{
+class TransitionDisplayActionsHBox extends HBox{
 
     TuringMachineDrawer drawer;
     Label noActionLabel;
 
-    TransitionActionsDisplay(TuringMachineDrawer drawer) {
+    TransitionDisplayActionsHBox(TuringMachineDrawer drawer) {
         this.drawer = drawer;
         noActionLabel = new Label("\u2205");
         noActionLabel.managedProperty().bind(noActionLabel.visibleProperty());
