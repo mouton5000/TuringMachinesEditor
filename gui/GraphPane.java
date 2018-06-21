@@ -478,8 +478,16 @@ public class GraphPane extends Pane {
         this.transitionOptionRectangle.addSymbol(symbol);
     }
 
-    void removeSymbol(String symbol) {
-        this.transitionOptionRectangle.removeSymbol(symbol);
+    void editSymbol(int index, String previousSymbol, String symbol) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.editSymbol(previousSymbol, symbol);
+        this.transitionOptionRectangle.editSymbol(index, previousSymbol, symbol);
+    }
+
+    void removeSymbol(int index, String symbol) {
+        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
+            transitionArrowGroup.removeSymbol(symbol);
+        this.transitionOptionRectangle.removeSymbol(index, symbol);
     }
 
     void addTape(Tape tape) {

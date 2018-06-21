@@ -117,16 +117,19 @@ class TapeBorderPanesHBox extends HBox{
 
     void addSymbol(String symbol){
         for(TapeBorderPane tapeBorderPane: tapes.values())
-            tapeBorderPane.tapePane.cellOptionRectangle.addSymbol(symbol);
+            tapeBorderPane.tapePane.addSymbol(symbol);
     }
 
-    void removeSymbol(String symbol) {
-        for(TapeBorderPane tapeBorderPane: tapes.values())
-            tapeBorderPane.tapePane.cellOptionRectangle.removeSymbol(symbol);
+    void editSymbol(int index, String previousSymbol, String symbol){
+        for(TapeBorderPane tapeBorderPane: tapes.values()) {
+            tapeBorderPane.tapePane.editSymbol(index, previousSymbol, symbol);
+        }
+    }
 
-        for(TapeBorderPane tapeBorderPane : tapes.values())
-            tapeBorderPane.tapePane.removeSymbol(symbol);
-
+    void removeSymbol(int index, String symbol) {
+        for(TapeBorderPane tapeBorderPane: tapes.values()) {
+            tapeBorderPane.tapePane.removeSymbol(index, symbol);
+        }
     }
 
     void addTape(Tape tape){
@@ -804,7 +807,7 @@ class TapePane extends Pane {
 
             if(cellLabel == null) {
                 cellLabel = new Label(symbol);
-                cellLabel.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+                cellLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                         TuringMachineDrawer.TAPE_CELL_SYMBOL_FONT_SIZE));
 
                 cellLabel.setMinWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
@@ -868,7 +871,24 @@ class TapePane extends Pane {
         cellOptionRectangle.removeHead(head);
     }
 
-    void removeSymbol(String symbol) {
+    void addSymbol(String symbol){
+        cellOptionRectangle.addSymbol(symbol);
+    }
+
+    void editSymbol(int index, String previousSymbol, String symbol){
+        cellOptionRectangle.editSymbol(index, symbol);
+
+        for(Map<Integer, Label> column : cellLabels.values()){
+            for(Label label : column.values()){
+                if(label.getText().equals(previousSymbol))
+                    label.setText(symbol);
+            }
+        }
+    }
+
+    void removeSymbol(int index, String symbol) {
+        cellOptionRectangle.removeSymbol(index);
+
         Iterator<Map.Entry<Integer, Map<Integer, Label>>> itColumns = cellLabels.entrySet().iterator();
 
         while (itColumns.hasNext()){
@@ -885,7 +905,6 @@ class TapePane extends Pane {
                 itColumns.remove();
         }
 
-        cellOptionRectangle.removeSymbol(symbol);
     }
 
     int lineOf(int head){

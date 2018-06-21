@@ -43,6 +43,7 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_TAPE_TOP_CHANGED = "TMTapeTopChanged";
 
     public static final String SUBSCRIBER_MSG_ADD_SYMBOL = "TMAddSymbol";
+    public static final String SUBSCRIBER_MSG_EDIT_SYMBOL = "TMEditSymbol";
     public static final String SUBSCRIBER_MSG_REMOVE_SYMBOL = "TMRemoveSymbol";
 
     public static final String SUBSCRIBER_MSG_INPUT_CHANGED= "TMInputChanged";
@@ -195,13 +196,26 @@ public class TuringMachine {
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL, this, symbol);
     }
 
-    public void removeSymbol(String symbol){
-        symbols.remove(symbol);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL, this, symbol);
+    public void editSymbol(int i, String symbol){
+        String prevSymbol = symbols.set(i, symbol);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL, this, i, prevSymbol, symbol);
+    }
+
+    public void removeSymbol(int i){
+        String symbol = symbols.remove(i);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL, this, i, symbol);
     }
 
     public List<String> getSymbols(){
         return symbols;
+    }
+
+    public String getSymbol(int i){
+        return symbols.get(i);
+    }
+
+    public boolean hasSymbol(String symbol) {
+        return symbols.contains(symbol);
     }
 
     void removeHeadFromTransitions(Tape tape, int head) {
@@ -710,6 +724,7 @@ public class TuringMachine {
     public static void main(String[] args){
         testNonDeterministic();
     }
+
 }
 
 class Configuration {

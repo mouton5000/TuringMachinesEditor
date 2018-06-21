@@ -28,6 +28,7 @@ public class TuringMachineDrawer extends Application {
     private static int HEIGHT;
     static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
+    static final String SYMBOL_FONT_NAME = "Cambria";
 
     static final String BLANK_SYMBOL = "\u2205";
     static final String LEFT_SYMBOL = "\u21D0";
@@ -42,8 +43,8 @@ public class TuringMachineDrawer extends Application {
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
     static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
     static final long STATE_PRESS_DURATION = 300;
-    static final int STATE_SYMBOL_FONT_SIZE = 15;
-    static final String STATE_SYMBOL_FONT_NAME = "Cambria";
+    static final int STATE_NAME_FONT_SIZE = 15;
+    static final String STATE_NAME_FONT_NAME = "Cambria";
 
     static final double TRANSITION_ANGLE = Math.PI/6;
     static final double TRANSITION_SIZE = STATE_RADIUS;
@@ -59,7 +60,6 @@ public class TuringMachineDrawer extends Application {
     static final double TRANSITION_PRESS_OPACITY = 0.8;
     static final long TRANSITION_PRESS_DURATION = 300;
     static final int TRANSITION_SYMBOL_FONT_SIZE = 15;
-    static final String TRANSITION_SYMBOL_FONT_NAME = "Cambria";
     static final double TRANSITION_DISPLAY_MAX_HEIGHT = 30;
     static final double TRANSITION_DISPLAY_MAX_WIDTH = 200;
     static final double TRANSITION_DISPLAY_MARGIN = 20;
@@ -89,8 +89,8 @@ public class TuringMachineDrawer extends Application {
     static final double TAPE_HOBX_ARROW_WIDTH = 40;
 
     static final double TAPE_COORDINATES_WIDTH = 30;
-    static final double TAPES_HEAD_MENU_HEIGHT = 50;
-    static final double TAPES_HEAD_MENU_SPACING = 15;
+    static final double TAPES_MENU_HEIGHT = 50;
+    static final double TAPES_MENU_SPACING = 15;
     static final double TAPES_HEAD_MENU_HEAD_SIZE = 40;
     static final double TAPE_HEAD_MENU_HEAD_STROKE_WIDTH = 3;
     static final long EDIT_PRESS_DURATION = 300;
@@ -98,7 +98,8 @@ public class TuringMachineDrawer extends Application {
     static final Color TAPE_HEAD_MENU_DEFAULT_FILL_COLOR = Color.WHITE;
     static final Color TAPE_HEAD_MENU_CENTERED_FILL_COLOR = Color.LIGHTGRAY;
     static final Color TAPE_HEAD_MENU_NOT_CENTERED_FILL_COLOR = Color.WHITE;
-
+    static final int TAPE_MENU_SYMBOL_FONT_SIZE = 35;
+    static final int TAPE_MENU_SYMBOL_SIZE = 40;
 
     static final double TAPE_CELL_WIDTH = 50;
     static final Integer TAPE_DEFAULT_TOP = 0;
@@ -112,7 +113,6 @@ public class TuringMachineDrawer extends Application {
     static final int OPTION_RECTANGLE_SYMBOL_SIZE = 34;
     static final int OPTION_RECTANGLE_SYMBOL_SPACING = 8;
     static final int OPTION_RECTANGLE_SYMBOL_FONT_SIZE = 32;
-    static final String OPTION_RECTANGLE_SYMBOL_FONT_NAME = "Cambria";
 
     static final double OPTION_RECTANGLE_HEAD_STROKE_WIDTH = 3;
     static final double OPTION_RECTANGLE_HEAD_SPACING = 15;
@@ -188,9 +188,17 @@ public class TuringMachineDrawer extends Application {
                         addSymbolFromMachine(symbol);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL:{
+                        Integer index = (Integer) parameters[1];
+                        String prevSymbol = (String) parameters[2];
+                        String symbol = (String) parameters[3];
+                        editSymbolFromMachine(index, prevSymbol, symbol);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL:{
-                        String symbol = (String) parameters[1];
-                        removeSymbolFromMachine(symbol);
+                        Integer index = (Integer) parameters[1];
+                        String symbol = (String) parameters[2];
+                        removeSymbolFromMachine(index, symbol);
                     }
                     break;
                 }
@@ -304,13 +312,22 @@ public class TuringMachineDrawer extends Application {
         tapesPane.addSymbol(symbol);
     }
 
-    void removeSymbol(String symbol){
-        this.machine.removeSymbol(symbol);
+    void editSymbol(int index, String symbol){
+        this.machine.removeSymbol(index);
     }
 
-    void removeSymbolFromMachine(String symbol){
-        graphPane.removeSymbol(symbol);
-        tapesPane.removeSymbol(symbol);
+    void editSymbolFromMachine(int index, String prevSymbol, String symbol){
+        graphPane.editSymbol(index, prevSymbol, symbol);
+        tapesPane.editSymbol(index, prevSymbol, symbol);
+    }
+
+    void removeSymbol(int index){
+        this.machine.removeSymbol(index);
+    }
+
+    void removeSymbolFromMachine(int index, String symbol){
+        graphPane.removeSymbol(index, symbol);
+        tapesPane.removeSymbol(index, symbol);
     }
 
     void addTape(){

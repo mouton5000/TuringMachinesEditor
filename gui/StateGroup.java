@@ -8,8 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
@@ -74,8 +72,8 @@ class StateGroup extends Group{
         initLine2.setVisible(false);
 
         label = new Label(name);
-        label.setFont(Font.font(TuringMachineDrawer.STATE_SYMBOL_FONT_NAME,
-                TuringMachineDrawer.STATE_SYMBOL_FONT_SIZE));
+        label.setFont(Font.font(TuringMachineDrawer.STATE_NAME_FONT_NAME,
+                TuringMachineDrawer.STATE_NAME_FONT_SIZE));
         label.setMinWidth(TuringMachineDrawer.STATE_RADIUS * 2);
         label.setMaxWidth(TuringMachineDrawer.STATE_RADIUS * 2);
         label.setMinHeight(TuringMachineDrawer.STATE_RADIUS * 2);

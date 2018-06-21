@@ -41,9 +41,9 @@ class TapesHeadMenu extends HBox {
         this.drawer = drawer;
         this.tapeToMenu = new HashMap<>();
 
-        this.setMinHeight(TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
-        this.setMaxHeight(TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT);
-        this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
+        this.setMinHeight(TuringMachineDrawer.TAPES_MENU_HEIGHT);
+        this.setMaxHeight(TuringMachineDrawer.TAPES_MENU_HEIGHT);
+        this.setSpacing(TuringMachineDrawer.TAPES_MENU_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
 
         AddTapeIcon addTapeIcon = new AddTapeIcon(drawer);
@@ -101,7 +101,7 @@ class TapeHeadMenu extends HBox {
         this.tape = tape;
 
         this.setAlignment(Pos.CENTER);
-        this.setSpacing(TuringMachineDrawer.TAPES_HEAD_MENU_SPACING);
+        this.setSpacing(TuringMachineDrawer.TAPES_MENU_SPACING);
 
         this.getChildren().add(new RemoveTapeIcon(drawer, this, tape));
 

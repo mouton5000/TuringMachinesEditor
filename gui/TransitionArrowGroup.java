@@ -427,6 +427,10 @@ public class TransitionArrowGroup extends Group {
         transitionDisplay.removeHead(tape, head);
     }
 
+    void editSymbol(String previousSymbol, String symbol){ transitionDisplay.editSymbol(previousSymbol, symbol); }
+
+    void removeSymbol(String symbol){ transitionDisplay.removeSymbol(symbol); }
+
     void addReadSymbol(Tape tape, int head, String symbol) {
         transitionDisplay.addReadSymbol(tape, head, symbol);
     }

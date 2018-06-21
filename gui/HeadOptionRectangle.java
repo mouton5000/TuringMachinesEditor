@@ -42,14 +42,6 @@ class HeadOptionRectangle extends OptionRectangle{
                 - changeColorIcon.getBoundsInLocal().getHeight() / 2
         );
 
-        changeColorPicker.setLayoutX(
-                TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING
-        );
-
-        changeColorPicker.setLayoutY(
-                - TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE / 2
-        );
-
 
         changeColorPicker.setLayoutX(
                 TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING
@@ -81,7 +73,7 @@ class HeadOptionRectangle extends OptionRectangle{
 
     @Override
     protected double getMaximizedHeight() {
-        return TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT - 2;
+        return TuringMachineDrawer.TAPES_MENU_HEIGHT - 2;
     }
     @Override
     protected double getMaximizedWidth() {
@@ -91,7 +83,7 @@ class HeadOptionRectangle extends OptionRectangle{
 
     @Override
     protected double getOffsetY() {
-        return - TuringMachineDrawer.TAPES_HEAD_MENU_HEIGHT / 2 + 1;
+        return - TuringMachineDrawer.TAPES_MENU_HEIGHT / 2 + 1;
     }
 
     @Override

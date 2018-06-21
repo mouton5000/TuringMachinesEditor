@@ -65,8 +65,12 @@ class CellOptionRectangle extends OptionRectangle{
 
     void addSymbol(String symbol) {symbolsGroup.addSymbol(symbol);}
 
-    void removeSymbol(String symbol) {
-        symbolsGroup.removeSymbol(symbol);
+    void editSymbol(int index, String symbol){
+        symbolsGroup.editSymbol(index, symbol);
+    }
+
+    void removeSymbol(int index) {
+        symbolsGroup.removeSymbol(index);
     }
 
     void addHead(Color color){
@@ -113,7 +117,7 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
 
         {
             CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
-            label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+            label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                     TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
             label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
 
@@ -148,7 +152,7 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
 
     void addSymbol(String symbol){
         CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, symbol);
-        label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+        label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
 
@@ -160,17 +164,12 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
         this.getChildren().add(label);
     }
 
-    void removeSymbol(String symbol) {
-        Iterator<Node> it = this.getChildren().iterator();
-        while(it.hasNext()){
-            Node child = it.next();
-            if(!(child instanceof CellOptionRectangleChooseSymbolOptionLabel))
-                continue;
-            CellOptionRectangleChooseSymbolOptionLabel label =
-                    (CellOptionRectangleChooseSymbolOptionLabel) child;
-            if(label.getText().equals(symbol))
-                it.remove();
-        }
+    void editSymbol(int index, String symbol){
+        ((CellOptionRectangleChooseSymbolOptionLabel) this.getChildren().get(index + 1)).setText(symbol);
+    }
+
+    void removeSymbol(int index) {
+        this.getChildren().remove(index + 1);
     }
 }
 

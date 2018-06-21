@@ -214,9 +214,16 @@ class TransitionOptionRectangle extends OptionRectangle {
         actionsMenu.addSymbol(symbol);
     }
 
-    void removeSymbol(String symbol) {
-        readSymbolMenu.removeSymbol(symbol);
-        actionsMenu.removeSymbol(symbol);
+    void editSymbol(int index, String previousSymbol, String symbol){
+        readSymbolMenu.editSymbol(index, symbol);
+        actionsMenu.editSymbol(index, symbol);
+        actionsDisplay.editSymbol(previousSymbol, symbol);
+    }
+
+    void removeSymbol(int index, String symbol) {
+        readSymbolMenu.removeSymbol(index);
+        actionsMenu.removeSymbol(index);
+        actionsDisplay.removeSymbol(symbol);
     }
 
     void addReadSymbol(Tape tape, int head, String symbol) {
@@ -516,6 +523,14 @@ class ReadSymbolMenu extends HBox{
         this.getChildren().add(label);
     }
 
+    void editSymbol(int index, String symbol) {
+        ((ChooseActionOptionLabel)this.getChildren().get(index + 1)).setText(symbol);
+    }
+
+    void removeSymbol(int index) {
+        this.getChildren().remove(index + 1);
+    }
+
     void changeColor(Tape tape, int head, Color color) {
 
         Set<String> selectedSymbols = new HashSet<>();
@@ -533,16 +548,6 @@ class ReadSymbolMenu extends HBox{
                 label.setSelected();
             else
                 label.setUnselected();
-        }
-    }
-
-    void removeSymbol(String symbol) {
-        Iterator<Node> it = this.getChildren().iterator();
-        while(it.hasNext()){
-            ChooseSymbolOptionLabel label =
-                    (ChooseSymbolOptionLabel) it.next();
-            if(label.getText().equals(symbol))
-                it.remove();
         }
     }
 
@@ -588,7 +593,7 @@ class ChooseSymbolOptionLabel extends Label{
         this.optionRectangle = optionRectangle;
 
         this.setBackground(UNSELECTED_BACKGROUND);
-        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+        this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
 
@@ -727,7 +732,7 @@ class HeadSymbolsLabelDisplay extends Label {
     HeadSymbolsLabelDisplay(Color color) {
         this.setTextFill(color);
 
-        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+        this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
 
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
@@ -832,6 +837,14 @@ class ActionsMenu extends HBox {
         this.getChildren().add(label);
     }
 
+    void editSymbol(int index, String symbol) {
+        ((ChooseActionOptionLabel)this.getChildren().get(index + 5)).setText(symbol);
+    }
+
+    void removeSymbol(int index) {
+        this.getChildren().remove(index + 5);
+    }
+
     void changeColor(Color color) {
         for(Node child : this.getChildren()){
             if(!(child instanceof ChooseActionOptionLabel))
@@ -839,19 +852,6 @@ class ActionsMenu extends HBox {
             ChooseActionOptionLabel label =
                     (ChooseActionOptionLabel) child;
             label.setTextFill(color);
-        }
-    }
-
-    void removeSymbol(String symbol) {
-        Iterator<Node> it = this.getChildren().iterator();
-        while(it.hasNext()){
-            Node child = it.next();
-            if(!(child instanceof ChooseActionOptionLabel))
-                continue;
-            ChooseActionOptionLabel label =
-                    (ChooseActionOptionLabel) child;
-            if(label.getText().equals(symbol))
-                it.remove();
         }
     }
 }
@@ -863,7 +863,7 @@ class ChooseActionOptionLabel extends Label{
         super(s);
         this.optionRectangle = optionRectangle;
 
-        this.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+        this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
 
@@ -915,7 +915,7 @@ class ActionDisplay extends HBox{
 
     private void addAction(Color color, String actionSymbol){
         Label label = new Label(actionSymbol);
-        label.setFont(Font.font(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_NAME,
+        label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         label.setTextFill(color);
 
@@ -942,6 +942,23 @@ class ActionDisplay extends HBox{
         this.getChildren().clear();
         for(Pair<String, Color> pair: transitionArrowGroup.getActionsDisplay()){
             this.addAction(pair.second, pair.first);
+        }
+    }
+
+    void editSymbol(String previousSymbol, String symbol){
+        for(Node child : this.getChildren()) {
+            Label label = (Label) child;
+            if(label.getText().equals(previousSymbol))
+                label.setText(symbol);
+        }
+    }
+
+    void removeSymbol(String symbol){
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            Label label = (Label)it.next();
+            if(label.getText().equals(symbol))
+                it.remove();
         }
     }
 

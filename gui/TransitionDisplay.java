@@ -59,6 +59,16 @@ class TransitionDisplay extends HBox {
         transitionDisplaySymbolsHBox.removeHead(tape, head);
     }
 
+    void editSymbol(String previousSymbol, String symbol){
+        transitionDisplaySymbolsHBox.editSymbol(previousSymbol, symbol);
+        transitionDisplayActionsHBox.editSymbol(previousSymbol, symbol);
+    }
+
+    void removeSymbol(String symbol){
+        transitionDisplaySymbolsHBox.removeSymbol(symbol);
+        transitionDisplayActionsHBox.removeSymbol(symbol);
+    }
+
     void addReadSymbol(Tape tape, int head, String symbol){
         transitionDisplaySymbolsHBox.addReadSymbol(tape, head, symbol);
     }
@@ -98,7 +108,7 @@ class TransitionDisplaySymbolsHBox extends HBox {
         starLabel = new Label("*");
         starLabel.managedProperty().bind(starLabel.visibleProperty());
 
-        starLabel.setFont(Font.font(TuringMachineDrawer.TRANSITION_SYMBOL_FONT_NAME,
+        starLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.TRANSITION_SYMBOL_FONT_SIZE));
 
         starLabel.setMinHeight(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_HEIGHT);
@@ -139,6 +149,16 @@ class TransitionDisplaySymbolsHBox extends HBox {
             starLabel.setVisible(true);
     }
 
+    void editSymbol(String previousSymbol, String symbol){
+        for(TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox : tapes.values())
+            transitionDisplaySymbolsByTapeHBox.editSymbol(previousSymbol, symbol);
+    }
+
+    void removeSymbol(String symbol){
+        for(TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox : tapes.values())
+            transitionDisplaySymbolsByTapeHBox.removeSymbol(symbol);
+    }
+
     void addReadSymbol(Tape tape, int head, String symbol){
         TransitionDisplaySymbolsByTapeHBox transitionDisplaySymbolsByTapeHBox = tapes.get(tape);
         transitionDisplaySymbolsByTapeHBox.addReadSymbol(head, symbol);
@@ -177,14 +197,14 @@ class TransitionDisplaySymbolsByTapeHBox extends HBox {
     }
 
     void addHead(Color color){
-        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = new TransitionDisplaySymbolsByHeadHBox(color);
-        this.getChildren().add(transitionDisplaySymbolsByHeadHBox);
+        TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel = new TransitionDisplaySymbolsByHeadLabel(color);
+        this.getChildren().add(transitionDisplaySymbolsByHeadLabel);
     }
 
 
     void editHeadColor(int head, Color color) {
-        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
-        transitionDisplaySymbolsByHeadHBox.setTextFill(color);
+        TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel = (TransitionDisplaySymbolsByHeadLabel) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadLabel.setTextFill(color);
     }
 
     void removeHead(int head){
@@ -193,34 +213,50 @@ class TransitionDisplaySymbolsByTapeHBox extends HBox {
             this.setVisible(true);
     }
 
+    void editSymbol(String previousSymbol, String symbol){
+        for(Node child: this.getChildren()){
+            TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel =
+                    (TransitionDisplaySymbolsByHeadLabel) child;
+            transitionDisplaySymbolsByHeadLabel.editSymbol(previousSymbol, symbol);
+        }
+    }
+
+    void removeSymbol(String symbol){
+        for(Node child: this.getChildren()){
+            TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel =
+                    (TransitionDisplaySymbolsByHeadLabel) child;
+            transitionDisplaySymbolsByHeadLabel.removeSymbol(symbol);
+        }
+    }
+
     void addReadSymbol(int head, String symbol) {
-        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
-        transitionDisplaySymbolsByHeadHBox.addReadSymbol(symbol);
+        TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel = (TransitionDisplaySymbolsByHeadLabel) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadLabel.addReadSymbol(symbol);
         this.setVisible(true);
     }
 
     void removeReadSymbol(int head, String symbol) {
-        TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) this.getChildren().get(head);
-        transitionDisplaySymbolsByHeadHBox.removeReadSymbol(symbol);
+        TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel = (TransitionDisplaySymbolsByHeadLabel) this.getChildren().get(head);
+        transitionDisplaySymbolsByHeadLabel.removeReadSymbol(symbol);
         if(this.isEmpty())
             this.setVisible(false);
     }
 
     boolean isEmpty(){
         for(Node child : this.getChildren()) {
-            TransitionDisplaySymbolsByHeadHBox transitionDisplaySymbolsByHeadHBox = (TransitionDisplaySymbolsByHeadHBox) child;
-            if(!transitionDisplaySymbolsByHeadHBox.getText().equals(""))
+            TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel = (TransitionDisplaySymbolsByHeadLabel) child;
+            if(!transitionDisplaySymbolsByHeadLabel.getText().equals(""))
                 return false;
         }
         return true;
     }
 
     ObservableValue<String> getSymbolDisplayTextProperty(int head) {
-        return ((TransitionDisplaySymbolsByHeadHBox)this.getChildren().get(head)).textProperty();
+        return ((TransitionDisplaySymbolsByHeadLabel)this.getChildren().get(head)).textProperty();
     }
 }
 
-class TransitionDisplaySymbolsByHeadHBox extends Label {
+class TransitionDisplaySymbolsByHeadLabel extends Label {
 
     private static Comparator<String> cmp = (s, t1) -> {
         if(s == null && t1 == null)
@@ -234,11 +270,11 @@ class TransitionDisplaySymbolsByHeadHBox extends Label {
 
     private Set<String> symbols;
 
-    TransitionDisplaySymbolsByHeadHBox(Color color) {
+    TransitionDisplaySymbolsByHeadLabel(Color color) {
         this.setText("");
         this.setTextFill(color);
 
-        this.setFont(Font.font(TuringMachineDrawer.TRANSITION_SYMBOL_FONT_NAME,
+        this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.TRANSITION_SYMBOL_FONT_SIZE));
 
         this.setMinHeight(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_HEIGHT);
@@ -246,6 +282,17 @@ class TransitionDisplaySymbolsByHeadHBox extends Label {
         this.setAlignment(Pos.CENTER);
 
         symbols = new TreeSet<>(cmp);
+    }
+
+    void editSymbol(String previousSymbol, String symbol){
+        if(symbols.remove(symbol))
+            symbols.add(previousSymbol);
+        reinitText();
+    }
+
+    void removeSymbol(String symbol){
+        symbols.remove(symbol);
+        reinitText();
     }
 
     void addReadSymbol(String symbol) {
@@ -273,7 +320,7 @@ class TransitionDisplayActionsHBox extends HBox{
         noActionLabel = new Label("\u2205");
         noActionLabel.managedProperty().bind(noActionLabel.visibleProperty());
 
-        noActionLabel.setFont(Font.font(TuringMachineDrawer.TRANSITION_SYMBOL_FONT_NAME,
+        noActionLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.TRANSITION_SYMBOL_FONT_SIZE));
 
         noActionLabel.setMinHeight(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_HEIGHT);
@@ -291,6 +338,29 @@ class TransitionDisplayActionsHBox extends HBox{
             TransitionDisplayActionLabel label = (TransitionDisplayActionLabel) child;
             if(label.getTextFill().equals(previousColor))
                 label.setTextFill(color);
+        }
+    }
+
+    void editSymbol(String previousSymbol, String symbol){
+        for(Node child: this.getChildren()){
+            if(!(child instanceof  TransitionDisplayActionLabel))
+                continue;
+            TransitionDisplayActionLabel label = (TransitionDisplayActionLabel) child;
+            if(label.getText().equals(previousSymbol))
+                label.setText(symbol);
+        }
+    }
+
+    void removeSymbol(String symbol){
+        Iterator<Node> it = this.getChildren().iterator();
+        while(it.hasNext()){
+            Node child = it.next();
+            if(!(child instanceof  TransitionDisplayActionLabel))
+                continue;
+
+            TransitionDisplayActionLabel label = (TransitionDisplayActionLabel) child;
+            if(label.getText().equals(symbol))
+                it.remove();
         }
     }
 
@@ -325,7 +395,7 @@ class TransitionDisplayActionLabel extends Label {
         this.setText(actionSymbol);
         this.setTextFill(color);
 
-        this.setFont(Font.font(TuringMachineDrawer.TRANSITION_SYMBOL_FONT_NAME,
+        this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.TRANSITION_SYMBOL_FONT_SIZE));
 
         this.setMinHeight(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_HEIGHT);
