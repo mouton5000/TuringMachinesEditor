@@ -6,6 +6,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
@@ -122,11 +123,27 @@ public class TuringMachineDrawer extends Application {
     static final int TAPE_OPTION_RECTANGLE_SPACING = 15;
     static final int TAPE_OPTION_RECTANGLE_ICON_WIDTH = 30;
 
+    static final double NOTIFICATION_WIDTH = 400;
+    static final double NOTIFICATION_HEIGHT = 100;
+    static final double NOTIFICATION_DURATION = 4000;
+    static final int NOTIFICATION_FONT_SIZE = 25;
+    static final String NOTIFICATION_FONT_NAME = "Cambria";
+
+    static final double PLAYER_ICON_RADIUS = 20;
+    static final double PLAYER_WIDTH = PLAYER_ICON_RADIUS * 13;
+    static final double PLAYER_HEIGHT = 100;
+    static final Color PLAYER_SELECTED_ICON_COLOR = Color.BLACK;
+    static final Color PLAYER_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
+
     boolean animating;
+    boolean buildMode;
+    boolean playing;
 
     private Stage stage;
     GraphPane graphPane;
     protected TapesVBox tapesPane;
+    Notification notification;
+    TuringPlayer player;
 
     public MenuItem newButton;
     public MenuItem saveButton;
@@ -142,6 +159,7 @@ public class TuringMachineDrawer extends Application {
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
+    TuringPlayerMouseHandler turingPlayerMouseHandler;
 
 
     @Override
@@ -153,6 +171,9 @@ public class TuringMachineDrawer extends Application {
 
         this.stage = stage;
         this.animating = false;
+        this.buildMode = false;
+        this.playing = false;
+
         this.defaultColorsIndex = 0;
 
         Subscriber s = new Subscriber() {
@@ -202,6 +223,26 @@ public class TuringMachineDrawer extends Application {
                         removeSymbolFromMachine(index, symbol);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_ERROR:{
+                        String error_msg = (String) parameters[1];
+                        notifyMsg(error_msg);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION:{
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE:{
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN:{
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED:{
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED:{
+                    }
+                    break;
                 }
             }
         };
@@ -213,6 +254,13 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ERROR);
+
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED);
 
         this.machine = new TuringMachine();
 
@@ -249,16 +297,24 @@ public class TuringMachineDrawer extends Application {
         tapesPane.setMaxWidth(WIDTH);
         tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
         tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+
+        notification.setLayoutX(WIDTH / 2);
+        player.setLayoutX(WIDTH - PLAYER_WIDTH / 2);
     }
 
     public void reinitDraw(){
 
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         tapesMouseHandler = new TapesMouseHandler(this);
+        turingPlayerMouseHandler = new TuringPlayerMouseHandler(this);
 
         graphPane = new GraphPane(this);
         tapesPane = new TapesVBox(this);
+        notification = new Notification();
+        player = new TuringPlayer(this);
 
+        notification.setLayoutY(MARGIN + NOTIFICATION_HEIGHT / 2);
+        player.setLayoutY(MARGIN + PLAYER_HEIGHT / 2);
         resizePanes();
 
         tapesPane.setAlignment(Pos.CENTER);
@@ -288,10 +344,13 @@ public class TuringMachineDrawer extends Application {
         separator.setMaxHeight(SEPARATOR_WIDTH);
         separator.setMinHeight(SEPARATOR_WIDTH);
 
+        Pane mainPane = new Pane();
+
         VBox box = new VBox();
         box.getChildren().addAll(menuBar, graphPane, separator, tapesPane);
 
-        Scene scene = new Scene(box, WIDTH, HEIGHT);
+        mainPane.getChildren().addAll(box, player, notification);
+        Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
 
@@ -370,6 +429,10 @@ public class TuringMachineDrawer extends Application {
     }
 
     void addHead(Tape tape, int line, int column, Color color) {
+        if(!isAvailable(color)) {
+            notifyMsg("That color was already given to another head.");
+            return;
+        }
         this.nextHeadColor = color;
         tape.addHead(line, column);
     }
@@ -390,14 +453,18 @@ public class TuringMachineDrawer extends Application {
         tapesPane.addHead(tape, color, line, column);
     }
 
-    boolean isAvailable(Color color) {
+    private boolean isAvailable(Color color) {
         return !headsColors.containsK(color);
     }
 
-    void editHeadColor(Tape tape, int head, Color color2) {
-        graphPane.editHeadColor(tape, head, color2);
-        tapesPane.editHeadColor(tape, head, color2);
-        this.headsColors.put(color2, new Pair<>(tape, head));
+    void editHeadColor(Tape tape, int head, Color color) {
+        if(!isAvailable(color)) {
+            notifyMsg("That color was already given to another head.");
+            return;
+        }
+        graphPane.editHeadColor(tape, head, color);
+        tapesPane.editHeadColor(tape, head, color);
+        this.headsColors.put(color, new Pair<>(tape, head));
     }
 
     Pair<Tape, Integer> getHead(Color color){
@@ -433,6 +500,57 @@ public class TuringMachineDrawer extends Application {
 
     void centerOn(Tape tape, int head) {
         tapesPane.centerOn(tape, head);
+    }
+
+    void closeAllOptionRectangle(){
+        graphPane.closeAllOptionRectangle();
+        tapesPane.closeAllOptionRectangle();
+    }
+
+    void notifyMsg(String msg){
+        notification.notifyMsg(msg);
+    }
+
+    void build() {
+        buildMode = true;
+        this.playing = false;
+        closeAllOptionRectangle();
+        graphPaneMouseHandler.unselect();
+
+        this.machine.build();
+    }
+
+    void reinitMachine(){
+        buildMode = false;
+        this.playing = false;
+        this.machine.reinitMachine();
+        this.machine.clearBuild();
+    }
+
+    void goToFirstConfiguration() {
+        this.playing = false;
+        this.machine.reinitMachine();
+    }
+
+    void goToLastConfiguration() {
+        this.playing = false;
+        while(this.machine.tick()){}
+        player.setLastFrame();
+    }
+
+    void tick(){
+        boolean notTerminated = this.machine.tick();
+        if(!notTerminated){
+            player.setLastFrame();
+        }
+    }
+
+    void play(){
+        this.playing = true;
+    }
+
+    void pause(){
+        this.playing = false;
     }
 
     public static void main(String[] args) {

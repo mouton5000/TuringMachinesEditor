@@ -106,6 +106,11 @@ class TapesHeadMenu extends HBox {
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
+
+    void closeAllOptionRectangle() {
+        for(TapeHeadMenu tapeHeadMenu: tapeToMenu.values())
+            tapeHeadMenu.closeHeadOptionRectangle(false);
+    }
 }
 
 class TapeHeadMenu extends HBox {
@@ -157,9 +162,8 @@ class TapeHeadMenu extends HBox {
         headOptionRectangle.maximize();
     }
 
-    void closeHeadOptionRectangle(){
-        headOptionRectangle.minimize(true);
-    }
+    void closeHeadOptionRectangle() { closeHeadOptionRectangle(true); }
+    void closeHeadOptionRectangle(boolean animate) { headOptionRectangle.minimize(animate); }
 
 }
 

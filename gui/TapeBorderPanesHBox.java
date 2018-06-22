@@ -258,6 +258,11 @@ class TapeBorderPanesHBox extends HBox{
         for(Node child : this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
+
+    void closeAllOptionRectangle() {
+        for(TapeBorderPane tapeBorderPane : tapes.values())
+            tapeBorderPane.closeAllOptionRectangle();
+    }
 }
 
 class TapeBorderPane extends BorderPane {
@@ -395,6 +400,10 @@ class TapeBorderPane extends BorderPane {
 
     double getYOf(int line) {
         return -line * TuringMachineDrawer.TAPE_CELL_WIDTH;
+    }
+
+    void closeAllOptionRectangle() {
+        tapePane.closeAllOptionRectangle();
     }
 }
 
@@ -660,7 +669,10 @@ class TapePane extends Pane {
     }
 
     void closeCellOptionRectangle(){
-        cellOptionRectangle.minimize(true);
+        closeCellOptionRectangle(true);
+    }
+    void closeCellOptionRectangle(boolean animate){
+        cellOptionRectangle.minimize(animate);
     }
 
     void openTapeOptionRectangle(Integer line, Integer column) {
@@ -676,7 +688,16 @@ class TapePane extends Pane {
     }
 
     void closeTapeOptionRectangle(){
-        tapeOptionRectangle.minimize(true);
+        closeTapeOptionRectangle(true);
+    }
+    void closeTapeOptionRectangle(boolean animate){
+        tapeOptionRectangle.minimize(animate);
+    }
+
+
+    void closeAllOptionRectangle() {
+        closeTapeOptionRectangle(false);
+        closeCellOptionRectangle(false);
     }
 
     void checkLinesAndColumns(double width, double height, boolean forceChange) {

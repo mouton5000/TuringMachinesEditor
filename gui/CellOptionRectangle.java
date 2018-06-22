@@ -272,12 +272,10 @@ class AddHeadOptionIcon extends Group {
 
         changeColorPicker.setOnAction(actionEvent ->{
             Color color = changeColorPicker.getValue();
-            if(optionRectangle.drawer.isAvailable(color)){
-                Tape tape = optionRectangle.currentTape;
-                Integer line = optionRectangle.currentLine;
-                Integer column = optionRectangle.currentColumn;
-                optionRectangle.drawer.addHead(tape, line, column, color);
-            }
+            Tape tape = optionRectangle.currentTape;
+            Integer line = optionRectangle.currentLine;
+            Integer column = optionRectangle.currentColumn;
+            optionRectangle.drawer.addHead(tape, line, column, color);
         });
 
         this.getChildren().addAll(addHeadIcon, changeColorPicker);

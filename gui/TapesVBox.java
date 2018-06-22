@@ -106,4 +106,10 @@ class TapesVBox extends VBox {
         this.tapesHeadMenu.centerOn(tape);
         this.tapesPane.centerOn(tape);
     }
+
+    void closeAllOptionRectangle() {
+        tapesHeadMenu.closeAllOptionRectangle();
+        symbolsMenu.closeAllOptionRectangle();
+        tapesPane.closeAllOptionRectangle();
+    }
 }

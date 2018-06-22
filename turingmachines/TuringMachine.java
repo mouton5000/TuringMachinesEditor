@@ -11,6 +11,7 @@ public class TuringMachine {
 
     public static final String SUBSCRIBER_MSG_FIRED_TRANSITION = "TMFireTransition";
     public static final String SUBSCRIBER_MSG_HEAD_WRITE = "TMHeadWrite";
+    public static final String SUBSCRIBER_MSG_SYMBOL_WRITTEN = "TMSymolWritten";
     public static final String SUBSCRIBER_MSG_HEAD_MOVED = "TMHeadMoved";
     public static final String SUBSCRIBER_MSG_CURRENT_STATE_CHANGED = "TMCurrentStateChanged";
 
@@ -52,6 +53,8 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_REMOVE_HEAD = "TMRemoveHead";
     public static final String SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED = "TMHeadInitialPositionChanged";
 
+    public static final String SUBSCRIBER_MSG_ERROR = "TMError";
+
     private int nbStates;
 
     private List<List<Transition>> outputTransitions;
@@ -69,6 +72,8 @@ public class TuringMachine {
     // Alphabet
     private List<String> symbols;
 
+    private Pair<Configuration, Iterator<Transition>> builtPath;
+
 
     public TuringMachine(){
         nbStates = 0;
@@ -84,6 +89,8 @@ public class TuringMachine {
 
         tapes = new ArrayList<>();
         symbols = new ArrayList<>();
+
+        builtPath = null;
     }
 
     public Transition addTransition(Integer input, Integer output){
@@ -158,17 +165,6 @@ public class TuringMachine {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED, this, currentState);
     }
 
-    public void reinitDeterministic(){
-        setCurrentState(initialStates.iterator().next(), false);
-        for(Tape tape: tapes)
-            tape.reinit();
-    }
-
-    public void reinitNonDeterministic(){
-        for(Tape tape: tapes)
-            tape.reinit();
-    }
-
     public Tape addTape(){
         Tape tape = new Tape(this);
         tapes.add(tape);
@@ -192,15 +188,19 @@ public class TuringMachine {
     }
 
     public void addSymbol(String symbol){
-        if(symbols.contains(symbol))
+        if(symbols.contains(symbol)) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "The symbol already exists.");
             return;
+        }
         symbols.add(symbol);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL, this, symbol);
     }
 
     public void editSymbol(int i, String symbol){
-        if(symbols.contains(symbol))
+        if(symbols.contains(symbol)) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "The symbol already exists.");
             return;
+        }
         String prevSymbol = symbols.set(i, symbol);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL, this, i, prevSymbol, symbol);
     }
@@ -268,24 +268,6 @@ public class TuringMachine {
         return isAccepting(currentState);
     }
 
-    private void tickDeterministic(){
-        for(Transition transition : outputTransitions.get(currentState))
-            if(transition.isCurrentlyValid()) {
-                transition.fire(true);
-                setCurrentState(transition.getOutput(), true);
-                break;
-            }
-    }
-
-    private void executeDeterministic(){
-        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
-        reinitDeterministic();
-        while(!isTerminated()) {
-            tickDeterministic();
-        }
-        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_END, this);
-    }
-
     private List<Transition> currentValidArcs(){
         List<Transition> transitions = new LinkedList<>();
         for(Transition transition : outputTransitions.get(currentState)) {
@@ -303,9 +285,13 @@ public class TuringMachine {
     }
 
     private void loadConfiguration(Configuration configuration){
+        loadConfiguration(configuration, false);
+    }
+
+    private void loadConfiguration(Configuration configuration, boolean log){
         for(Map.Entry<Tape, TapeConfiguration> entry: configuration.tapeConfigurations.entrySet())
-            entry.getKey().loadConfiguration(entry.getValue());
-        this.currentState = configuration.state;
+            entry.getKey().loadConfiguration(entry.getValue(), log);
+        this.setCurrentState(configuration.state, log);
     }
 
     private boolean isFinalConfiguration(Configuration configuration){
@@ -383,46 +369,62 @@ public class TuringMachine {
 
     }
 
-    private void executeNonDeterministic(){
-        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
-        reinitNonDeterministic();
+    public void build(){
+        if(!isValid()) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Invalid machine. No initial and/or final state.");
+            return;
+        }
 
+        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
+        for(Tape tape : tapes)
+                tape.reinit();
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START, this);
 
         HashSet<Configuration> initialConfigurations = new HashSet<>();
 
-        for(Integer state : initialStates) {
+        for (Integer state : initialStates) {
             this.setCurrentState(state, false);
             initialConfigurations.add(saveConfiguration());
         }
-        Pair<Configuration, Iterator<Transition>> pair = this.exploreNonDeterministic(initialConfigurations);
+        builtPath = this.exploreNonDeterministic(initialConfigurations);
+
+        if(builtPath == null)
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot end computation.");
+        else
+            reinitMachine();
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END, this);
 
-        if(pair == null)
-            return;
+    }
 
-        Configuration initialConfiguration = pair.first;
-        Iterator<Transition> it = pair.second;
+    public boolean tick(){
+        if(builtPath == null) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
+            return false;
+        }
 
-        this.loadConfiguration(initialConfiguration);
-        while(it.hasNext()){
+        Iterator<Transition> it = builtPath.second;
+        if(it.hasNext()){
             Transition transition = it.next();
             transition.fire(true);
             setCurrentState(transition.getOutput(), true);
-
+            return true;
         }
         Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_END, this);
+        return false;
     }
 
-    public void execute(){
-        if(!isValid())
+    public void reinitMachine(){
+        if(builtPath == null) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
             return;
-        if(isDeterministic())
-            executeDeterministic();
-        else
-            executeNonDeterministic();
+        }
+        this.loadConfiguration(builtPath.first, true);
+    }
+
+    public void clearBuild(){
+        this.builtPath = null;
     }
 
     private boolean isDeterministic(int state){
@@ -504,6 +506,11 @@ public class TuringMachine {
                 return true;
         }
         return false;
+    }
+
+    public void execute(){
+        this.build();
+        while(this.tick()){}
     }
 
     @Override
@@ -595,7 +602,6 @@ public class TuringMachine {
         t.setInitialState(a);
         t.setAcceptingState(y);
         t.setFinalState(n);
-        t.reinitDeterministic();
 
         Subscriber s = new Subscriber() {
             @Override

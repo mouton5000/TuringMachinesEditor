@@ -570,7 +570,10 @@ public class GraphPane extends Pane {
     }
 
     void closeStateOptionRectangle(){
-        stateOptionRectangle.minimize(true);
+        closeStateOptionRectangle(true);
+    }
+    void closeStateOptionRectangle(boolean animate){
+        stateOptionRectangle.minimize(animate);
     }
 
     void openTransitionOptionRectangle(TransitionArrowGroup transitionArrowGroup){
@@ -583,7 +586,13 @@ public class GraphPane extends Pane {
         transitionOptionRectangle.maximize();
     }
 
-    void closeTransitionOptionRectangle(){
-        transitionOptionRectangle.minimize(true);
+    void closeTransitionOptionRectangle() { closeTransitionOptionRectangle(true); }
+    void closeTransitionOptionRectangle(boolean animate){
+        transitionOptionRectangle.minimize(animate);
+    }
+
+    void closeAllOptionRectangle() {
+        closeStateOptionRectangle(false);
+        closeTransitionOptionRectangle(false);
     }
 }

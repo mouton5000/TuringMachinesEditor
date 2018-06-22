@@ -264,8 +264,11 @@ public class Tape{
         Integer line = headsLine.get(head);
 
         this.write(line, column, symbol, false);
-        if(log)
-            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE, this.machine, this, head, symbol);
+        if(log) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE, this.machine, this, head);
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN, this.machine, this,
+                    line, column, symbol);
+        }
 
     }
 
@@ -338,19 +341,42 @@ public class Tape{
     }
 
     void loadConfiguration(TapeConfiguration configuration){
-        this.headsColumn.clear();
-        this.headsLine.clear();
+        this.loadConfiguration(configuration, false);
+    }
+
+    void loadConfiguration(TapeConfiguration configuration, boolean log){
+        headsColumn.clear();
+        headsLine.clear();
+
         headsColumn.addAll(configuration.headsColumn);
         headsLine.addAll(configuration.headsLine);
 
-//        Useless with GC?
-//        for(Map.Entry<Integer, Map<Integer, String>> entry: cells.entrySet())
-//            entry.getValue().clear();
+        if(log){
+            for(int head = 0; head < nbHeads; head++){
+                Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED, this.machine, this, head,
+                        headsLine.get(head), headsColumn.get(head));
+            }
+        }
+
+        if(log) {
+            for (Map.Entry<Integer, Map<Integer, String>> entry : cells.entrySet()) {
+                for (Map.Entry<Integer, String> entry2 : entry.getValue().entrySet()) {
+                    Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN, this.machine, this,
+                            entry2.getKey(), entry.getKey(), null);
+                }
+                entry.getValue().clear();
+            }
+        }
 
         cells.clear();
 
-        for(Map.Entry<Integer, Map<Integer, String>> entry: configuration.cells.entrySet())
+        for(Map.Entry<Integer, Map<Integer, String>> entry: configuration.cells.entrySet()) {
             cells.put(entry.getKey(), new HashMap<>(entry.getValue()));
+            for (Map.Entry<Integer, String> entry2 : entry.getValue().entrySet()) {
+                Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN, this.machine, this,
+                        entry2.getKey(), entry.getKey(), entry2.getValue());
+            }
+        }
 
     }
 

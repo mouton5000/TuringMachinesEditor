@@ -114,6 +114,7 @@ abstract class OptionRectangle extends Group{
             maximizedRectangle.setY(minimizedRectangle.getLayoutY() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
             maximizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
             maximizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+            this.setVisible(false);
         }
     }
 

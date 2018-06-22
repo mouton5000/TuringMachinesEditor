@@ -63,9 +63,7 @@ class HeadOptionRectangle extends OptionRectangle{
 
         changeColorPicker.setOnAction(actionEvent ->
         {
-            if(drawer.isAvailable(changeColorPicker.getValue())){
-                drawer.editHeadColor(this.tape, this.currentHead, changeColorPicker.getValue());
-            }
+            drawer.editHeadColor(this.tape, this.currentHead, changeColorPicker.getValue());
         });
 
         this.getChildren().addAll(changeColorIcon, changeColorPicker, removeHeadIcon);

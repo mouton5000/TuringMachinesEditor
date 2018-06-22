@@ -76,7 +76,10 @@ class SymbolsMenu extends HBox {
     }
 
     void closeSymbolOptionRectangle(){
-        symbolOptionRectangle.minimize(true);
+        closeSymbolOptionRectangle(true);
+    }
+    void closeSymbolOptionRectangle(boolean animate){
+        symbolOptionRectangle.minimize(animate);
     }
 
     int getIndex(SymbolLabel symbolLabel){
@@ -103,6 +106,8 @@ class SymbolsMenu extends HBox {
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
+
+    void closeAllOptionRectangle() { closeSymbolOptionRectangle(false); }
 }
 
 class AddSymbolIcon extends ImageView {
