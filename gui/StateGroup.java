@@ -122,6 +122,14 @@ class StateGroup extends Group{
         initLine2.setVisible(isInitial);
     }
 
+    String getName(){
+        return label.getText();
+    }
+
+    public void setName(String name) {
+        this.label.setText(name);
+    }
+
 
     void startTimeline(){
         this.animating = true;

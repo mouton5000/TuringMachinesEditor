@@ -43,7 +43,7 @@ public class TuringMachineDrawer extends Application {
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
     static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
     static final long STATE_PRESS_DURATION = 300;
-    static final int STATE_NAME_FONT_SIZE = 15;
+    static final int STATE_NAME_FONT_SIZE = 12;
     static final String STATE_NAME_FONT_NAME = "Cambria";
 
     static final double TRANSITION_ANGLE = Math.PI/6;

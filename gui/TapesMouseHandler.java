@@ -6,6 +6,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import turingmachines.Tape;
 import util.Pair;
+import util.widget.VirtualKeyboard;
+
+import java.util.Optional;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -278,13 +281,27 @@ public class TapesMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof AddSymbolIcon){
-            String symbol = String.valueOf((int)(Math.random() * 10));
-            drawer.addSymbol("0");
+
+            VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
+            virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+            virtualKeyboard.setY(mouseEvent.getScreenY());
+
+            Optional<String> result = virtualKeyboard.showAndWait();
+            if(result.isPresent()){
+                drawer.addSymbol(result.get());
+            }
             mouseEvent.consume();
         }
         else if(source instanceof EditSymbolIcon){
-            String symbol = String.valueOf((int)(Math.random() * 10));
-            drawer.editSymbol(((EditSymbolIcon) source).optionRectangle.currentSymbolIndex, "2");
+
+            VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
+            virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+            virtualKeyboard.setY(mouseEvent.getScreenY());
+
+            Optional<String> result = virtualKeyboard.showAndWait();
+            if(result.isPresent())
+                drawer.editSymbol(((EditSymbolIcon) source).optionRectangle.currentSymbolIndex, result.get());
+
             mouseEvent.consume();
         }
         else if(source instanceof RemoveSymbolIcon){

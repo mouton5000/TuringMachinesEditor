@@ -6,6 +6,9 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import turingmachines.Tape;
+import util.widget.VirtualKeyboard;
+
+import java.util.Optional;
 
 /**
  * Created by dimitri.watel on 04/06/18.
@@ -145,6 +148,17 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(source instanceof EditStateNameOptionIcon){
+
+            EditStateNameOptionIcon editStateNameOptionIcon = (EditStateNameOptionIcon) source;
+            StateGroup stateGroup = editStateNameOptionIcon.optionRectangle.currentState;
+
+            VirtualKeyboard virtualKeyboard = new VirtualKeyboard(stateGroup.getName());
+            virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+            virtualKeyboard.setY(mouseEvent.getScreenY());
+
+            Optional<String> result = virtualKeyboard.showAndWait();
+            if(result.isPresent())
+                stateGroup.setName(result.get());
             mouseEvent.consume();
         }
         else if(source instanceof RemoveStateOptionIcon){
