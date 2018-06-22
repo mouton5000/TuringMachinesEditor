@@ -191,8 +191,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             ChooseSymbolOptionLabel chooseSymbolOptionLabel = (ChooseSymbolOptionLabel) source;
             TransitionOptionRectangle optionRectangle = chooseSymbolOptionLabel.optionRectangle;
 
-            String symbol = (chooseSymbolOptionLabel.getText().equals(TuringMachineDrawer.BLANK_SYMBOL))?
-                    null:chooseSymbolOptionLabel.getText();
+            String symbol = chooseSymbolOptionLabel.getText();
 
             if(optionRectangle.currentTape != null) {
                 if(chooseSymbolOptionLabel.selected)
@@ -209,12 +208,12 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             ChooseActionOptionLabel chooseActionOptionLabel = (ChooseActionOptionLabel) source;
             TransitionOptionRectangle optionRectangle = chooseActionOptionLabel.optionRectangle;
 
-            String actionSymbol = (chooseActionOptionLabel.getText().equals(TuringMachineDrawer.BLANK_SYMBOL))?
-                    null:chooseActionOptionLabel.getText();
+            String actionSymbol = chooseActionOptionLabel.getText();
 
-            if(optionRectangle.currentTape != null)
+            if(optionRectangle.currentTape != null) {
                 drawer.graphPane.addAction(optionRectangle.currentTransitionArrowGroup,
                         optionRectangle.currentTape, optionRectangle.currentHead, actionSymbol);
+            }
             mouseEvent.consume();
         }
         else if(source instanceof RemoveActionIcon){

@@ -18,7 +18,6 @@ import util.Pair;
 import util.Subscriber;
 
 import java.util.List;
-import java.util.Set;
 
 public class TuringMachineDrawer extends Application {
 
@@ -35,6 +34,7 @@ public class TuringMachineDrawer extends Application {
     static final String RIGHT_SYMBOL = "\u21D2";
     static final String DOWN_SYMBOL = "\u21D3";
     static final String UP_SYMBOL = "\u21D1";
+    static final String NO_ACTION_SYMBOL = "-";
 
     static final int STATE_RADIUS = 20;
     static final double FINAL_STATE_RADIUS_RATIO = 0.8;
@@ -95,11 +95,12 @@ public class TuringMachineDrawer extends Application {
     static final double TAPE_HEAD_MENU_HEAD_STROKE_WIDTH = 3;
     static final long EDIT_PRESS_DURATION = 300;
     static final Color EDIT_PRESS_COLOR = Color.DARKGRAY;
-    static final Color TAPE_HEAD_MENU_DEFAULT_FILL_COLOR = Color.WHITE;
+    static final Color TAPE_MENU_DEFAULT_FILL_COLOR = Color.WHITE;
     static final Color TAPE_HEAD_MENU_CENTERED_FILL_COLOR = Color.LIGHTGRAY;
     static final Color TAPE_HEAD_MENU_NOT_CENTERED_FILL_COLOR = Color.WHITE;
     static final int TAPE_MENU_SYMBOL_FONT_SIZE = 35;
     static final int TAPE_MENU_SYMBOL_SIZE = 40;
+    static final double TAPE_MENU_RATIO = 2.0 / 3;
 
     static final double TAPE_CELL_WIDTH = 50;
     static final Integer TAPE_DEFAULT_TOP = 0;
@@ -210,6 +211,8 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL);
 
         this.machine = new TuringMachine();
 
@@ -307,16 +310,16 @@ public class TuringMachineDrawer extends Application {
         this.machine.addSymbol(symbol);
     }
 
-    void addSymbolFromMachine(String symbol){
+    private void addSymbolFromMachine(String symbol){
         graphPane.addSymbol(symbol);
         tapesPane.addSymbol(symbol);
     }
 
     void editSymbol(int index, String symbol){
-        this.machine.removeSymbol(index);
+        this.machine.editSymbol(index, symbol);
     }
 
-    void editSymbolFromMachine(int index, String prevSymbol, String symbol){
+    private void editSymbolFromMachine(int index, String prevSymbol, String symbol){
         graphPane.editSymbol(index, prevSymbol, symbol);
         tapesPane.editSymbol(index, prevSymbol, symbol);
     }
@@ -325,7 +328,7 @@ public class TuringMachineDrawer extends Application {
         this.machine.removeSymbol(index);
     }
 
-    void removeSymbolFromMachine(int index, String symbol){
+    private void removeSymbolFromMachine(int index, String symbol){
         graphPane.removeSymbol(index, symbol);
         tapesPane.removeSymbol(index, symbol);
     }

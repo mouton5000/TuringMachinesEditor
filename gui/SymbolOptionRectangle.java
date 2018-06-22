@@ -5,17 +5,19 @@ import javafx.scene.image.ImageView;
 
 class SymbolOptionRectangle extends OptionRectangle {
 
-    TuringMachineDrawer drawer;
+    SymbolsMenu symbolsMenu;
     int currentSymbolIndex;
 
-    SymbolOptionRectangle(TuringMachineDrawer drawer) {
+    SymbolOptionRectangle(TuringMachineDrawer drawer, SymbolsMenu symbolsMenu) {
         super(drawer, drawer.tapesMouseHandler);
+        this.symbolsMenu = symbolsMenu;
 
         EditSymbolIcon editSymbolIcon = new EditSymbolIcon(drawer, this);
         RemoveSymbolIcon removeSymbolIcon = new RemoveSymbolIcon(drawer, this);
 
         editSymbolIcon.setLayoutX(
-                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
+                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING
                         + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2
                         - editSymbolIcon.getBoundsInLocal().getWidth() / 2
         );
@@ -26,13 +28,16 @@ class SymbolOptionRectangle extends OptionRectangle {
 
 
         removeSymbolIcon.setLayoutX(
-                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE * 3 / 2
-                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING * 2
+                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
+                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE * 3 / 2
+                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING * 3
                         - removeSymbolIcon.getBoundsInLocal().getWidth() / 2
         );
         removeSymbolIcon.setLayoutY(
                 - removeSymbolIcon.getBoundsInLocal().getHeight() / 2
         );
+
+        this.setOnMouseClicked(drawer.tapesMouseHandler);
 
         this.getChildren().addAll(editSymbolIcon, removeSymbolIcon);
     }
@@ -43,7 +48,8 @@ class SymbolOptionRectangle extends OptionRectangle {
     }
     @Override
     protected double getMaximizedWidth() {
-        return TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE * 2
+        return  TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
+                + TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE * 2
                 + TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING * 3;
     }
 

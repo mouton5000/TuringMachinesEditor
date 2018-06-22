@@ -620,7 +620,7 @@ class TapePane extends Pane {
 
         animatedRectangle = new Rectangle(0, 0,
                 TuringMachineDrawer.TAPE_CELL_WIDTH, TuringMachineDrawer.TAPE_CELL_WIDTH);
-        animatedRectangle.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
+        animatedRectangle.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animatedRectangle.setStroke(Color.BLACK);
         animatedRectangle.setVisible(false);
 
@@ -897,7 +897,7 @@ class TapePane extends Pane {
             while(itLines.hasNext()){
                 Map.Entry<Integer, Label> entry2 = itLines.next();
                 if(entry2.getValue().getText().equals(symbol)) {
-                    this.getChildren().remove(entry2.getValue());
+                    tapeLinesGroup.getChildren().remove(entry2.getValue());
                     itLines.remove();
                 }
             }
@@ -937,7 +937,7 @@ class TapePane extends Pane {
 
     void stopTimeline(){
         timeline.stop();
-        animatedRectangle.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
+        animatedRectangle.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animatedRectangle.setVisible(false);
         animating = false;
     }

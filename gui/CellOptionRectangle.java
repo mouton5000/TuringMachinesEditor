@@ -17,8 +17,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
 
-import java.util.Iterator;
-
 /**
  * Created by dimitri.watel on 11/06/18.
  */
@@ -165,11 +163,11 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
     }
 
     void editSymbol(int index, String symbol){
-        ((CellOptionRectangleChooseSymbolOptionLabel) this.getChildren().get(index + 1)).setText(symbol);
+        ((CellOptionRectangleChooseSymbolOptionLabel) this.getChildren().get(index + 2)).setText(symbol);
     }
 
     void removeSymbol(int index) {
-        this.getChildren().remove(index + 1);
+        this.getChildren().remove(index + 2);
     }
 }
 

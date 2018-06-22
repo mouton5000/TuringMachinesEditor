@@ -524,7 +524,7 @@ class ReadSymbolMenu extends HBox{
     }
 
     void editSymbol(int index, String symbol) {
-        ((ChooseActionOptionLabel)this.getChildren().get(index + 1)).setText(symbol);
+        ((ChooseSymbolOptionLabel)this.getChildren().get(index + 1)).setText(symbol);
     }
 
     void removeSymbol(int index) {
@@ -793,12 +793,13 @@ class ActionsMenu extends HBox {
         removeActionIcon = new RemoveActionIcon(optionRectangle);
         this.getChildren().add(removeActionIcon);
 
-        String directions[] = {TuringMachineDrawer.LEFT_SYMBOL,
+        String defaultActions[] = {TuringMachineDrawer.LEFT_SYMBOL,
                 TuringMachineDrawer.RIGHT_SYMBOL,
                 TuringMachineDrawer.DOWN_SYMBOL,
-                TuringMachineDrawer.UP_SYMBOL
+                TuringMachineDrawer.UP_SYMBOL,
+                TuringMachineDrawer.BLANK_SYMBOL
         } ;
-        for(String direction : directions) {
+        for(String direction : defaultActions) {
             ChooseActionOptionLabel label =
                     new ChooseActionOptionLabel(optionRectangle, direction);
 
@@ -838,11 +839,11 @@ class ActionsMenu extends HBox {
     }
 
     void editSymbol(int index, String symbol) {
-        ((ChooseActionOptionLabel)this.getChildren().get(index + 5)).setText(symbol);
+        ((ChooseActionOptionLabel)this.getChildren().get(index + 6)).setText(symbol);
     }
 
     void removeSymbol(int index) {
-        this.getChildren().remove(index + 5);
+        this.getChildren().remove(index +6);
     }
 
     void changeColor(Color color) {

@@ -374,11 +374,15 @@ public class GraphPane extends Pane {
     }
 
     void addReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                null:symbol;
         Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
         transition.addReadSymbols(tape, head, symbol);
     }
 
     void removeReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                null:symbol;
         Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
         transition.removeReadSymbols(tape, head, symbol);
     }
@@ -419,6 +423,8 @@ public class GraphPane extends Pane {
             case TuringMachineDrawer.UP_SYMBOL:
                 action = new MoveAction(tape, head, Direction.UP);
                 break;
+            case TuringMachineDrawer.BLANK_SYMBOL:
+                actionSymbol = null;
             default:
                 action = new WriteAction(tape, head, actionSymbol);
                 break;
@@ -456,7 +462,11 @@ public class GraphPane extends Pane {
                 }
                 break;
             case WRITE:
-                actionSymbol = (String)value;
+                if(value == null)
+                    actionSymbol = TuringMachineDrawer.BLANK_SYMBOL;
+                else
+                    actionSymbol = (String)value;
+
                 break;
         }
 

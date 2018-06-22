@@ -192,11 +192,15 @@ public class TuringMachine {
     }
 
     public void addSymbol(String symbol){
+        if(symbols.contains(symbol))
+            return;
         symbols.add(symbol);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_SYMBOL, this, symbol);
     }
 
     public void editSymbol(int i, String symbol){
+        if(symbols.contains(symbol))
+            return;
         String prevSymbol = symbols.set(i, symbol);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_EDIT_SYMBOL, this, i, prevSymbol, symbol);
     }

@@ -46,7 +46,9 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
         if(source instanceof TapeBorderPane
                 || source instanceof CellOptionRectangleSymbolsOptionsGroup
-                || source instanceof CellOptionRectangleHeadOptionsGroup) {
+                || source instanceof CellOptionRectangleHeadOptionsGroup
+                || source instanceof TapesHeadMenu
+                || source instanceof SymbolsMenu) {
             dragX = x;
             dragY = y;
             mouseEvent.consume();
@@ -63,6 +65,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 Integer line = tapePane.getLine(y);
                 Integer column = tapePane.getColumn(x);
                 tapePane.startTimeline(line, column);
+            }
+        }
+        else if(source instanceof SymbolLabel){
+            SymbolLabel symbolLabel = (SymbolLabel) source;
+            if(!symbolLabel.symbolsMenu.symbolOptionRectangle.isMaximized()){
+                symbolLabel.startTimeline();
             }
         }
     }
@@ -110,6 +118,10 @@ public class TapesMouseHandler implements EventHandler<Event> {
             else if(minimizedOptionRectangle.optionRectangle instanceof HeadOptionRectangle) {
                 HeadOptionRectangle optionRectangle = (HeadOptionRectangle) minimizedOptionRectangle.optionRectangle;
                 optionRectangle.tapeHeadMenu.closeHeadOptionRectangle();
+            }
+            else if(minimizedOptionRectangle.optionRectangle instanceof SymbolOptionRectangle) {
+                SymbolOptionRectangle optionRectangle = (SymbolOptionRectangle) minimizedOptionRectangle.optionRectangle;
+                optionRectangle.symbolsMenu.closeSymbolOptionRectangle();
             }
             mouseEvent.consume();
         }
@@ -167,7 +179,6 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 if (!pressFinished)
                     drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
                 else
-//                drawer.editHeadColor((Color) ((HeadMenuSelect) source).getStroke());
                     headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.getHead());
             }
             mouseEvent.consume();
@@ -246,6 +257,40 @@ public class TapesMouseHandler implements EventHandler<Event> {
                     break;
             }
         }
+        else if(source instanceof SymbolsMenu){
+            if(((SymbolsMenu) source).symbolOptionRectangle.isMaximized())
+                ((SymbolsMenu) source).closeSymbolOptionRectangle();
+            mouseEvent.consume();
+        }
+        else if(source instanceof SymbolLabel){
+
+            SymbolLabel symbolLabel = (SymbolLabel) source;
+
+            if(symbolLabel.symbolsMenu.symbolOptionRectangle.isMaximized())
+                symbolLabel.symbolsMenu.closeSymbolOptionRectangle();
+            else {
+                boolean pressFinished = !symbolLabel.animating;
+                symbolLabel.stopTimeline();
+
+                if (pressFinished)
+                    symbolLabel.symbolsMenu.openSymbolOptionRectantle(symbolLabel.symbolsMenu.getIndex(symbolLabel));
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof AddSymbolIcon){
+            String symbol = String.valueOf((int)(Math.random() * 10));
+            drawer.addSymbol("0");
+            mouseEvent.consume();
+        }
+        else if(source instanceof EditSymbolIcon){
+            String symbol = String.valueOf((int)(Math.random() * 10));
+            drawer.editSymbol(((EditSymbolIcon) source).optionRectangle.currentSymbolIndex, "2");
+            mouseEvent.consume();
+        }
+        else if(source instanceof RemoveSymbolIcon){
+            drawer.removeSymbol(((RemoveSymbolIcon) source).optionRectangle.currentSymbolIndex);
+            mouseEvent.consume();
+        }
     }
 
     private void handleDragEvent(MouseEvent mouseEvent) {
@@ -289,8 +334,31 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
+        else if(source instanceof TapesHeadMenu){
+            if(dragX == null)
+                dragX = x;
+            else {
+                TapesHeadMenu group = (TapesHeadMenu) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
+        else if(source instanceof SymbolsMenu){
+            if(dragX == null)
+                dragX = x;
+            else {
+                SymbolsMenu group = (SymbolsMenu) source;
+                group.translate(x - dragX);
+                dragX = x;
+            }
+            mouseEvent.consume();
+        }
         else if(source instanceof HeadMenuSelect) {
             ((HeadMenuSelect) source).stopTimeline();
+        }
+        else if(source instanceof SymbolLabel) {
+            ((SymbolLabel) source).stopTimeline();
         }
         else if(source instanceof TapePane) {
             ((TapePane) source).stopTimeline();

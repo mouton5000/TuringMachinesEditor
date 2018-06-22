@@ -35,11 +35,13 @@ class TapesHeadMenu extends HBox {
                     CornerRadii.EMPTY, Insets.EMPTY));
 
     TapeHeadMenu centered;
+    private double offsetX;
 
     TapesHeadMenu(TuringMachineDrawer drawer) {
 
         this.drawer = drawer;
         this.tapeToMenu = new HashMap<>();
+        this.offsetX = 0;
 
         this.setMinHeight(TuringMachineDrawer.TAPES_MENU_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.TAPES_MENU_HEIGHT);
@@ -47,6 +49,9 @@ class TapesHeadMenu extends HBox {
         this.setAlignment(Pos.CENTER_LEFT);
 
         AddTapeIcon addTapeIcon = new AddTapeIcon(drawer);
+
+        this.setOnMousePressed(drawer.tapesMouseHandler);
+        this.setOnMouseDragged(drawer.tapesMouseHandler);
 
         this.getChildren().addAll(addTapeIcon, new Separator(Orientation.VERTICAL));
 
@@ -88,6 +93,18 @@ class TapesHeadMenu extends HBox {
             centered.setBackground(TapesHeadMenu.NOT_CENTERED_BACKGROUND);
         tapeHeadMenu.setBackground(TapesHeadMenu.CENTERED_BACKGROUND);
         centered = tapeHeadMenu;
+    }
+
+    void translate(double dx){
+        if(dx > offsetX)
+            dx = offsetX;
+
+        if(dx == 0)
+            return;
+
+        offsetX -= dx;
+        for(Node child: this.getChildren())
+            child.setTranslateX(child.getTranslateX() + dx);
     }
 }
 
@@ -192,7 +209,7 @@ class HeadMenuSelect extends Rectangle {
 
     void stopTimeline(){
         timeline.stop();
-        this.setFill(TuringMachineDrawer.TAPE_HEAD_MENU_DEFAULT_FILL_COLOR);
+        this.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animating = false;
     }
 }

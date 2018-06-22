@@ -317,7 +317,7 @@ class TransitionDisplayActionsHBox extends HBox{
 
     TransitionDisplayActionsHBox(TuringMachineDrawer drawer) {
         this.drawer = drawer;
-        noActionLabel = new Label("\u2205");
+        noActionLabel = new Label(TuringMachineDrawer.NO_ACTION_SYMBOL);
         noActionLabel.managedProperty().bind(noActionLabel.visibleProperty());
 
         noActionLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,

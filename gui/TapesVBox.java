@@ -44,12 +44,12 @@ class TapesVBox extends VBox {
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth();
             double height = newVal.getHeight();
-            tapesHeadMenu.setMinWidth(width * 3.0 / 4);
-            tapesHeadMenu.setMaxWidth(width * 3.0 / 4);
-            symbolsMenu.setMinWidth(width / 4);
-            symbolsMenu.setMaxWidth(width / 4);
-            tapesHeadClip.setWidth(width * (3.0 / 4) - 100);
-            symbolclip.setWidth(width / 4 - 100);
+            tapesHeadMenu.setMinWidth(width * TuringMachineDrawer.TAPE_MENU_RATIO);
+            tapesHeadMenu.setMaxWidth(width * TuringMachineDrawer.TAPE_MENU_RATIO);
+            symbolsMenu.setMinWidth(width * (1 - TuringMachineDrawer.TAPE_MENU_RATIO));
+            symbolsMenu.setMaxWidth(width * (1 - TuringMachineDrawer.TAPE_MENU_RATIO));
+            tapesHeadClip.setWidth(width * TuringMachineDrawer.TAPE_MENU_RATIO - 30);
+            symbolclip.setWidth(width  * (1 - TuringMachineDrawer.TAPE_MENU_RATIO) - 30);
             tapesPane.setMinHeight(height - TuringMachineDrawer.TAPES_MENU_HEIGHT);
             tapesPane.setMaxHeight(height - TuringMachineDrawer.TAPES_MENU_HEIGHT);
             tapesPane.setMinWidth(width);
