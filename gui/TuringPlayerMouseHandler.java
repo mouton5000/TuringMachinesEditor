@@ -23,7 +23,7 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
 
         Object source = mouseEvent.getSource();
 
-        if(source instanceof BuildIcon){
+        if(!drawer.playing && source instanceof BuildIcon){
             if(drawer.buildMode) {
                 drawer.player.buildIcon.setSelected();
                 drawer.player.hidePlayer();
@@ -35,10 +35,10 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
                 drawer.build();
             }
         }
-        else if(source instanceof StopIcon){
+        else if(!drawer.playing && source instanceof StopIcon){
             drawer.goToFirstConfiguration();
         }
-        if(source instanceof PlayIcon){
+        if(!drawer.playing && source instanceof PlayIcon){
             drawer.player.setPause();
             drawer.play();
         }
@@ -46,10 +46,10 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
             drawer.player.setPlay();
             drawer.pause();
         }
-        else if(source instanceof OneFrameIcon){
+        else if(!drawer.playing && source instanceof OneFrameIcon){
             drawer.tick();
         }
-        else if(source instanceof LastFrameIcon){
+        else if(!drawer.playing && source instanceof LastFrameIcon){
             drawer.goToLastConfiguration();
         }
 

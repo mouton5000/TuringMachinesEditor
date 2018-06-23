@@ -72,7 +72,7 @@ public class TuringMachine {
     // Alphabet
     private List<String> symbols;
 
-    private Pair<Configuration, Iterator<Transition>> builtPath;
+    private Pair<Configuration, ListIterator<Transition>> builtPath;
 
 
     public TuringMachine(){
@@ -260,11 +260,11 @@ public class TuringMachine {
         return acceptingStates.get(state);
     }
 
-    private boolean isTerminated(){
+    public boolean isTerminated(){
         return isFinal(currentState);
     }
 
-    private boolean isAccepting(){
+    public boolean isAccepting(){
         return isAccepting(currentState);
     }
 
@@ -319,7 +319,7 @@ public class TuringMachine {
         return children;
     }
 
-    private Pair<Configuration, Iterator<Transition>> exploreNonDeterministic(Set<Configuration> initialConfigurations){
+    private Pair<Configuration, ListIterator<Transition>> exploreNonDeterministic(Set<Configuration> initialConfigurations){
         LinkedList<Configuration> toExplore = new LinkedList<>();
         Map<Configuration, Configuration> fathers = new HashMap<>();
         Map<Configuration, Transition> arcFathers = new HashMap<>();
@@ -365,7 +365,7 @@ public class TuringMachine {
             toReturn.addFirst(arcFathers.get(configuration));
             configuration = fathers.get(configuration);
         }
-        return new Pair<>(configuration, toReturn.iterator());
+        return new Pair<>(configuration, toReturn.listIterator(0));
 
     }
 
@@ -391,8 +391,6 @@ public class TuringMachine {
 
         if(builtPath == null)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot end computation.");
-        else
-            reinitMachine();
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END, this);
 
@@ -415,12 +413,14 @@ public class TuringMachine {
         return false;
     }
 
-    public void reinitMachine(){
+    public void reinit(){
         if(builtPath == null) {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
             return;
         }
         this.loadConfiguration(builtPath.first, true);
+        while(builtPath.second.hasPrevious())
+            builtPath.second.previous();
     }
 
     public void clearBuild(){

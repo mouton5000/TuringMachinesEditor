@@ -1,5 +1,8 @@
 package gui;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -10,6 +13,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 import turingmachines.*;
 import util.BidirMap;
 import util.Subscriber;
@@ -43,6 +47,8 @@ public class GraphPane extends Pane {
     private Double nextControl1Y;
     private Double nextControl2X;
     private Double nextControl2Y;
+
+    private StateGroup lastCurrentStateGroup;
 
     GraphPane(TuringMachineDrawer drawer){
         this.drawer = drawer;
@@ -78,6 +84,8 @@ public class GraphPane extends Pane {
         graphOffsetY = 0;
 
         currentDefaultStateChar = 'A';
+
+        lastCurrentStateGroup = null;
 
         Subscriber s = new Subscriber() {
             @Override
@@ -594,5 +602,58 @@ public class GraphPane extends Pane {
     void closeAllOptionRectangle() {
         closeStateOptionRectangle(false);
         closeTransitionOptionRectangle(false);
+    }
+
+    Timeline getChangeCurrentStateTimeline(Integer state) {
+        StateGroup stateGroup = stateGroupToState.getK(state);
+
+        Timeline timeline = new Timeline();
+
+        KeyFrame keyFrame;
+
+        KeyValue knew = stateGroup.getCurrentStateKeyValue();
+
+        if(lastCurrentStateGroup != null){
+            KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), klast, knew);
+        }
+        else
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), knew);
+
+        timeline.getKeyFrames().add(keyFrame);
+
+        lastCurrentStateGroup = stateGroup;
+        return timeline;
+    }
+
+    Timeline getRemoveCurrentStateTimeline() {
+
+        if(lastCurrentStateGroup != null){
+            Timeline timeline = new Timeline();
+
+            KeyFrame keyFrame;
+            KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), klast);
+            timeline.getKeyFrames().add(keyFrame);
+            lastCurrentStateGroup = null;
+
+            return timeline;
+        }
+        else
+            return null;
+    }
+
+    Timeline getFiredTransitionTimeline(Transition transition) {
+        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+
+        Timeline timeline = new Timeline();
+
+        KeyFrame keyFrame = transitionArrowGroup.getFiredKeyValue();
+
+        timeline.setCycleCount(2);
+        timeline.setAutoReverse(true);
+        timeline.getKeyFrames().add(keyFrame);
+
+        return timeline;
     }
 }

@@ -1,5 +1,8 @@
 package gui;
 
+import javafx.animation.ParallelTransition;
+import javafx.animation.SequentialTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -9,15 +12,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import turingmachines.Tape;
+import turingmachines.Transition;
 import turingmachines.TuringMachine;
 import util.BidirMap;
 import util.Colors;
 import util.Pair;
 import util.Subscriber;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class TuringMachineDrawer extends Application {
@@ -29,6 +36,16 @@ public class TuringMachineDrawer extends Application {
     static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
     static final String SYMBOL_FONT_NAME = "Cambria";
+
+    static final double CURRENT_STATE_ANIMATION_DURATION = 500;
+    static final Color STATE_CURRENT_COLOR = Color.DARKBLUE;
+    static final double TRANSITION_FIRED_ANIMATION_DURATION = 500;
+    static final Color TRANSITION_FIRED_COLOR = Color.RED;
+    static final double TRANSITION_FIRED_STROKE_WIDTH = 10;
+    static final double HEAD_WRITE_ANIMATION_DURATION = 250;
+    static final double HEAD_WRITE_STROKE_WIDTH = 10;
+    static final double HEAD_MOVE_ANIMATION_DURATION = 500;
+    static final double SYMBOL_WRITE_ANIMATION_DURATION = 500;
 
     static final String BLANK_SYMBOL = "\u2205";
     static final String LEFT_SYMBOL = "\u21D0";
@@ -161,6 +178,9 @@ public class TuringMachineDrawer extends Application {
     TapesMouseHandler tapesMouseHandler;
     TuringPlayerMouseHandler turingPlayerMouseHandler;
 
+    SequentialTransition machineTimeLine;
+    ParallelTransition directTimeline;
+    LinkedList<Timeline> toPlay;
 
     @Override
     public void start(Stage stage) throws Exception{
@@ -175,6 +195,10 @@ public class TuringMachineDrawer extends Application {
         this.playing = false;
 
         this.defaultColorsIndex = 0;
+
+        this.machineTimeLine = new SequentialTransition();
+        this.directTimeline = new ParallelTransition();
+        toPlay = new LinkedList<>();
 
         Subscriber s = new Subscriber() {
             @Override
@@ -228,19 +252,38 @@ public class TuringMachineDrawer extends Application {
                         notifyMsg(error_msg);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED:{
+                        Integer state = (Integer)parameters[1];
+                        toPlay.add(graphPane.getChangeCurrentStateTimeline(state));
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION:{
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE:{
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN:{
+                        Transition transition = (Transition) parameters[1];
+                        toPlay.add(graphPane.getFiredTransitionTimeline(transition));
                     }
                     break;
                     case TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED:{
+                        Tape tape = (Tape) parameters[1];
+                        Integer head = (Integer) parameters[2];
+                        Integer line = (Integer) parameters[3];
+                        Integer column = (Integer) parameters[4];
+                        toPlay.add(tapesPane.getMoveHeadTimeline(tape, head, line, column));
                     }
                     break;
-                    case TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED:{
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE:{
+                        Tape tape = (Tape) parameters[1];
+                        Integer head = (Integer) parameters[2];
+                        toPlay.add(tapesPane.getHeadWriteTimeline(tape, head));
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN:{
+                        Tape tape = (Tape) parameters[1];
+                        Integer line = (Integer) parameters[2];
+                        Integer column = (Integer) parameters[3];
+                        String symbol = (String) parameters[4];
+                        Timeline timeline = tapesPane.getWriteSymbolTimeline(tape, line, column, symbol);
+                        if(timeline != null)
+                            toPlay.add(timeline);
                     }
                     break;
                 }
@@ -256,11 +299,11 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ERROR);
 
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_CURRENT_STATE_CHANGED);
 
         this.machine = new TuringMachine();
 
@@ -518,39 +561,103 @@ public class TuringMachineDrawer extends Application {
         graphPaneMouseHandler.unselect();
 
         this.machine.build();
+        this.goToFirstConfiguration();
     }
 
     void reinitMachine(){
+        this.directTimeline.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
         buildMode = false;
-        this.playing = false;
-        this.machine.reinitMachine();
+        this.playing = true;
+        this.machine.reinit();
         this.machine.clearBuild();
+        Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
+        if(removeFirst != null)
+            toPlay.add(removeFirst);
+        this.flushDirect();
     }
 
     void goToFirstConfiguration() {
-        this.playing = false;
-        this.machine.reinitMachine();
+        this.directTimeline.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+        this.playing = true;
+        this.machine.reinit();
+        this.flushDirect();
+        this.player.setFirstFrame();
     }
 
     void goToLastConfiguration() {
-        this.playing = false;
-        while(this.machine.tick()){}
+        this.directTimeline.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+        this.playing = true;
+        Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
+        while(this.machine.tick()){
+            if(this.machine.isTerminated())
+                break;
+            clearTimeline();
+        }
+        if(removeFirst != null)
+            toPlay.add(removeFirst);
+        flushDirect();
         player.setLastFrame();
     }
 
     void tick(){
-        boolean notTerminated = this.machine.tick();
-        if(!notTerminated){
+        this.playing = true;
+        this.machineTimeLine.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+        if(this.machine.tick())
+            flushTimeline();
+        else {
             player.setLastFrame();
+            this.playing = false;
         }
     }
 
     void play(){
+        this.player.setPlay();
+        this.machineTimeLine.setOnFinished(actionEvent -> {
+            if(this.playing)
+                this.play();
+        });
         this.playing = true;
+
+        if(this.machine.tick())
+            flushTimeline();
+        else {
+            player.setLastFrame();
+            this.playing = false;
+        }
+
     }
 
     void pause(){
+        this.player.setPause();
         this.playing = false;
+    }
+
+    void clearTimeline(){
+        toPlay.clear();
+    }
+
+    void flushTimeline(){
+        this.machineTimeLine.getChildren().clear();
+        this.machineTimeLine.getChildren().addAll(this.toPlay);
+        toPlay.clear();
+
+        this.machineTimeLine.play();
+    }
+
+    void flushDirect(){
+        this.directTimeline.getChildren().clear();
+        this.directTimeline.getChildren().addAll(this.toPlay);
+        toPlay.clear();
+
+        this.directTimeline.play();
     }
 
     public static void main(String[] args) {

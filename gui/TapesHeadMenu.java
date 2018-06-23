@@ -111,6 +111,10 @@ class TapesHeadMenu extends HBox {
         for(TapeHeadMenu tapeHeadMenu: tapeToMenu.values())
             tapeHeadMenu.closeHeadOptionRectangle(false);
     }
+
+    KeyFrame getHeadWriteKeyFrame(Tape tape, Integer head) {
+        return tapeToMenu.get(tape).getHeadWriteKeyFrame(head);
+    }
 }
 
 class TapeHeadMenu extends HBox {
@@ -165,6 +169,10 @@ class TapeHeadMenu extends HBox {
     void closeHeadOptionRectangle() { closeHeadOptionRectangle(true); }
     void closeHeadOptionRectangle(boolean animate) { headOptionRectangle.minimize(animate); }
 
+    KeyFrame getHeadWriteKeyFrame(Integer head) {
+        HeadMenuSelect headRectangle = (HeadMenuSelect) this.getChildren().get(head + 1);
+        return headRectangle.getHeadWriteKeyFrame();
+    }
 }
 
 class HeadMenuSelect extends Rectangle {
@@ -215,6 +223,14 @@ class HeadMenuSelect extends Rectangle {
         timeline.stop();
         this.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animating = false;
+    }
+
+    KeyFrame getHeadWriteKeyFrame() {
+        KeyValue kStrokeWidth = new KeyValue(this.strokeWidthProperty(),
+                TuringMachineDrawer.HEAD_WRITE_STROKE_WIDTH,
+                Interpolator.EASE_BOTH);
+
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_WRITE_ANIMATION_DURATION), kStrokeWidth);
     }
 }
 

@@ -474,6 +474,35 @@ public class TransitionArrowGroup extends Group {
     List<Pair<String, Color>> getActionsDisplay() {
         return transitionDisplay.getActionsDisplay();
     }
+
+    KeyFrame getFiredKeyValue() {
+        KeyFrame keyFrame;
+
+        KeyValue kCenterColor = new KeyValue(this.centerLine.strokeProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_COLOR,
+                Interpolator.EASE_BOTH);
+        KeyValue kCenterStrokeWidth = new KeyValue(this.centerLine.strokeWidthProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_STROKE_WIDTH,
+                Interpolator.EASE_BOTH);
+        KeyValue kArrow1Color = new KeyValue(this.arrowLine1.strokeProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_COLOR,
+                Interpolator.EASE_BOTH);
+        KeyValue kArrow1StrokeWidth = new KeyValue(this.arrowLine1.strokeWidthProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_STROKE_WIDTH,
+                Interpolator.EASE_BOTH);
+        KeyValue kArrow2Color = new KeyValue(this.arrowLine2.strokeProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_COLOR,
+                Interpolator.EASE_BOTH);
+        KeyValue kArrow2StrokeWidth = new KeyValue(this.arrowLine2.strokeWidthProperty(),
+                TuringMachineDrawer.TRANSITION_FIRED_STROKE_WIDTH,
+                Interpolator.EASE_BOTH);
+
+        keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.TRANSITION_FIRED_ANIMATION_DURATION / 2),
+                kCenterColor, kCenterStrokeWidth, kArrow1Color, kArrow1StrokeWidth,
+                kArrow2Color, kArrow2StrokeWidth);
+
+        return keyFrame;
+    }
 }
 
 class TransitionArrowInvisibleLine extends CubicCurve{

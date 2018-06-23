@@ -12,6 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import turingmachines.TuringMachine;
 
 class StateGroup extends Group{
 
@@ -155,5 +156,17 @@ class StateGroup extends Group{
         this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         this.innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         this.animating = false;
+    }
+
+    KeyValue getCurrentStateKeyValue() {
+        return new KeyValue(this.outerCircle.fillProperty(),
+                TuringMachineDrawer.STATE_CURRENT_COLOR,
+                Interpolator.EASE_BOTH);
+    }
+
+    KeyValue getNoCurrentStateKeyValue() {
+        return new KeyValue(this.outerCircle.fillProperty(),
+                TuringMachineDrawer.UNSELECTED_STATE_COLOR,
+                Interpolator.EASE_BOTH);
     }
 }

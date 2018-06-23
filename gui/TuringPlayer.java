@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
+import org.w3c.dom.css.Rect;
 
 /**
  * Created by dimitri.watel on 22/06/18.
@@ -12,6 +13,7 @@ import javafx.scene.shape.Rectangle;
 class TuringPlayer extends Group {
     TuringMachineDrawer drawer;
 
+    Rectangle rectangle;
     BuildIcon buildIcon;
     StopIcon stopIcon;
     PlayIcon playIcon;
@@ -22,7 +24,7 @@ class TuringPlayer extends Group {
     TuringPlayer(TuringMachineDrawer drawer){
         this.drawer = drawer;
 
-        Rectangle rectangle = new Rectangle(
+        rectangle = new Rectangle(
                 - TuringMachineDrawer.PLAYER_WIDTH / 2,
                 - TuringMachineDrawer.PLAYER_HEIGHT / 2,
                 TuringMachineDrawer.PLAYER_WIDTH,
@@ -42,7 +44,7 @@ class TuringPlayer extends Group {
         oneFrameIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 2.5);
         lastFrameIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
 
-        buildIcon.setUnselected();
+        buildIcon.setSelected();
         stopIcon.setSelected();
         playIcon.setUnselected();
         pauseIcon.setUnselected();
@@ -59,18 +61,39 @@ class TuringPlayer extends Group {
 
 
     void setPlay(){
-        playIcon.setVisible(true);
-        pauseIcon.setVisible(false);
+        playIcon.setVisible(false);
+        pauseIcon.setVisible(true);
+        stopIcon.setUnselected();
+        playIcon.setUnselected();
+        pauseIcon.setSelected();
+        oneFrameIcon.setUnselected();
+        lastFrameIcon.setUnselected();
     }
 
     void setPause(){
-        playIcon.setVisible(false);
-        pauseIcon.setVisible(true);
+        playIcon.setVisible(true);
+        pauseIcon.setVisible(false);
+        stopIcon.setSelected();
+        playIcon.setSelected();
+        pauseIcon.setUnselected();
+        oneFrameIcon.setSelected();
+        lastFrameIcon.setSelected();
+    }
+
+    void setFirstFrame() {
+        playIcon.setVisible(true);
+        pauseIcon.setVisible(false);
+        stopIcon.setUnselected();
+        playIcon.setSelected();
+        pauseIcon.setUnselected();
+        oneFrameIcon.setSelected();
+        lastFrameIcon.setSelected();
     }
 
     void setLastFrame() {
-        setPlay();
-        stopIcon.setUnselected();
+        playIcon.setVisible(true);
+        pauseIcon.setVisible(false);
+        stopIcon.setSelected();
         playIcon.setUnselected();
         pauseIcon.setUnselected();
         oneFrameIcon.setUnselected();
@@ -78,6 +101,8 @@ class TuringPlayer extends Group {
     }
 
     void showPlayer() {
+        rectangle.setWidth(TuringMachineDrawer.PLAYER_WIDTH);
+        rectangle.setX(- TuringMachineDrawer.PLAYER_WIDTH / 2);
         buildIcon.setLayoutX(-TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
         buildIcon.setSelected();
 
@@ -86,12 +111,13 @@ class TuringPlayer extends Group {
         pauseIcon.setVisible(false);
         oneFrameIcon.setVisible(true);
         lastFrameIcon.setVisible(true);
-        stopIcon.setSelected();
+        setFirstFrame();
     }
 
     void hidePlayer(){
+        rectangle.setWidth(TuringMachineDrawer.PLAYER_ICON_RADIUS);
+        rectangle.setX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 4.5);
         buildIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
-        buildIcon.setUnselected();
 
         stopIcon.setVisible(false);
         playIcon.setVisible(false);

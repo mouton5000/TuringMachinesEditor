@@ -20,6 +20,7 @@ import turingmachines.Tape;
 import turingmachines.TuringMachine;
 import util.Subscriber;
 
+import java.security.Key;
 import java.util.*;
 
 /**
@@ -263,6 +264,18 @@ class TapeBorderPanesHBox extends HBox{
         for(TapeBorderPane tapeBorderPane : tapes.values())
             tapeBorderPane.closeAllOptionRectangle();
     }
+
+    KeyFrame getHeadWriteKeyFrame(Tape tape, Integer head) {
+        return tapes.get(tape).getHeadWriteKeyFrame(head);
+    }
+
+    KeyFrame getMoveHeadKeyFrame(Tape tape, Integer head, Integer line, Integer column) {
+        return tapes.get(tape).getMoveHeadKeyFrame(head, line, column);
+    }
+
+    Timeline getWriteSymbolTimeline(Tape tape, Integer line, Integer column, String symbol) {
+        return tapes.get(tape).getWriteSymbolTimeline(line, column, symbol);
+    }
 }
 
 class TapeBorderPane extends BorderPane {
@@ -404,6 +417,18 @@ class TapeBorderPane extends BorderPane {
 
     void closeAllOptionRectangle() {
         tapePane.closeAllOptionRectangle();
+    }
+
+    KeyFrame getHeadWriteKeyFrame(Integer head) {
+        return tapePane.getHeadWriteKeyFrame(head);
+    }
+
+    KeyFrame getMoveHeadKeyFrame(Integer head, Integer line, Integer column) {
+        return tapePane.getMoveHeadKeyFrame(head, line, column);
+    }
+
+    Timeline getWriteSymbolTimeline(Integer line, Integer column, String symbol) {
+        return tapePane.getWriteSymbolTimeline(line, column, symbol);
     }
 }
 
@@ -961,6 +986,69 @@ class TapePane extends Pane {
         animatedRectangle.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animatedRectangle.setVisible(false);
         animating = false;
+    }
+
+    KeyFrame getHeadWriteKeyFrame(Integer head) {
+        Rectangle headRectangle = heads.get(head);
+
+        KeyValue kStrokeWidth = new KeyValue(headRectangle.strokeWidthProperty(),
+                TuringMachineDrawer.HEAD_WRITE_STROKE_WIDTH,
+                Interpolator.EASE_BOTH);
+
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_WRITE_ANIMATION_DURATION), kStrokeWidth);
+    }
+
+    KeyFrame getMoveHeadKeyFrame(Integer head, Integer line, Integer column) {
+        Rectangle headRectangle = heads.get(head);
+
+        KeyValue kX = new KeyValue(headRectangle.layoutXProperty(),
+                tapeBorderPane.getXOf(column) - TuringMachineDrawer.TAPE_CELL_HEAD_SIZE / 2,
+                Interpolator.EASE_BOTH);
+
+        KeyValue kY = new KeyValue(headRectangle.layoutYProperty(),
+                tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_HEAD_SIZE / 2,
+                Interpolator.EASE_BOTH);
+
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_MOVE_ANIMATION_DURATION), kX, kY);
+    }
+
+    Timeline getWriteSymbolTimeline(Integer line, Integer column, String symbol) {
+        Map<Integer, Label> h = cellLabels.computeIfAbsent(line, k -> new HashMap<>());
+        Label cellLabel = h.get(column);
+        if(cellLabel == null){
+            cellLabel = new Label("");
+            cellLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
+                    TuringMachineDrawer.TAPE_CELL_SYMBOL_FONT_SIZE));
+
+            cellLabel.setMinWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
+            cellLabel.setMaxWidth(TuringMachineDrawer.TAPE_CELL_WIDTH);
+            cellLabel.setMinHeight(TuringMachineDrawer.TAPE_CELL_WIDTH);
+            cellLabel.setMaxHeight(TuringMachineDrawer.TAPE_CELL_WIDTH);
+            cellLabel.setAlignment(Pos.CENTER);
+
+            tapeLinesGroup.getChildren().add(cellLabel);
+            cellLabel.setLayoutX(tapeBorderPane.getXOf(column)- cellLabel.getMinWidth() / 2);
+            cellLabel.setLayoutY(tapeBorderPane.getYOf(line)- cellLabel.getMinHeight() / 2);
+
+            h.put(column, cellLabel);
+        }
+
+        final Label cellLabel2 = cellLabel;
+        Timeline timeline = new Timeline();
+
+        KeyValue ktransp = new KeyValue(cellLabel2.opacityProperty(),0 );
+        KeyFrame kftransp = new KeyFrame(Duration.millis(TuringMachineDrawer.SYMBOL_WRITE_ANIMATION_DURATION / 2),
+                actionEvent -> {
+                    cellLabel2.setText(symbol);
+                }, ktransp);
+
+        KeyValue kopa= new KeyValue(cellLabel2.opacityProperty(),1 );
+        KeyFrame kfopa = new KeyFrame(Duration.millis(TuringMachineDrawer.SYMBOL_WRITE_ANIMATION_DURATION),
+                kopa);
+
+        timeline.getKeyFrames().addAll(kftransp, kfopa);
+        return timeline;
+
     }
 }
 

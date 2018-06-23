@@ -1,5 +1,7 @@
 package gui;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Separator;
@@ -111,5 +113,26 @@ class TapesVBox extends VBox {
         tapesHeadMenu.closeAllOptionRectangle();
         symbolsMenu.closeAllOptionRectangle();
         tapesPane.closeAllOptionRectangle();
+    }
+
+    Timeline getHeadWriteTimeline(Tape tape, Integer head) {
+        KeyFrame kHeadMenu = tapesHeadMenu.getHeadWriteKeyFrame(tape, head);
+        KeyFrame kTape = tapesPane.getHeadWriteKeyFrame(tape, head);
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(kHeadMenu, kTape);
+        timeline.setCycleCount(2);
+        timeline.setAutoReverse(true);
+        return timeline;
+    }
+
+    Timeline getMoveHeadTimeline(Tape tape, Integer head, Integer line, Integer column) {
+        KeyFrame kTape = tapesPane.getMoveHeadKeyFrame(tape, head, line, column);
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(kTape);
+        return timeline;
+    }
+
+    Timeline getWriteSymbolTimeline(Tape tape, Integer line, Integer column, String symbol) {
+        return tapesPane.getWriteSymbolTimeline(tape, line, column, symbol);
     }
 }
