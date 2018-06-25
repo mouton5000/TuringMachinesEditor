@@ -14,8 +14,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import turingmachines.*;
 import util.BidirMap;
+import util.Pair;
 import util.Subscriber;
 
 import java.util.HashSet;
@@ -26,7 +29,7 @@ import java.util.Set;
 /**
  * Created by dimitri.watel on 18/06/18.
  */
-public class GraphPane extends Pane {
+class GraphPane extends Pane {
 
     TuringMachineDrawer drawer;
     StateOptionRectangle stateOptionRectangle;
@@ -80,12 +83,7 @@ public class GraphPane extends Pane {
         stateGroupToState = new BidirMap<>();
         arrowGroupToTransition = new BidirMap<>();
 
-        graphOffsetX = 0;
-        graphOffsetY = 0;
-
-        currentDefaultStateChar = 'A';
-
-        lastCurrentStateGroup = null;
+        reinit();
 
         Subscriber s = new Subscriber() {
             @Override
@@ -192,20 +190,27 @@ public class GraphPane extends Pane {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
     }
 
+    void reinit() {
+        graphOffsetX = 0;
+        graphOffsetY = 0;
+        currentDefaultStateChar = 'A';
+        lastCurrentStateGroup = null;
+    }
+
 
     private int gridClosest(double value){
         return ((int)value / TuringMachineDrawer.GRAPH_GRID_WIDTH) * TuringMachineDrawer.GRAPH_GRID_WIDTH;
     }
 
-    void addState(double x, double y){
+    int addState(double x, double y){
         String name = Character.toString(currentDefaultStateChar);
-        this.addState(x, y, name);
+        return this.addState(x, y, name);
     }
 
-    void addState(double x, double y, String name){
+    int addState(double x, double y, String name){
         nextX = x;
         nextY = y;
-        drawer.machine.addState(name);
+        return drawer.machine.addState(name);
     }
 
     void addStateFromMachine(Integer state){
@@ -241,11 +246,10 @@ public class GraphPane extends Pane {
     }
 
     void removeStateFromMachine(Integer state){
-        StateGroup stateGroup = stateGroupToState.getK(state);
+        StateGroup stateGroup = stateGroupToState.removeV(state);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
         this.getChildren().remove(stateGroup);
-        this.stateGroupToState.removeV(state);
 
         Set<Map.Entry<StateGroup, Integer>> entries = new HashSet<>(stateGroupToState.entrySet());
         for(Map.Entry<StateGroup, Integer> entry : entries){
@@ -261,24 +265,28 @@ public class GraphPane extends Pane {
         stateGroup.setLayoutY(yg + graphOffsetY);
     }
 
-    void addTransition(StateGroup start, StateGroup end){
-        addTransition(start, end, null, null, null, null);
+    Integer getState(StateGroup stateGroup) {
+        return stateGroupToState.getV(stateGroup);
+    }
+
+    Transition addTransition(StateGroup start, StateGroup end){
+        return addTransition(start, end, null, null, null, null);
     }
 
 
-    void addTransition(StateGroup start, StateGroup end,
-                       Double nextControl1X, Double nextControl1Y,
-                       Double nextControl2X, Double nextControl2Y
+    Transition addTransition(StateGroup start, StateGroup end,
+                             Double control1X, Double control1Y,
+                             Double control2X, Double control2Y
     ){
         Integer input = stateGroupToState.getV(start);
         Integer output = stateGroupToState.getV(end);
 
-        this.nextControl1X = nextControl1X;
-        this.nextControl1Y = nextControl1Y;
-        this.nextControl2X = nextControl2X;
-        this.nextControl2Y = nextControl2Y;
+        this.nextControl1X = control1X;
+        this.nextControl1Y = control1Y;
+        this.nextControl2X = control2X;
+        this.nextControl2Y = control2Y;
 
-        drawer.machine.addTransition(input, output);
+        return drawer.machine.addTransition(input, output);
     }
 
     private void addTransitionFromMachine(Transition transition){
@@ -331,7 +339,7 @@ public class GraphPane extends Pane {
     }
 
     void removeTransitionFromMachine(Transition transition){
-        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.removeV(transition);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
         this.getChildren().remove(transitionArrowGroup);
@@ -655,5 +663,87 @@ public class GraphPane extends Pane {
         timeline.getKeyFrames().add(keyFrame);
 
         return timeline;
+    }
+
+    JSONObject getJSON() {
+        JSONArray jsonStates = new JSONArray();
+        for(int state = 0; state < stateGroupToState.size(); state++)
+            jsonStates.put(stateGroupToState.getK(state).getJSON());
+
+        JSONArray jsonTransition = new JSONArray();
+        for(Map.Entry<TransitionArrowGroup, Transition> entry: arrowGroupToTransition.entrySet())
+            jsonTransition.put(entry.getKey().getJSON());
+
+        return new JSONObject().put("states", jsonStates).put("transitions", jsonTransition);
+    }
+
+    void loadJSON(JSONObject jsonGraph){
+        JSONArray jsonStates = jsonGraph.getJSONArray("states");
+        for(int i = 0; i < jsonStates.length(); i++){
+            JSONObject jsonState = jsonStates.getJSONObject(i);
+            double x = jsonState.getDouble("x");
+            double y = jsonState.getDouble("y");
+            String name = jsonState.getString("name");
+
+            int state = this.addState(x, y, name);
+            StateGroup stateGroup = stateGroupToState.getK(state);
+
+            if(jsonState.getBoolean("isInitial"))
+                this.toggleInitial(stateGroup);
+
+            if(jsonState.getBoolean("isFinal"))
+                this.toggleFinal(stateGroup);
+
+            if(jsonState.getBoolean("isAccepting"))
+                this.toggleAccepting(stateGroup);
+
+        }
+
+        JSONArray jsonTransitions = jsonGraph.getJSONArray("transitions");
+        for(int i = 0; i < jsonTransitions.length(); i++) {
+            JSONObject jsonTransition = jsonTransitions.getJSONObject(i);
+
+            int inputState = jsonTransition.getInt("input");
+            int outputState = jsonTransition.getInt("output");
+            StateGroup inputStateGroup = stateGroupToState.getK(inputState);
+            StateGroup outputStateGroup = stateGroupToState.getK(outputState);
+
+            double control1X = jsonTransition.getDouble("control1X");
+            double control1Y = jsonTransition.getDouble("control1Y");
+            double control2X = jsonTransition.getDouble("control2X");
+            double control2Y = jsonTransition.getDouble("control2Y");
+
+            Transition transition = this.addTransition(inputStateGroup, outputStateGroup,
+                    control1X, control1Y,
+                    control2X, control2Y);
+            TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+
+            JSONObject jsonDisplay = jsonTransition.getJSONObject("display");
+            JSONArray jsonReadSymbols = jsonDisplay.getJSONArray("readSymbols");
+            for(int tapeId = 0; tapeId < jsonReadSymbols.length(); tapeId++){
+                JSONArray jsonReadSymbolsOfTape = jsonReadSymbols.getJSONArray(tapeId);
+                Tape tape = drawer.machine.getTape(tapeId);
+                for(int head = 0; head < jsonReadSymbolsOfTape.length(); head++){
+                    JSONArray jsonReadSymbolsOfHead = jsonReadSymbolsOfTape.getJSONArray(head);
+                    for(Object symbol : jsonReadSymbolsOfHead)
+                        this.addReadSymbol(transitionArrowGroup, tape, head, (String)symbol);
+                }
+            }
+
+            JSONArray jsonActions = jsonDisplay.getJSONArray("actions");
+            for(int j = 0; j < jsonActions.length(); j++){
+                JSONObject jsonAction = jsonActions.getJSONObject(j);
+
+                Color color = Color.valueOf(jsonAction.getString("color"));
+                Pair<Tape, Integer> pair = drawer.getHead(color);
+                Tape tape = pair.first;
+                Integer head = pair.second;
+
+                String actionSymbol = jsonAction.getString("actionSymbol");
+                this.addAction(transitionArrowGroup, tape, head, actionSymbol);
+            }
+
+        }
+
     }
 }

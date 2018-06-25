@@ -16,6 +16,9 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.w3c.dom.css.Rect;
 import turingmachines.Tape;
 import turingmachines.TuringMachine;
 import util.Subscriber;
@@ -276,6 +279,16 @@ class TapeBorderPanesHBox extends HBox{
     Timeline getWriteSymbolTimeline(Tape tape, Integer line, Integer column, String symbol) {
         return tapes.get(tape).getWriteSymbolTimeline(line, column, symbol);
     }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child: this.getChildren()) {
+            if(!(child instanceof TapeBorderPane))
+                continue;
+            jsonArray.put(((TapeBorderPane)child).getJSON());
+        }
+        return jsonArray;
+    }
 }
 
 class TapeBorderPane extends BorderPane {
@@ -429,6 +442,14 @@ class TapeBorderPane extends BorderPane {
 
     Timeline getWriteSymbolTimeline(Integer line, Integer column, String symbol) {
         return tapePane.getWriteSymbolTimeline(line, column, symbol);
+    }
+
+    JSONObject getJSON() {
+        return tapePane.getJSON()
+                .put("leftBound", (left == null)?"inf":left)
+                .put("rightBound", (right == null)?"inf":right)
+                .put("bottomBound", (bottom == null)?"inf":bottom)
+                .put("topBound", (top == null)?"inf":top);
     }
 }
 
@@ -1049,6 +1070,38 @@ class TapePane extends Pane {
         timeline.getKeyFrames().addAll(kftransp, kfopa);
         return timeline;
 
+    }
+
+    JSONObject getJSON() {
+        JSONArray jsonHeads = new JSONArray();
+        for(Rectangle headRectangle: heads){
+            jsonHeads.put(
+                    new JSONObject()
+                            .put("line", headsLines.get(headRectangle))
+                            .put("column", headsColumns.get(headRectangle))
+                            .put("color", headRectangle.getStroke())
+            );
+        }
+
+        JSONArray jsonCells = new JSONArray();
+        for(Map.Entry<Integer, Map<Integer, Label>> entry: cellLabels.entrySet()){
+            int line = entry.getKey();
+            for(Map.Entry<Integer, Label> entry2: entry.getValue().entrySet()){
+                if(entry2.getValue().getText() == null)
+                    continue;
+                int column = entry2.getKey();
+
+                jsonCells.put(new JSONObject()
+                .put("line", line)
+                .put("column", column)
+                .put("symbol", entry2.getValue().getText())
+                );
+            }
+        }
+
+        return new JSONObject()
+                .put("heads", jsonHeads)
+                .put("cells", jsonCells);
     }
 }
 

@@ -9,13 +9,15 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import turingmachines.Tape;
 import turingmachines.Transition;
 import turingmachines.TuringMachine;
@@ -24,6 +26,9 @@ import util.Colors;
 import util.Pair;
 import util.Subscriber;
 
+import java.io.*;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -164,6 +169,7 @@ public class TuringMachineDrawer extends Application {
 
     public MenuItem newButton;
     public MenuItem saveButton;
+    public MenuItem saveAsButton;
     public MenuItem loadButton;
 
 
@@ -182,6 +188,8 @@ public class TuringMachineDrawer extends Application {
     ParallelTransition directTimeline;
     LinkedList<Timeline> toPlay;
 
+    private String lastSaveFilename;
+
     @Override
     public void start(Stage stage) throws Exception{
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
@@ -195,6 +203,8 @@ public class TuringMachineDrawer extends Application {
         this.playing = false;
 
         this.defaultColorsIndex = 0;
+
+        lastSaveFilename = null;
 
         this.machineTimeLine = new SequentialTransition();
         this.directTimeline = new ParallelTransition();
@@ -307,7 +317,7 @@ public class TuringMachineDrawer extends Application {
 
         this.machine = new TuringMachine();
 
-        reinitDraw();
+        initDraw();
 
         this.stage.getScene().widthProperty().addListener((obs, oldVal, newVal) -> {
             WIDTH = newVal.intValue();
@@ -319,33 +329,12 @@ public class TuringMachineDrawer extends Application {
             resizePanes();
         });
 
-
-
-        Tape tape = this.machine.addTape();
-        tape.addHead();
-
-        this.addSymbol("0");
-        this.addSymbol("1");
+        newMachine();
 
         stage.show();
     }
 
-    private void resizePanes(){
-        graphPane.setMinWidth(WIDTH);
-        graphPane.setMaxWidth(WIDTH);
-        graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
-        graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
-
-        tapesPane.setMinWidth(WIDTH);
-        tapesPane.setMaxWidth(WIDTH);
-        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-
-        notification.setLayoutX(WIDTH / 2);
-        player.setLayoutX(WIDTH - PLAYER_WIDTH / 2);
-    }
-
-    public void reinitDraw(){
+    private void initDraw(){
 
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         tapesMouseHandler = new TapesMouseHandler(this);
@@ -372,16 +361,26 @@ public class TuringMachineDrawer extends Application {
 //        NewSaveLoadButtonHandler slh = new NewSaveLoadButtonHandler(this);
         newButton = new MenuItem();
         newButton.setText("New");
-//        newButton.setOnAction(slh);
+        newButton.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
+        newButton.setOnAction(actionEvent -> newMachine());
 
         saveButton = new MenuItem();
         saveButton.setText("Save");
+        saveButton.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+        saveButton.setOnAction(actionEvent -> saveMachine());
+
+        saveAsButton = new MenuItem();
+        saveAsButton.setText("Save as");
+        saveAsButton.setAccelerator(KeyCombination.keyCombination("Ctrl+Shift+S"));
+        saveAsButton.setOnAction(actionEvent -> saveAsMachine());
 
         loadButton = new MenuItem();
+        loadButton.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
         loadButton.setText("Load");
+        loadButton.setOnAction(actionEvent -> loadMachine());
 
         fileMenu.getItems().addAll(newButton, new SeparatorMenuItem(),
-                saveButton, loadButton);
+                saveButton, saveAsButton, loadButton);
 
         Separator separator = new Separator();
         separator.setMaxHeight(SEPARATOR_WIDTH);
@@ -400,6 +399,21 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    private void resizePanes(){
+        graphPane.setMinWidth(WIDTH);
+        graphPane.setMaxWidth(WIDTH);
+        graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
+        graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
+
+        tapesPane.setMinWidth(WIDTH);
+        tapesPane.setMaxWidth(WIDTH);
+        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+
+        notification.setLayoutX(WIDTH / 2);
+        player.setLayoutX(WIDTH - PLAYER_WIDTH / 2);
+    }
+
     ReadOnlyDoubleProperty screenWidthProperty(){
         return this.stage.widthProperty();
     }
@@ -413,6 +427,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void addSymbolFromMachine(String symbol){
+        System.out.println(symbol);
         graphPane.addSymbol(symbol);
         tapesPane.addSymbol(symbol);
     }
@@ -532,10 +547,16 @@ public class TuringMachineDrawer extends Application {
     }
 
     void removeHeadFromMachine(Tape tape, int head){
+        System.out.println(tape+" "+head+" "+getColorOfHead(tape, head));
         headsColors.removeV(new Pair<>(tape, head));
-        for(Pair<Tape, Integer> pair : headsColors.values())
-            if(pair.first == tape && pair.second > head)
+        for(Pair<Tape, Integer> pair : new HashSet<>(headsColors.values())) {
+            System.out.println(pair.first+" "+ pair.second+" "+(pair.first == tape && pair.second > head));
+            if (pair.first == tape && pair.second > head) {
+                Color color = headsColors.removeV(pair);
                 pair.second--;
+                headsColors.put(color, pair);
+            }
+        }
 
         graphPane.removeHead(tape, head);
         tapesPane.removeHead(tape, head);
@@ -658,6 +679,120 @@ public class TuringMachineDrawer extends Application {
         toPlay.clear();
 
         this.directTimeline.play();
+    }
+
+    private void clearMachine(){
+        this.machine.clear();
+        this.graphPane.reinit();
+    }
+
+    void newMachine(){
+        clearMachine();
+
+        this.addTape();
+        this.addHead(this.machine.getTape(0), 0, 0, Color.BLACK);
+        this.addSymbol("0");
+        this.addSymbol("1");
+    }
+
+    void saveMachine(){
+        if(lastSaveFilename != null)
+            saveAsMachine(lastSaveFilename);
+        else
+            saveAsMachine();
+    }
+
+    void saveAsMachine() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose save file");
+
+        if(lastSaveFilename != null) {
+            File dir = new File(lastSaveFilename).getParentFile();
+            if (dir != null)
+                fileChooser.setInitialDirectory(dir);
+        }
+
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("TuringMachine files", "*.tm")
+        );
+
+        File file = fileChooser.showOpenDialog(stage);
+        if(file != null)
+            saveAsMachine(file.getAbsolutePath());
+    }
+
+    private void saveAsMachine(String filename){
+        lastSaveFilename = filename;
+
+        JSONObject jsonMachine = getJSON();
+        try {
+            FileWriter fw = new FileWriter(filename, false);
+            jsonMachine.write(fw);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void loadMachine(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose loadMachine file");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("TuringMachine files", "*.tm")
+        );
+
+        File file = fileChooser.showOpenDialog(stage);
+        if(file != null)
+            loadMachine(file.getAbsolutePath());
+    }
+
+    private void loadMachine(String filename){
+        StringBuilder sb = new StringBuilder();
+        try {
+
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+            String line;
+            while((line = br.readLine()) != null)
+                sb.append(line);
+
+            JSONObject jsonObject = new JSONObject(sb.toString());
+
+            clearMachine();
+            loadJSON(jsonObject);
+
+            br.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private JSONObject getJSON(){
+        JSONObject jsonOptions = new JSONObject();
+
+
+        JSONObject jsonGraph = graphPane.getJSON();
+        JSONObject jsonTape = tapesPane.getJSON();
+
+        return new JSONObject()
+                .put("options", jsonOptions)
+                .put("graph", jsonGraph)
+                .put("tapes", jsonTape);
+    }
+
+    private void loadJSON(JSONObject jsonObject){
+        JSONObject jsonOptions = jsonObject.getJSONObject("options");
+
+        JSONObject jsonTapes = jsonObject.getJSONObject("tapes");
+        tapesPane.loadJSON(jsonTapes);
+
+
+        JSONObject jsonGraph =  jsonObject.getJSONObject("graph");
+        graphPane.loadJSON(jsonGraph);
+
     }
 
     public static void main(String[] args) {

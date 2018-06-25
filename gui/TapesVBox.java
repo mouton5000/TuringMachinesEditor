@@ -8,6 +8,8 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import turingmachines.Tape;
 
 
@@ -134,5 +136,68 @@ class TapesVBox extends VBox {
 
     Timeline getWriteSymbolTimeline(Tape tape, Integer line, Integer column, String symbol) {
         return tapesPane.getWriteSymbolTimeline(tape, line, column, symbol);
+    }
+
+    JSONObject getJSON() {
+        return new JSONObject()
+//                .put("tapeHeadsMenu", tapesHeadMenu.getJSON())
+                .put("symbolsMenu", symbolsMenu.getJSON())
+                .put("tapes", tapesPane.getJSON());
+    }
+
+    void loadJSON(JSONObject jsonTapes) {
+        JSONArray jsonSymbols = jsonTapes.getJSONArray("symbolsMenu");
+        for(Object object : jsonSymbols)
+            drawer.addSymbol((String)object);
+
+        JSONArray jsonTapesAr = jsonTapes.getJSONArray("tapes");
+        for(int i = 0; i < jsonTapesAr.length(); i++){
+            drawer.addTape();
+            Tape tape = drawer.machine.getTape(i);
+
+            JSONObject jsonTape = jsonTapesAr.getJSONObject(i);
+
+            Object leftBoundObj = jsonTape.get("leftBound");
+            if(leftBoundObj instanceof Integer)
+                tape.setLeftBound((Integer)leftBoundObj);
+            else
+                tape.setLeftBound(null);
+
+            Object rightBoundObj = jsonTape.get("rightBound");
+            if(rightBoundObj instanceof Integer)
+                tape.setRightBound((Integer)rightBoundObj);
+            else
+                tape.setRightBound(null);
+
+            Object bottomBoundObj = jsonTape.get("bottomBound");
+            if(bottomBoundObj instanceof Integer)
+                tape.setBottomBound((Integer)bottomBoundObj);
+            else
+                tape.setBottomBound(null);
+
+            Object topBoundObj = jsonTape.get("topBound");
+            if(topBoundObj instanceof Integer)
+                tape.setTopBound((Integer)topBoundObj);
+            else
+                tape.setTopBound(null);
+
+            JSONArray jsonHeads = jsonTape.getJSONArray("heads");
+            for(int j = 0; j < jsonHeads.length(); j++){
+                JSONObject jsonHead = jsonHeads.getJSONObject(j);
+                Color color = Color.valueOf(jsonHead.getString("color"));
+                int line = jsonHead.getInt("line");
+                int column = jsonHead.getInt("column");
+                drawer.addHead(tape, line, column, color);
+            }
+
+            JSONArray jsonCells = jsonTape.getJSONArray("cells");
+            for(int j = 0; j < jsonCells.length(); j++){
+                JSONObject jsonCell = jsonCells.getJSONObject(j);
+                String symbol = jsonCell.getString("symbol");
+                int line = jsonCell.getInt("line");
+                int column = jsonCell.getInt("column");
+                tape.writeInput(line, column, symbol);
+            }
+        }
     }
 }

@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import turingmachines.Tape;
 
 import java.util.HashMap;
@@ -115,6 +117,16 @@ class TapesHeadMenu extends HBox {
     KeyFrame getHeadWriteKeyFrame(Tape tape, Integer head) {
         return tapeToMenu.get(tape).getHeadWriteKeyFrame(head);
     }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child: this.getChildren()) {
+            if(!(child instanceof TapeHeadMenu))
+                continue;
+            jsonArray.put(((TapeHeadMenu)child).getJSON());
+        }
+        return jsonArray;
+    }
 }
 
 class TapeHeadMenu extends HBox {
@@ -138,15 +150,8 @@ class TapeHeadMenu extends HBox {
     }
 
     void addHead(Color color){
-        HeadMenuSelect headRectangle = new HeadMenuSelect(
-                drawer,
-                this,
-                0, 0,
-                TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE,
-                TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE);
-        headRectangle.setFill(Color.WHITE);
+        HeadMenuSelect headRectangle = new HeadMenuSelect(drawer, this);
         headRectangle.setStroke(color);
-        headRectangle.setStrokeWidth(TuringMachineDrawer.TAPE_HEAD_MENU_HEAD_STROKE_WIDTH);
         this.getChildren().add(headRectangle);
     }
 
@@ -173,6 +178,16 @@ class TapeHeadMenu extends HBox {
         HeadMenuSelect headRectangle = (HeadMenuSelect) this.getChildren().get(head + 1);
         return headRectangle.getHeadWriteKeyFrame();
     }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child: this.getChildren()) {
+            if(!(child instanceof HeadMenuSelect))
+                continue;
+            jsonArray.put(((HeadMenuSelect)child).getJSON());
+        }
+        return jsonArray;
+    }
 }
 
 class HeadMenuSelect extends Rectangle {
@@ -182,10 +197,13 @@ class HeadMenuSelect extends Rectangle {
     private Timeline timeline;
     boolean animating;
 
-    HeadMenuSelect( TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu, double x, double y, double width, double height) {
-        super(x, y, width, height);
+    HeadMenuSelect( TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu) {
+        super(0, 0, TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE, TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE);
         this.drawer = drawer;
         this.tapeHeadMenu = tapeHeadMenu;
+
+        this.setFill(Color.WHITE);
+        this.setStrokeWidth(TuringMachineDrawer.TAPE_HEAD_MENU_HEAD_STROKE_WIDTH);
 
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
@@ -231,6 +249,11 @@ class HeadMenuSelect extends Rectangle {
                 Interpolator.EASE_BOTH);
 
         return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_WRITE_ANIMATION_DURATION), kStrokeWidth);
+    }
+
+    JSONObject getJSON() {
+        return new JSONObject()
+                .put("color", this.getStroke());
     }
 }
 

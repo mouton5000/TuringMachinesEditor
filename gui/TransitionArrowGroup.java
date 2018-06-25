@@ -15,6 +15,7 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeType;
 import javafx.util.Duration;
+import org.json.JSONObject;
 import turingmachines.Tape;
 import util.Pair;
 import util.Vector;
@@ -503,12 +504,23 @@ public class TransitionArrowGroup extends Group {
 
         return keyFrame;
     }
+
+    JSONObject getJSON() {
+        return new JSONObject()
+                .put("input", drawer.graphPane.getState(input))
+                .put("output", drawer.graphPane.getState(output))
+                .put("control1X", centerLine.getControlX1())
+                .put("control1Y", centerLine.getControlY1())
+                .put("control2X", centerLine.getControlX2())
+                .put("control2Y", centerLine.getControlY2())
+                .put("display", transitionDisplay.getJSON());
+    }
 }
 
 class TransitionArrowInvisibleLine extends CubicCurve{
     TransitionArrowGroup transitionArrowGroup;
 
-    public TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
+    TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
         super();
         this.transitionArrowGroup = transitionArrowGroup;
 
@@ -522,7 +534,7 @@ class TransitionArrowControl1KeyCircle extends Circle{
 
     TransitionArrowGroup transitionArrowGroup;
 
-    public TransitionArrowControl1KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
+    TransitionArrowControl1KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
         super(v);
         this.transitionArrowGroup = transitionArrowGroup;
     }
@@ -531,7 +543,7 @@ class TransitionArrowControl2KeyCircle extends Circle{
 
     TransitionArrowGroup transitionArrowGroup;
 
-    public TransitionArrowControl2KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
+    TransitionArrowControl2KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
         super(v);
         this.transitionArrowGroup = transitionArrowGroup;
     }

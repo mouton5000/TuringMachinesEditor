@@ -1,5 +1,7 @@
 package util;
 
+import gui.TransitionArrowGroup;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,14 +64,16 @@ public class BidirMap<K, V> {
         return reverse.get(value);
     }
 
-    public void removeK(K key){
+    public V removeK(K key){
         V value = direct.remove(key);
         reverse.remove(value);
+        return value;
     }
 
-    public void removeV(V value){
+    public K removeV(V value){
         K key = reverse.remove(value);
         direct.remove(key);
+        return key;
     }
 
     public boolean containsK(K key) {

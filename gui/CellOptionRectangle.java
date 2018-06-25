@@ -113,19 +113,9 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
         symbolsIcon.setTranslateY(- symbolsIcon.getBoundsInLocal().getHeight() / 2
         + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2);
 
-        {
-            CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
-            label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
-                    TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-            label.setOnMouseClicked(optionRectangle.tapePane.drawer.tapesMouseHandler);
-
-            label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-            label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-
-            this.getChildren().add(label);
-        }
+        this.addSymbol(TuringMachineDrawer.BLANK_SYMBOL);
+        for(String symbol : this.optionRectangle.drawer.machine.getSymbols())
+            this.addSymbol(symbol);
     }
 
     void translate(double dx){

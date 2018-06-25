@@ -13,6 +13,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import org.json.JSONArray;
+
+import java.util.Iterator;
 
 class SymbolsMenu extends HBox {
 
@@ -108,6 +111,16 @@ class SymbolsMenu extends HBox {
     }
 
     void closeAllOptionRectangle() { closeSymbolOptionRectangle(false); }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child : this.getChildren()){
+            if(!(child instanceof  SymbolLabel))
+                continue;
+            jsonArray.put(((SymbolLabel)child).getText());
+        }
+        return jsonArray;
+    }
 }
 
 class AddSymbolIcon extends ImageView {
@@ -165,6 +178,7 @@ class SymbolLabel extends Group {
         this.setOnMouseDragged(drawer.tapesMouseHandler);
     }
 
+    String getText(){ return symbolLabel.getText(); }
     void setText(String symbol){
         symbolLabel.setText(symbol);
     }

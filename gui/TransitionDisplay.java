@@ -9,6 +9,8 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import turingmachines.Tape;
 import util.Pair;
 
@@ -91,6 +93,12 @@ class TransitionDisplay extends HBox {
 
     List<Pair<String, Color>> getActionsDisplay() {
         return transitionDisplayActionsHBox.getActionsDisplay();
+    }
+
+    JSONObject getJSON() {
+        return new JSONObject()
+                .put("readSymbols", transitionDisplaySymbolsHBox.getJSON())
+                .put("actions", transitionDisplayActionsHBox.getJSON());
     }
 }
 
@@ -181,8 +189,18 @@ class TransitionDisplaySymbolsHBox extends HBox {
         return true;
     }
 
-    public ObservableValue<String> getSymbolDisplayTextProperty(Tape tape, int head) {
+    ObservableValue<String> getSymbolDisplayTextProperty(Tape tape, int head) {
         return tapes.get(tape).getSymbolDisplayTextProperty(head);
+    }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child : this.getChildren()) {
+            if (!(child instanceof TransitionDisplaySymbolsByTapeHBox))
+                continue;
+            jsonArray.put(((TransitionDisplaySymbolsByTapeHBox)child).getJSON());
+        }
+        return jsonArray;
     }
 }
 
@@ -254,6 +272,16 @@ class TransitionDisplaySymbolsByTapeHBox extends HBox {
     ObservableValue<String> getSymbolDisplayTextProperty(int head) {
         return ((TransitionDisplaySymbolsByHeadLabel)this.getChildren().get(head)).textProperty();
     }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Node child: this.getChildren()) {
+            TransitionDisplaySymbolsByHeadLabel transitionDisplaySymbolsByHeadLabel =
+                    (TransitionDisplaySymbolsByHeadLabel) child;
+            jsonArray.put(transitionDisplaySymbolsByHeadLabel.getJSON());
+        }
+        return jsonArray;
+    }
 }
 
 class TransitionDisplaySymbolsByHeadLabel extends Label {
@@ -307,6 +335,13 @@ class TransitionDisplaySymbolsByHeadLabel extends Label {
 
     private void reinitText(){
         this.setText(String.join("|", symbols));
+    }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(String symbol: symbols)
+            jsonArray.put(symbol);
+        return jsonArray;
     }
 }
 
@@ -386,6 +421,17 @@ class TransitionDisplayActionsHBox extends HBox{
             pairs.add(new Pair<>(label.getText(), (Color) label.getTextFill()));
         }
         return pairs;
+    }
+
+    JSONArray getJSON() {
+        JSONArray jsonArray = new JSONArray();
+        for(Pair<String, Color> pair : getActionsDisplay()){
+            jsonArray.put(new JSONObject()
+                    .put("actionSymbol", pair.first)
+            .put("color", pair.second)
+            );
+        }
+        return jsonArray;
     }
 }
 

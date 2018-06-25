@@ -12,6 +12,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import org.json.JSONObject;
 import turingmachines.TuringMachine;
 
 class StateGroup extends Group{
@@ -168,5 +169,15 @@ class StateGroup extends Group{
         return new KeyValue(this.outerCircle.fillProperty(),
                 TuringMachineDrawer.UNSELECTED_STATE_COLOR,
                 Interpolator.EASE_BOTH);
+    }
+
+    JSONObject getJSON() {
+        return new JSONObject()
+                .put("x", this.getLayoutX())
+                .put("y", this.getLayoutY())
+                .put("name", this.getName())
+                .put("isFinal", this.isFinal())
+                .put("isAccepting", this.isAccepting())
+                .put("isInitial", this.isInitial());
     }
 }

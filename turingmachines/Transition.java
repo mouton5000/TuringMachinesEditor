@@ -21,6 +21,14 @@ public class Transition {
         actions = new ArrayList<>();
     }
 
+    void setInput(int input) {
+        this.input = input;
+    }
+
+    void setOutput(int output) {
+        this.output = output;
+    }
+
     public Integer getInput() {
         return input;
     }
@@ -141,6 +149,5 @@ public class Transition {
     public String toString() {
         return this.machine.getStateName(input) + " --> " + this.machine.getStateName(output);
     }
-
 }
 

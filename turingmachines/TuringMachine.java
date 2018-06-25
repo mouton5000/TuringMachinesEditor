@@ -128,12 +128,18 @@ public class TuringMachine {
     public void removeState(int state){
         Set<Transition> transitions = new HashSet<>(outputTransitions.get(state));
         for(int state2 = 0; state2 < getNbStates(); state2++){
-            for(Transition transition : outputTransitions.get(state2))
+            for(Transition transition : outputTransitions.get(state2)) {
                 if(state == transition.getOutput())
                     transitions.add(transition);
+                if(state < transition.getInput())
+                    transition.setInput(transition.getInput() - 1);
+                if(state < transition.getOutput())
+                    transition.setOutput(transition.getOutput() - 1);
+            }
         }
         for(Transition transition : transitions)
             this.removeTransition(transition);
+
 
         outputTransitions.remove(state);
         nbStates--;
@@ -176,6 +182,10 @@ public class TuringMachine {
         return tapes.get(i);
     }
 
+    public void removeTape(int i){
+        removeTape(tapes.get(i));
+    }
+
     public void removeTape(Tape tape){
         for(int head = tape.getNbHeads() - 1; head >= 0; head--)
             tape.removeHead(head);
@@ -185,6 +195,10 @@ public class TuringMachine {
 
     public Iterator<Tape> getTapes() {
         return tapes.iterator();
+    }
+
+    public int getNbTapes(){
+        return tapes.size();
     }
 
     public void addSymbol(String symbol){
@@ -220,6 +234,10 @@ public class TuringMachine {
 
     public boolean hasSymbol(String symbol) {
         return symbols.contains(symbol);
+    }
+
+    public int getNbSymbols(){
+        return symbols.size();
     }
 
     void removeHeadFromTransitions(Tape tape, int head) {
@@ -266,6 +284,15 @@ public class TuringMachine {
 
     public boolean isAccepting(){
         return isAccepting(currentState);
+    }
+
+    public void clear() {
+        for(int i = this.getNbStates() - 1; i >= 0; i--)
+            this.removeState(i);
+        for(int i = this.getNbTapes() - 1; i >= 0; i--)
+            this.removeTape(i);
+        for(int i = this.getNbSymbols() - 1; i >= 0; i--)
+            this.removeSymbol(i);
     }
 
     private List<Transition> currentValidArcs(){
@@ -734,7 +761,6 @@ public class TuringMachine {
     public static void main(String[] args){
         testNonDeterministic();
     }
-
 }
 
 class Configuration {
