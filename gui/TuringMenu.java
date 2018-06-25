@@ -1,60 +1,95 @@
 package gui;
 
 import javafx.scene.Group;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-import org.w3c.dom.css.Rect;
+
 
 /**
  * Created by dimitri.watel on 22/06/18.
  */
-class TuringPlayer extends Group {
+class TuringMenu extends Group {
     TuringMachineDrawer drawer;
 
-    Rectangle rectangle;
-    BuildIcon buildIcon;
-    StopIcon stopIcon;
-    PlayIcon playIcon;
-    PauseIcon pauseIcon;
-    OneFrameIcon oneFrameIcon;
-    LastFrameIcon lastFrameIcon;
+    private Rectangle rectangle;
+    private NewFileIcon newFileIcon;
+    private OpenFileIcon openFileIcon;
+    private SaveFileIcon saveFileIcon;
+    private SaveAsFileIcon saveAsFileIcon;
 
-    TuringPlayer(TuringMachineDrawer drawer){
+    private StopIcon stopIcon;
+    private PlayIcon playIcon;
+    private PauseIcon pauseIcon;
+    private OneFrameIcon oneFrameIcon;
+    private LastFrameIcon lastFrameIcon;
+
+    private ParametersIcon parametersIcon;
+    private BuildIcon buildIcon;
+
+    TuringMenu(TuringMachineDrawer drawer){
         this.drawer = drawer;
 
         rectangle = new Rectangle(
-                - TuringMachineDrawer.PLAYER_WIDTH / 2,
-                - TuringMachineDrawer.PLAYER_HEIGHT / 2,
-                TuringMachineDrawer.PLAYER_WIDTH,
-                TuringMachineDrawer.PLAYER_HEIGHT
+                - TuringMachineDrawer.MENU_WIDTH / 2,
+                - TuringMachineDrawer.MENU_HEIGHT / 2,
+                TuringMachineDrawer.MENU_WIDTH,
+                TuringMachineDrawer.MENU_HEIGHT
         );
         rectangle.setFill(Color.TRANSPARENT);
 
-        buildIcon = new BuildIcon(this.drawer);
+        newFileIcon = new NewFileIcon(this.drawer);
+        openFileIcon = new OpenFileIcon(this.drawer);
+        saveFileIcon = new SaveFileIcon(this.drawer);
+        saveAsFileIcon = new SaveAsFileIcon(this.drawer);
+
         stopIcon = new StopIcon(this.drawer);
         playIcon = new PlayIcon(this.drawer);
         pauseIcon = new PauseIcon(this.drawer);
         oneFrameIcon = new OneFrameIcon(this.drawer);
         lastFrameIcon = new LastFrameIcon(this.drawer);
 
-        buildIcon.setLayoutX(-TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
-        stopIcon.setLayoutX(-TuringMachineDrawer.PLAYER_ICON_RADIUS * 2.5);
-        oneFrameIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 2.5);
-        lastFrameIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
+        parametersIcon = new ParametersIcon(this.drawer);
+        buildIcon = new BuildIcon(this.drawer);
 
-        buildIcon.setSelected();
+        newFileIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 6.25);
+        openFileIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 3.75);
+        saveFileIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 1.25);
+        saveAsFileIcon.setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 1.25);
+
+        stopIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 6.25);
+        playIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 3.75);
+        pauseIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 3.75);
+        oneFrameIcon.setLayoutX(-TuringMachineDrawer.MENU_ICON_RADIUS * 1.25);
+        lastFrameIcon.setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 1.25);
+
+        parametersIcon.setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 3.75);
+        buildIcon.setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 6.25);
+
+        newFileIcon.setSelected();
+        openFileIcon.setSelected();
+        saveFileIcon.setSelected();
+        saveAsFileIcon.setSelected();
+
         stopIcon.setSelected();
         playIcon.setUnselected();
         pauseIcon.setUnselected();
         oneFrameIcon.setUnselected();
         lastFrameIcon.setUnselected();
 
+        parametersIcon.setSelected();
+        buildIcon.setSelected();
+
+
         setPlay();
         hidePlayer();
 
-        this.getChildren().addAll(rectangle, buildIcon, stopIcon, playIcon, pauseIcon, oneFrameIcon, lastFrameIcon);
+        this.getChildren().addAll(rectangle,
+                newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon,
+                stopIcon, playIcon, pauseIcon, oneFrameIcon, lastFrameIcon,
+                parametersIcon, buildIcon);
 
 
     }
@@ -101,10 +136,11 @@ class TuringPlayer extends Group {
     }
 
     void showPlayer() {
-        rectangle.setWidth(TuringMachineDrawer.PLAYER_WIDTH);
-        rectangle.setX(- TuringMachineDrawer.PLAYER_WIDTH / 2);
-        buildIcon.setLayoutX(-TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
-        buildIcon.setSelected();
+
+        newFileIcon.setVisible(false);
+        openFileIcon.setVisible(false);
+        saveFileIcon.setVisible(false);
+        saveAsFileIcon.setVisible(false);
 
         stopIcon.setVisible(true);
         playIcon.setVisible(true);
@@ -115,9 +151,11 @@ class TuringPlayer extends Group {
     }
 
     void hidePlayer(){
-        rectangle.setWidth(TuringMachineDrawer.PLAYER_ICON_RADIUS);
-        rectangle.setX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 4.5);
-        buildIcon.setLayoutX(TuringMachineDrawer.PLAYER_ICON_RADIUS * 5);
+
+        newFileIcon.setVisible(true);
+        openFileIcon.setVisible(true);
+        saveFileIcon.setVisible(true);
+        saveAsFileIcon.setVisible(true);
 
         stopIcon.setVisible(false);
         playIcon.setVisible(false);
@@ -135,35 +173,112 @@ abstract class PlayerIcon extends Group{
     PlayerIcon(TuringMachineDrawer drawer){
 
         circle = new Circle();
-        circle.setRadius(TuringMachineDrawer.PLAYER_ICON_RADIUS);
+        circle.setRadius(TuringMachineDrawer.MENU_ICON_RADIUS);
         this.setOpacity(0.5);
 
-        this.setOnMouseClicked(drawer.turingPlayerMouseHandler);
+        this.setOnMouseClicked(drawer.turingMenuMouseHandler);
 
         this.getChildren().add(circle);
 
     }
 
     void setSelected(){
-        circle.setFill(TuringMachineDrawer.PLAYER_SELECTED_ICON_COLOR);
+        circle.setFill(TuringMachineDrawer.MENU_SELECTED_ICON_COLOR);
     }
     void setUnselected(){
-        circle.setFill(TuringMachineDrawer.PLAYER_UNSELECTED_ICON_COLOR);
+        circle.setFill(TuringMachineDrawer.MENU_UNSELECTED_ICON_COLOR);
     }
 }
+
+class NewFileIcon extends PlayerIcon {
+
+    NewFileIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        ImageView imageView = new ImageView("./images/new_file.png");
+        imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
+        imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
+        this.getChildren().add(imageView);
+    }
+}
+
+class OpenFileIcon extends PlayerIcon {
+
+    OpenFileIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        ImageView imageView = new ImageView("./images/open_file.png");
+        imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
+        imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
+        this.getChildren().add(imageView);
+    }
+}
+
+class SaveFileIcon extends PlayerIcon {
+
+    SaveFileIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        ImageView imageView = new ImageView("./images/save_file.png");
+        imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
+        imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
+        this.getChildren().add(imageView);
+    }
+}
+
+class SaveAsFileIcon extends PlayerIcon {
+
+    SaveAsFileIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        ImageView imageView = new ImageView("./images/saveas_file.png");
+        imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
+        imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
+        this.getChildren().add(imageView);
+    }
+}
+
+class ParametersIcon extends PlayerIcon {
+
+    ParametersIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        double smallRadius = TuringMachineDrawer.STATE_RADIUS / 6;
+
+        Circle circle1 = new Circle(-smallRadius * 3, 0, smallRadius);
+        circle1.setFill(Color.WHITE);
+
+        Circle circle2 = new Circle(smallRadius);
+        circle2.setFill(Color.WHITE);
+
+        Circle circle3 = new Circle(smallRadius * 3, 0, smallRadius);
+        circle3.setFill(Color.WHITE);
+
+        this.getChildren().addAll(circle1, circle2, circle3);
+    }
+}
+
 
 class BuildIcon extends PlayerIcon{
 
     BuildIcon(TuringMachineDrawer drawer){
         super(drawer);
 
-        double outerRadius = TuringMachineDrawer.PLAYER_ICON_RADIUS * 7 / 12;
-        double circleStroke = TuringMachineDrawer.PLAYER_ICON_RADIUS / 6;
+        double outerRadius = TuringMachineDrawer.MENU_ICON_RADIUS * 7 / 12;
+        double circleStroke = TuringMachineDrawer.MENU_ICON_RADIUS / 6;
         double cogSize = circleStroke;
 
         Circle circle = new Circle();
         circle.setRadius(outerRadius - circleStroke / 2);
-        circle.setStrokeWidth(TuringMachineDrawer.PLAYER_ICON_RADIUS / 6);
+        circle.setStrokeWidth(TuringMachineDrawer.MENU_ICON_RADIUS / 6);
         circle.setStroke(Color.WHITE);
         circle.setFill(Color.TRANSPARENT);
         this.getChildren().add(circle);
@@ -198,10 +313,10 @@ class StopIcon extends PlayerIcon{
         super(drawer);
 
         Rectangle rectangle = new Rectangle(
-                - TuringMachineDrawer.PLAYER_ICON_RADIUS * 3.0 / 8,
-                - TuringMachineDrawer.PLAYER_ICON_RADIUS * 3.0 / 8,
-                TuringMachineDrawer.PLAYER_ICON_RADIUS * 3.0 / 4,
-                TuringMachineDrawer.PLAYER_ICON_RADIUS * 3.0 / 4);
+                - TuringMachineDrawer.MENU_ICON_RADIUS * 3.0 / 8,
+                - TuringMachineDrawer.MENU_ICON_RADIUS * 3.0 / 8,
+                TuringMachineDrawer.MENU_ICON_RADIUS * 3.0 / 4,
+                TuringMachineDrawer.MENU_ICON_RADIUS * 3.0 / 4);
         rectangle.setFill(Color.WHITE);
         rectangle.setArcHeight(5);
         rectangle.setArcWidth(5);
@@ -214,7 +329,7 @@ class PlayIcon extends PlayerIcon{
     PlayIcon(TuringMachineDrawer drawer) {
         super(drawer);
 
-        double playEdgeLength = TuringMachineDrawer.PLAYER_ICON_RADIUS * 7.0 / 8;
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
 
         Polygon triangle = new Polygon(
@@ -233,7 +348,7 @@ class PauseIcon extends PlayerIcon{
     PauseIcon(TuringMachineDrawer drawer) {
         super(drawer);
 
-        double playEdgeLength = TuringMachineDrawer.PLAYER_ICON_RADIUS * 7.0 / 8;
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
 
         Rectangle rectangle1 = new Rectangle(
@@ -260,7 +375,7 @@ class OneFrameIcon extends PlayerIcon{
         super(drawer);
 
 
-        double playEdgeLength = TuringMachineDrawer.PLAYER_ICON_RADIUS * 7.0 / 8;
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
 
         double leftX = -height / 2;
@@ -288,7 +403,7 @@ class LastFrameIcon extends PlayerIcon{
     LastFrameIcon(TuringMachineDrawer drawer) {
         super(drawer);
 
-        double playEdgeLength = TuringMachineDrawer.PLAYER_ICON_RADIUS * 7.0 / 8;
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
 
         double leftX = - height * 11.0 / 12;

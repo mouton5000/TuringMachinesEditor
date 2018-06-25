@@ -6,10 +6,10 @@ import javafx.scene.input.MouseEvent;
 /**
  * Created by dimitri.watel on 22/06/18.
  */
-public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
+public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
     TuringMachineDrawer drawer;
-    TuringPlayerMouseHandler(TuringMachineDrawer drawer){
+    TuringMenuMouseHandler(TuringMachineDrawer drawer){
         this.drawer = drawer;
     }
 
@@ -33,11 +33,11 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
             drawer.goToFirstConfiguration();
         }
         if(!drawer.playing && source instanceof PlayIcon){
-            drawer.player.setPause();
+            drawer.menu.setPause();
             drawer.play();
         }
         else if(source instanceof PauseIcon){
-            drawer.player.setPlay();
+            drawer.menu.setPlay();
             drawer.pause();
         }
         else if(!drawer.playing && source instanceof OneFrameIcon){
@@ -45,6 +45,18 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
         }
         else if(!drawer.playing && source instanceof LastFrameIcon){
             drawer.goToLastConfiguration();
+        }
+        else if(!drawer.playing && source instanceof NewFileIcon){
+            drawer.newMachine();
+        }
+        else if(!drawer.playing && source instanceof SaveFileIcon){
+            drawer.saveMachine();
+        }
+        else if(!drawer.playing && source instanceof SaveAsFileIcon){
+            drawer.saveAsMachine();
+        }
+        else if(!drawer.playing && source instanceof OpenFileIcon){
+            drawer.loadMachine();
         }
 
 

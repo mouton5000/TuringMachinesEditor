@@ -9,7 +9,6 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -45,7 +44,6 @@ public class TuringMachineDrawer extends Application {
     static final Color TRANSITION_FIRED_COLOR = Color.RED;
     static final double TRANSITION_FIRED_STROKE_WIDTH = 10;
     static final double HEAD_WRITE_STROKE_WIDTH = 10;
-    static final long ACCELERATED_ANIMATION_DURATION = 25;
 
     static final String BLANK_SYMBOL = "\u2205";
     static final String LEFT_SYMBOL = "\u21D0";
@@ -146,11 +144,11 @@ public class TuringMachineDrawer extends Application {
     static final int NOTIFICATION_FONT_SIZE = 25;
     static final String NOTIFICATION_FONT_NAME = "Cambria";
 
-    static final double PLAYER_ICON_RADIUS = 20;
-    static final double PLAYER_WIDTH = PLAYER_ICON_RADIUS * 13;
-    static final double PLAYER_HEIGHT = 100;
-    static final Color PLAYER_SELECTED_ICON_COLOR = Color.BLACK;
-    static final Color PLAYER_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
+    static final double MENU_ICON_RADIUS = 20;
+    static final double MENU_WIDTH = MENU_ICON_RADIUS * 15;
+    static final double MENU_HEIGHT = MENU_ICON_RADIUS * 3;
+    static final Color MENU_SELECTED_ICON_COLOR = Color.BLACK;
+    static final Color MENU_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
 
     boolean animating;
     boolean buildMode;
@@ -160,13 +158,7 @@ public class TuringMachineDrawer extends Application {
     GraphPane graphPane;
     protected TapesVBox tapesPane;
     Notification notification;
-    TuringPlayer player;
-
-    public MenuItem newButton;
-    public MenuItem saveButton;
-    public MenuItem saveAsButton;
-    public MenuItem loadButton;
-
+    TuringMenu menu;
 
     public TuringMachine machine;
 
@@ -177,7 +169,7 @@ public class TuringMachineDrawer extends Application {
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
-    TuringPlayerMouseHandler turingPlayerMouseHandler;
+    TuringMenuMouseHandler turingMenuMouseHandler;
 
     SequentialTransition machineTimeLine;
     ParallelTransition directTimeline;
@@ -333,49 +325,18 @@ public class TuringMachineDrawer extends Application {
 
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         tapesMouseHandler = new TapesMouseHandler(this);
-        turingPlayerMouseHandler = new TuringPlayerMouseHandler(this);
+        turingMenuMouseHandler = new TuringMenuMouseHandler(this);
 
         graphPane = new GraphPane(this);
         tapesPane = new TapesVBox(this);
         notification = new Notification();
-        player = new TuringPlayer(this);
+        menu = new TuringMenu(this);
 
-        notification.setLayoutY(MARGIN + NOTIFICATION_HEIGHT / 2);
-        player.setLayoutY(MARGIN + PLAYER_HEIGHT / 2);
+        notification.setLayoutY(NOTIFICATION_HEIGHT / 2);
+        menu.setLayoutY(MENU_HEIGHT / 2);
         resizePanes();
 
         tapesPane.setAlignment(Pos.CENTER);
-
-        MenuBar menuBar = new MenuBar();
-        menuBar.setMinHeight(MARGIN);
-        menuBar.setMaxHeight(MARGIN);
-
-        Menu fileMenu = new Menu("File");
-        menuBar.getMenus().addAll(fileMenu);
-
-//        NewSaveLoadButtonHandler slh = new NewSaveLoadButtonHandler(this);
-        newButton = new MenuItem();
-        newButton.setText("New");
-        newButton.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-        newButton.setOnAction(actionEvent -> newMachine());
-
-        saveButton = new MenuItem();
-        saveButton.setText("Save");
-        saveButton.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
-        saveButton.setOnAction(actionEvent -> saveMachine());
-
-        saveAsButton = new MenuItem();
-        saveAsButton.setText("Save as");
-        saveAsButton.setAccelerator(KeyCombination.keyCombination("Ctrl+Shift+S"));
-        saveAsButton.setOnAction(actionEvent -> saveAsMachine());
-
-        loadButton = new MenuItem();
-        loadButton.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-        loadButton.setText("Load");
-        loadButton.setOnAction(actionEvent -> loadMachine());
-
-        fileMenu.getItems().addAll(newButton, new SeparatorMenuItem(),
-                saveButton, saveAsButton, loadButton);
 
         Separator separator = new Separator();
         separator.setMaxHeight(SEPARATOR_WIDTH);
@@ -384,9 +345,9 @@ public class TuringMachineDrawer extends Application {
         Pane mainPane = new Pane();
 
         VBox box = new VBox();
-        box.getChildren().addAll(menuBar, graphPane, separator, tapesPane);
+        box.getChildren().addAll(graphPane, separator, tapesPane);
 
-        mainPane.getChildren().addAll(box, player, notification);
+        mainPane.getChildren().addAll(box, menu, notification);
         Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
         stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
@@ -406,7 +367,7 @@ public class TuringMachineDrawer extends Application {
         tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
 
         notification.setLayoutX(WIDTH / 2);
-        player.setLayoutX(WIDTH - PLAYER_WIDTH / 2);
+        menu.setLayoutX(WIDTH - MENU_WIDTH / 2);
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){
@@ -568,8 +529,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     void build() {
-        player.buildIcon.setUnselected();
-        player.showPlayer();
+        menu.showPlayer();
         buildMode = true;
         this.playing = false;
         closeAllOptionRectangle();
@@ -580,8 +540,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     void reinitMachine(){
-        player.buildIcon.setSelected();
-        player.hidePlayer();
+        menu.hidePlayer();
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
@@ -602,7 +561,7 @@ public class TuringMachineDrawer extends Application {
         this.playing = true;
         this.machine.loadFirstConfiguration();
         this.flushDirect();
-        this.player.setFirstFrame();
+        this.menu.setFirstFrame();
     }
 
     void goToLastConfiguration() {
@@ -612,7 +571,7 @@ public class TuringMachineDrawer extends Application {
         this.playing = true;
         this.machine.loadLastConfiguration();
         this.flushDirect();
-        this.player.setLastFrame();
+        this.menu.setLastFrame();
     }
 
     void tick(){
@@ -623,13 +582,13 @@ public class TuringMachineDrawer extends Application {
         if(this.machine.tick())
             flushTimeline();
         else {
-            player.setLastFrame();
+            menu.setLastFrame();
             this.playing = false;
         }
     }
 
     void play(){
-        this.player.setPlay();
+        this.menu.setPlay();
         this.machineTimeLine.setOnFinished(actionEvent -> {
             if(this.playing)
                 this.play();
@@ -639,19 +598,15 @@ public class TuringMachineDrawer extends Application {
         if(this.machine.tick())
             flushTimeline();
         else {
-            player.setLastFrame();
+            menu.setLastFrame();
             this.playing = false;
         }
 
     }
 
     void pause(){
-        this.player.setPause();
+        this.menu.setPause();
         this.playing = false;
-    }
-
-    void clearTimeline(){
-        toPlay.clear();
     }
 
     void flushTimeline(){
@@ -718,6 +673,9 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void saveAsMachine(String filename){
+        if(buildMode)
+            this.reinitMachine();
+
         lastSaveFilename = filename;
 
         JSONObject jsonMachine = getJSON();
