@@ -72,7 +72,7 @@ public class TuringMachine {
     // Alphabet
     private List<String> symbols;
 
-    private Pair<Configuration, ListIterator<Transition>> builtPath;
+    private Pair<Pair<Configuration, Configuration>, ListIterator<Transition>> builtPath;
 
 
     public TuringMachine(){
@@ -346,7 +346,8 @@ public class TuringMachine {
         return children;
     }
 
-    private Pair<Configuration, ListIterator<Transition>> exploreNonDeterministic(Set<Configuration> initialConfigurations){
+    private Pair<Pair<Configuration, Configuration>, ListIterator<Transition>> exploreNonDeterministic(
+            Set<Configuration> initialConfigurations){
         LinkedList<Configuration> toExplore = new LinkedList<>();
         Map<Configuration, Configuration> fathers = new HashMap<>();
         Map<Configuration, Transition> arcFathers = new HashMap<>();
@@ -387,12 +388,14 @@ public class TuringMachine {
             else
                 configuration = firstFinalConfiguration;
         }
+        Configuration lastConfiguration = configuration;
+
         LinkedList<Transition> toReturn = new LinkedList<>();
         while(!initialConfigurations.contains(configuration)){
             toReturn.addFirst(arcFathers.get(configuration));
             configuration = fathers.get(configuration);
         }
-        return new Pair<>(configuration, toReturn.listIterator(0));
+        return new Pair<>(new Pair<>(configuration, lastConfiguration), toReturn.listIterator(0));
 
     }
 
@@ -440,14 +443,24 @@ public class TuringMachine {
         return false;
     }
 
-    public void reinit(){
+    public void loadFirstConfiguration(){
         if(builtPath == null) {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
             return;
         }
-        this.loadConfiguration(builtPath.first, true);
+        this.loadConfiguration(builtPath.first.first, true);
         while(builtPath.second.hasPrevious())
             builtPath.second.previous();
+    }
+
+    public void loadLastConfiguration(){
+        if(builtPath == null) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
+            return;
+        }
+        this.loadConfiguration(builtPath.first.second, true);
+        while(builtPath.second.hasNext())
+            builtPath.second.next();
     }
 
     public void clearBuild(){

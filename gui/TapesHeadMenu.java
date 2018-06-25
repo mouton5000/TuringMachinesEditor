@@ -258,7 +258,7 @@ class HeadMenuSelect extends Rectangle {
                 TuringMachineDrawer.HEAD_WRITE_STROKE_WIDTH,
                 Interpolator.EASE_BOTH);
 
-        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_WRITE_ANIMATION_DURATION), kStrokeWidth);
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION / 2), kStrokeWidth);
     }
 
     JSONObject getJSON() {

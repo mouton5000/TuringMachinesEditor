@@ -40,15 +40,12 @@ public class TuringMachineDrawer extends Application {
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
     static final String SYMBOL_FONT_NAME = "Cambria";
 
-    static final double CURRENT_STATE_ANIMATION_DURATION = 500;
+    static long ANIMATION_DURATION = 500;
     static final Color STATE_CURRENT_COLOR = Color.DARKBLUE;
-    static final double TRANSITION_FIRED_ANIMATION_DURATION = 500;
     static final Color TRANSITION_FIRED_COLOR = Color.RED;
     static final double TRANSITION_FIRED_STROKE_WIDTH = 10;
-    static final double HEAD_WRITE_ANIMATION_DURATION = 250;
     static final double HEAD_WRITE_STROKE_WIDTH = 10;
-    static final double HEAD_MOVE_ANIMATION_DURATION = 500;
-    static final double SYMBOL_WRITE_ANIMATION_DURATION = 500;
+    static final long ACCELERATED_ANIMATION_DURATION = 25;
 
     static final String BLANK_SYMBOL = "\u2205";
     static final String LEFT_SYMBOL = "\u21D0";
@@ -590,7 +587,7 @@ public class TuringMachineDrawer extends Application {
         });
         buildMode = false;
         this.playing = true;
-        this.machine.reinit();
+        this.machine.loadFirstConfiguration();
         this.machine.clearBuild();
         Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
         if(removeFirst != null)
@@ -603,7 +600,7 @@ public class TuringMachineDrawer extends Application {
             this.playing = false;
         });
         this.playing = true;
-        this.machine.reinit();
+        this.machine.loadFirstConfiguration();
         this.flushDirect();
         this.player.setFirstFrame();
     }
@@ -613,16 +610,9 @@ public class TuringMachineDrawer extends Application {
             this.playing = false;
         });
         this.playing = true;
-        Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
-        while(this.machine.tick()){
-            if(this.machine.isTerminated())
-                break;
-            clearTimeline();
-        }
-        if(removeFirst != null)
-            toPlay.add(removeFirst);
-        flushDirect();
-        player.setLastFrame();
+        this.machine.loadLastConfiguration();
+        this.flushDirect();
+        this.player.setLastFrame();
     }
 
     void tick(){
@@ -735,8 +725,7 @@ public class TuringMachineDrawer extends Application {
             FileWriter fw = new FileWriter(filename, false);
             jsonMachine.write(fw);
             fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 
@@ -767,10 +756,8 @@ public class TuringMachineDrawer extends Application {
             loadJSON(jsonObject);
 
             br.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
+
         }
 
 

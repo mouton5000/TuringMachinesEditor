@@ -18,12 +18,10 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.w3c.dom.css.Rect;
 import turingmachines.Tape;
 import turingmachines.TuringMachine;
 import util.Subscriber;
 
-import java.security.Key;
 import java.util.*;
 
 /**
@@ -1026,7 +1024,7 @@ class TapePane extends Pane {
                 TuringMachineDrawer.HEAD_WRITE_STROKE_WIDTH,
                 Interpolator.EASE_BOTH);
 
-        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_WRITE_ANIMATION_DURATION), kStrokeWidth);
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION / 2), kStrokeWidth);
     }
 
     KeyFrame getMoveHeadKeyFrame(Integer head, Integer line, Integer column) {
@@ -1040,7 +1038,7 @@ class TapePane extends Pane {
                 tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_HEAD_SIZE / 2,
                 Interpolator.EASE_BOTH);
 
-        return new KeyFrame(Duration.millis(TuringMachineDrawer.HEAD_MOVE_ANIMATION_DURATION), kX, kY);
+        return new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), kX, kY);
     }
 
     Timeline getWriteSymbolTimeline(Integer line, Integer column, String symbol) {
@@ -1068,13 +1066,13 @@ class TapePane extends Pane {
         Timeline timeline = new Timeline();
 
         KeyValue ktransp = new KeyValue(cellLabel2.opacityProperty(),0 );
-        KeyFrame kftransp = new KeyFrame(Duration.millis(TuringMachineDrawer.SYMBOL_WRITE_ANIMATION_DURATION / 2),
+        KeyFrame kftransp = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION / 2),
                 actionEvent -> {
                     cellLabel2.setText(symbol);
                 }, ktransp);
 
         KeyValue kopa= new KeyValue(cellLabel2.opacityProperty(),1 );
-        KeyFrame kfopa = new KeyFrame(Duration.millis(TuringMachineDrawer.SYMBOL_WRITE_ANIMATION_DURATION),
+        KeyFrame kfopa = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION),
                 kopa);
 
         timeline.getKeyFrames().addAll(kftransp, kfopa);

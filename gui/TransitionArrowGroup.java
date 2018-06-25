@@ -498,7 +498,7 @@ public class TransitionArrowGroup extends Group {
                 TuringMachineDrawer.TRANSITION_FIRED_STROKE_WIDTH,
                 Interpolator.EASE_BOTH);
 
-        keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.TRANSITION_FIRED_ANIMATION_DURATION / 2),
+        keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION / 2),
                 kCenterColor, kCenterStrokeWidth, kArrow1Color, kArrow1StrokeWidth,
                 kArrow2Color, kArrow2StrokeWidth);
 

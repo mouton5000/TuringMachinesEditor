@@ -628,10 +628,10 @@ class GraphPane extends Pane {
 
         if(lastCurrentStateGroup != null){
             KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
-            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), klast, knew);
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), klast, knew);
         }
         else
-            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), knew);
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), knew);
 
         timeline.getKeyFrames().add(keyFrame);
 
@@ -646,7 +646,7 @@ class GraphPane extends Pane {
 
             KeyFrame keyFrame;
             KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
-            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.CURRENT_STATE_ANIMATION_DURATION), klast);
+            keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), klast);
             timeline.getKeyFrames().add(keyFrame);
             lastCurrentStateGroup = null;
 
