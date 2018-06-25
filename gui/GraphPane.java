@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import turingmachines.*;
 import util.BidirMap;
 import util.Pair;
+import util.StringEnumerator;
 import util.Subscriber;
 
 import java.util.HashSet;
@@ -41,7 +42,7 @@ class GraphPane extends Pane {
     private BidirMap<StateGroup, Integer> stateGroupToState;
     private BidirMap<TransitionArrowGroup, Transition> arrowGroupToTransition;
 
-    private char currentDefaultStateChar;
+    private StringEnumerator stringEnumerator;
 
     private Double nextX;
     private Double nextY;
@@ -193,7 +194,7 @@ class GraphPane extends Pane {
     void reinit() {
         graphOffsetX = 0;
         graphOffsetY = 0;
-        currentDefaultStateChar = 'A';
+        stringEnumerator = new StringEnumerator();
         lastCurrentStateGroup = null;
     }
 
@@ -203,7 +204,7 @@ class GraphPane extends Pane {
     }
 
     int addState(double x, double y){
-        String name = Character.toString(currentDefaultStateChar);
+        String name = stringEnumerator.next();
         return this.addState(x, y, name);
     }
 
@@ -214,7 +215,6 @@ class GraphPane extends Pane {
     }
 
     void addStateFromMachine(Integer state){
-        currentDefaultStateChar++;
         String name = drawer.machine.getStateName(state);
         StateGroup circle = new StateGroup(this.drawer, name);
         this.moveStateGroup(circle, nextX, nextY);
