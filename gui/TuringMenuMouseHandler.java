@@ -29,6 +29,9 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
             else
                 drawer.build();
         }
+        else if(!drawer.playing && source instanceof ParametersIcon){
+            drawer.openParameters();
+        }
         else if(!drawer.playing && source instanceof StopIcon){
             drawer.goToFirstConfiguration();
         }

@@ -293,6 +293,36 @@ class TapeBorderPanesHBox extends HBox{
         for(TapeBorderPane tapeBorderPane : tapes.values())
             tapeBorderPane.clear();
     }
+
+    void eraseTapes(String tapesCellsDescription) {
+        String[] tapesCellsDescriptionAr = tapesCellsDescription.split(";");
+        if(tapesCellsDescriptionAr.length != tapes.size())
+            return;
+
+        int i = 0;
+        for(Node child: this.getChildren()) {
+            if(!(child instanceof TapeBorderPane))
+                continue;
+
+            ((TapeBorderPane)child).eraseTape(tapesCellsDescriptionAr[i]);
+            i++;
+        }
+
+    }
+
+    String getTapesString() {
+        StringBuilder sb = new StringBuilder();
+
+        for(Node child: this.getChildren()) {
+            if(!(child instanceof TapeBorderPane))
+                continue;
+
+            sb.append(((TapeBorderPane)child).getTapeString());
+            sb.append(';');
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
 }
 
 class TapeBorderPane extends BorderPane {
@@ -458,6 +488,45 @@ class TapeBorderPane extends BorderPane {
 
     void clear() {
         tapePane.clear();
+    }
+
+    void eraseTape(String tapeCellsDescription) {
+        try {
+            tapeCellsDescription = tapeCellsDescription.trim();
+            String[] tapeCellsDescriptionAr = tapeCellsDescription.split("\n");
+
+            String[] lineColumn = tapeCellsDescriptionAr[0].trim().split(" ");
+            int line = Integer.valueOf(lineColumn[0]);
+            int firstColumn = Integer.valueOf(lineColumn[1]);
+
+            tapePane.clear();
+            int column;
+
+            for(int i = 1; i < tapeCellsDescriptionAr.length; i++){
+                column = firstColumn;
+                for(int j = 0; j < tapeCellsDescriptionAr[i].length(); j++){
+                    char c = tapeCellsDescriptionAr[i].charAt(j);
+                    if(c == ' '){
+                        column++;
+                        continue;
+                    }
+                    String symbol = String.valueOf(c);
+                    if((bottom == null || line >= bottom) && (top == null || line <= top)
+                            && (left == null || column >= left) && (right == null || column <= right)
+                            && (symbol == null || drawer.machine.hasSymbol(symbol)))
+                        tape.writeInput(line, column, symbol);
+                    column++;
+                }
+                line++;
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    String getTapeString() {
+        return tapePane.getTapeString();
     }
 }
 
@@ -1113,8 +1182,56 @@ class TapePane extends Pane {
     }
 
     void clear() {
+        for(Map.Entry<Integer, Map<Integer, Label>> entry : new HashSet<>(cellLabels.entrySet()))
+            for(Map.Entry<Integer, Label> entry2 : new HashSet<>(entry.getValue().entrySet()))
+                tapeBorderPane.tape.writeInput(entry.getKey(), entry2.getKey(), null);
+
+        cellLabels.clear();
         cellOptionRectangle.clear();
         tapeOptionRectangle.clear();
+    }
+
+    String getTapeString() {
+        int minLine = Integer.MAX_VALUE;
+        int minColumn = Integer.MAX_VALUE;
+        int maxLine = Integer.MIN_VALUE;
+        int maxColumn = Integer.MIN_VALUE;
+
+        for(Map.Entry<Integer, Map<Integer, Label>> entry : cellLabels.entrySet()) {
+            minLine = Math.min(minLine, entry.getKey());
+            maxLine = Math.max(maxLine, entry.getKey());
+            for (Map.Entry<Integer, Label> entry2 : entry.getValue().entrySet()) {
+                minColumn = Math.min(minColumn, entry2.getKey());
+                maxColumn = Math.max(maxColumn, entry2.getKey());
+            }
+        }
+
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(minLine);
+        sb.append(' ');
+        sb.append(minColumn);
+        sb.append('\n');
+
+        for(int line = minLine; line <= maxLine; line++){
+            Map<Integer, Label> v1 = cellLabels.get(line);
+            for(int column = minColumn; column <= maxColumn; column++){
+                if(v1 == null) {
+                    sb.append(' ');
+                    continue;
+                }
+                Label label = v1.get(column);
+                if(label == null)
+                    sb.append(' ');
+                else
+                    sb.append(label.getText());
+            }
+            sb.append('\n');
+        }
+
+
+        return sb.toString();
+
     }
 }
 

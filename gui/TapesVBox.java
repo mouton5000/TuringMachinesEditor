@@ -206,4 +206,13 @@ class TapesVBox extends VBox {
         symbolsMenu.clear();
         tapesPane.clear();
     }
+
+    void eraseTapes(String tapesCellsDescription) {
+        tapesCellsDescription = tapesCellsDescription.trim();
+        tapesPane.eraseTapes(tapesCellsDescription);
+    }
+
+    String getTapesString() {
+        return tapesPane.getTapesString();
+    }
 }

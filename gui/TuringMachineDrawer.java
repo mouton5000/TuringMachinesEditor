@@ -28,6 +28,7 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class TuringMachineDrawer extends Application {
 
@@ -170,6 +171,7 @@ public class TuringMachineDrawer extends Application {
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
     TuringMenuMouseHandler turingMenuMouseHandler;
+    TuringMenuKeyHandler turingMenuKeyHandler;
 
     SequentialTransition machineTimeLine;
     ParallelTransition directTimeline;
@@ -326,6 +328,8 @@ public class TuringMachineDrawer extends Application {
         graphPaneMouseHandler = new GraphPaneMouseHandler(this);
         tapesMouseHandler = new TapesMouseHandler(this);
         turingMenuMouseHandler = new TuringMenuMouseHandler(this);
+        turingMenuKeyHandler = new TuringMenuKeyHandler(this);
+
 
         graphPane = new GraphPane(this);
         tapesPane = new TapesVBox(this);
@@ -349,6 +353,8 @@ public class TuringMachineDrawer extends Application {
 
         mainPane.getChildren().addAll(box, menu, notification);
         Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
+        scene.setOnKeyPressed(turingMenuKeyHandler);
+
         stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
 
@@ -721,9 +727,24 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    void openParameters() {
+        Dialog<Settings> dialog = Settings.getDialog(
+                TuringMachineDrawer.ANIMATION_DURATION,
+                tapesPane.getTapesString());
+        Optional<Settings> result = dialog.showAndWait();
+
+        if(result.isPresent()){
+            Settings settings = result.get();
+            ANIMATION_DURATION = settings.duration;
+
+            if(settings.changeTapesCells)
+                tapesPane.eraseTapes(settings.tapesCellsDescription);
+        }
+    }
+
     private JSONObject getJSON(){
         JSONObject jsonOptions = new JSONObject();
-
+        jsonOptions.put("animationDuration", ANIMATION_DURATION);
 
         JSONObject jsonGraph = graphPane.getJSON();
         JSONObject jsonTape = tapesPane.getJSON();
@@ -736,6 +757,7 @@ public class TuringMachineDrawer extends Application {
 
     private void loadJSON(JSONObject jsonObject){
         JSONObject jsonOptions = jsonObject.getJSONObject("options");
+        ANIMATION_DURATION = jsonOptions.getLong("animationDuration");
 
         JSONObject jsonTapes = jsonObject.getJSONObject("tapes");
         tapesPane.loadJSON(jsonTapes);
