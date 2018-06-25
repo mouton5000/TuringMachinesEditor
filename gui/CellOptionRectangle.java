@@ -23,8 +23,10 @@ import turingmachines.Tape;
 class CellOptionRectangle extends OptionRectangle{
 
     final TapePane tapePane;
+
     private final CellOptionRectangleSymbolsOptionsGroup symbolsGroup;
     private final CellOptionRectangleHeadOptionsGroup headsGroup;
+
     Tape currentTape;
     int currentLine;
     int currentColumn;
@@ -32,6 +34,8 @@ class CellOptionRectangle extends OptionRectangle{
     CellOptionRectangle(TuringMachineDrawer drawer, TapePane tapePane) {
         super(drawer, drawer.tapesMouseHandler);
         this.tapePane = tapePane;
+        this.currentTape = tapePane.tapeBorderPane.tape;
+
         symbolsGroup = new CellOptionRectangleSymbolsOptionsGroup(this);
         headsGroup = new CellOptionRectangleHeadOptionsGroup(this);
 
@@ -75,8 +79,7 @@ class CellOptionRectangle extends OptionRectangle{
         headsGroup.addHead(color);
     }
 
-    void setLineAndColumn(Tape tape, int line, int column){
-        this.currentTape = tape;
+    void setLineAndColumn(int line, int column){
         this.currentLine = line;
         this.currentColumn = column;
     }
@@ -90,6 +93,11 @@ class CellOptionRectangle extends OptionRectangle{
     @Override
     protected Node associatedNode() {
         return tapePane;
+    }
+
+    @Override
+    public void clear() {
+        this.setLineAndColumn(0, 0);
     }
 }
 
@@ -270,4 +278,7 @@ class AddHeadOptionIcon extends Group {
 
         this.getChildren().addAll(addHeadIcon, changeColorPicker);
     }
+
+
+
 }

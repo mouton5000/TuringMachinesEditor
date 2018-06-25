@@ -106,6 +106,11 @@ class StateOptionRectangle extends OptionRectangle{
     protected Node associatedNode() {
         return graphPane;
     }
+
+    @Override
+    public void clear() {
+        currentState = null;
+    }
 }
 
 class FinalStateOption extends Group {

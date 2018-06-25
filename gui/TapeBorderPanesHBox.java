@@ -289,6 +289,12 @@ class TapeBorderPanesHBox extends HBox{
         }
         return jsonArray;
     }
+
+    void clear() {
+        closeAllOptionRectangle();
+        for(TapeBorderPane tapeBorderPane : tapes.values())
+            tapeBorderPane.clear();
+    }
 }
 
 class TapeBorderPane extends BorderPane {
@@ -450,6 +456,10 @@ class TapeBorderPane extends BorderPane {
                 .put("rightBound", (right == null)?"inf":right)
                 .put("bottomBound", (bottom == null)?"inf":bottom)
                 .put("topBound", (top == null)?"inf":top);
+    }
+
+    void clear() {
+        tapePane.clear();
     }
 }
 
@@ -708,7 +718,7 @@ class TapePane extends Pane {
         cellOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         cellOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        cellOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
+        cellOptionRectangle.setLineAndColumn(line, column);
         cellOptionRectangle.toFront();
         cellOptionRectangle.setVisible(true);
         cellOptionRectangle.maximize();
@@ -727,7 +737,7 @@ class TapePane extends Pane {
         tapeOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
         tapeOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
                 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        tapeOptionRectangle.setLineAndColumn(this.tapeBorderPane.tape, line, column);
+        tapeOptionRectangle.setLineAndColumn(line, column);
         tapeOptionRectangle.toFront();
         tapeOptionRectangle.setVisible(true);
         tapeOptionRectangle.maximize();
@@ -1102,6 +1112,11 @@ class TapePane extends Pane {
         return new JSONObject()
                 .put("heads", jsonHeads)
                 .put("cells", jsonCells);
+    }
+
+    void clear() {
+        cellOptionRectangle.clear();
+        tapeOptionRectangle.clear();
     }
 }
 

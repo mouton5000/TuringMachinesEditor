@@ -97,6 +97,11 @@ class HeadOptionRectangle extends OptionRectangle{
     public void setHead(int head) {
         this.currentHead = head;
     }
+
+    @Override
+    public void clear() {
+        currentHead = 0;
+    }
 }
 
 class RemoveHeadIcon extends ImageView{

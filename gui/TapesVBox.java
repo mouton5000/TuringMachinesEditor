@@ -200,4 +200,10 @@ class TapesVBox extends VBox {
             }
         }
     }
+
+    void clear() {
+        tapesHeadMenu.clear();
+        symbolsMenu.clear();
+        tapesPane.clear();
+    }
 }

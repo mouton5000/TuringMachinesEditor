@@ -127,6 +127,11 @@ class TapesHeadMenu extends HBox {
         }
         return jsonArray;
     }
+
+    void clear() {
+        for(TapeHeadMenu tapeHeadMenu: tapeToMenu.values())
+            tapeHeadMenu.clear();
+    }
 }
 
 class TapeHeadMenu extends HBox {
@@ -187,6 +192,11 @@ class TapeHeadMenu extends HBox {
             jsonArray.put(((HeadMenuSelect)child).getJSON());
         }
         return jsonArray;
+    }
+
+    void clear() {
+        closeHeadOptionRectangle();
+        headOptionRectangle.clear();
     }
 }
 

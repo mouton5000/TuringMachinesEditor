@@ -243,6 +243,13 @@ class TransitionOptionRectangle extends OptionRectangle {
     void removeAction(int index){
         actionsDisplay.removeAction(index);
     }
+
+    @Override
+    public void clear() {
+        currentTape = null;
+        currentHead = 0;
+        currentTransitionArrowGroup = null;
+    }
 }
 
 class HeadOptionsGroup extends HBox{

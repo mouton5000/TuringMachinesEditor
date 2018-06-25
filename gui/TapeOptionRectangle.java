@@ -39,6 +39,8 @@ class TapeOptionRectangle extends OptionRectangle{
         super(drawer, drawer.tapesMouseHandler);
         this.tapeBorderPane = tapeBorderPane;
 
+        this.currentTape = tapeBorderPane.tape;
+
         add_column_left_icon = new TapeOptionIcon(this, "./images/add_column_left.png",
                 TapeOptionIconAction.ADD, TapeOptionIconDirection.LEFT);
         add_column_right_icon = new TapeOptionIcon(this, "./images/add_column_right.png",
@@ -210,8 +212,7 @@ class TapeOptionRectangle extends OptionRectangle{
 
     }
 
-    void setLineAndColumn(Tape tape, int line, int column){
-        this.currentTape = tape;
+    void setLineAndColumn(int line, int column){
         this.currentLine = line;
         this.currentColumn = column;
 
@@ -272,6 +273,12 @@ class TapeOptionRectangle extends OptionRectangle{
     @Override
     protected Node associatedNode() {
         return tapeBorderPane.tapePane;
+    }
+
+    @Override
+    public void clear() {
+        currentLine = 0;
+        currentColumn = 0;
     }
 }
 

@@ -24,16 +24,10 @@ public class TuringPlayerMouseHandler implements EventHandler<MouseEvent> {
         Object source = mouseEvent.getSource();
 
         if(!drawer.playing && source instanceof BuildIcon){
-            if(drawer.buildMode) {
-                drawer.player.buildIcon.setSelected();
-                drawer.player.hidePlayer();
+            if(drawer.buildMode)
                 drawer.reinitMachine();
-            }
-            else{
-                drawer.player.buildIcon.setUnselected();
-                drawer.player.showPlayer();
+            else
                 drawer.build();
-            }
         }
         else if(!drawer.playing && source instanceof StopIcon){
             drawer.goToFirstConfiguration();

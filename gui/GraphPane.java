@@ -84,7 +84,7 @@ class GraphPane extends Pane {
         stateGroupToState = new BidirMap<>();
         arrowGroupToTransition = new BidirMap<>();
 
-        reinit();
+        clear();
 
         Subscriber s = new Subscriber() {
             @Override
@@ -191,11 +191,16 @@ class GraphPane extends Pane {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
     }
 
-    void reinit() {
+    void clear() {
         graphOffsetX = 0;
         graphOffsetY = 0;
         stringEnumerator = new StringEnumerator();
         lastCurrentStateGroup = null;
+
+        closeStateOptionRectangle();
+        closeTransitionOptionRectangle();
+        stateOptionRectangle.clear();
+        transitionOptionRectangle.clear();
     }
 
 

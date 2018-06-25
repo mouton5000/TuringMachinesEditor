@@ -53,6 +53,7 @@ class SymbolsMenu extends HBox {
     }
 
     void removeSymbol(int index){
+        closeSymbolOptionRectangle();
         this.getChildren().remove(getSymbolLabel(index));
     }
 
@@ -120,6 +121,11 @@ class SymbolsMenu extends HBox {
             jsonArray.put(((SymbolLabel)child).getText());
         }
         return jsonArray;
+    }
+
+    void clear() {
+        closeSymbolOptionRectangle();
+        symbolOptionRectangle.clear();
     }
 }
 

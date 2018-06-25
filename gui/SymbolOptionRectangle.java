@@ -71,6 +71,11 @@ class SymbolOptionRectangle extends OptionRectangle {
     void setSymbolIndex(int currentSymbolIndex) {
         this.currentSymbolIndex = currentSymbolIndex;
     }
+
+    @Override
+    public void clear() {
+        currentSymbolIndex = 0;
+    }
 }
 
 class EditSymbolIcon extends ImageView {

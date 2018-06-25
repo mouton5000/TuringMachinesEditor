@@ -16,7 +16,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
 import turingmachines.Transition;
@@ -28,7 +27,6 @@ import util.Subscriber;
 
 import java.io.*;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -427,7 +425,6 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void addSymbolFromMachine(String symbol){
-        System.out.println(symbol);
         graphPane.addSymbol(symbol);
         tapesPane.addSymbol(symbol);
     }
@@ -547,10 +544,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void removeHeadFromMachine(Tape tape, int head){
-        System.out.println(tape+" "+head+" "+getColorOfHead(tape, head));
         headsColors.removeV(new Pair<>(tape, head));
         for(Pair<Tape, Integer> pair : new HashSet<>(headsColors.values())) {
-            System.out.println(pair.first+" "+ pair.second+" "+(pair.first == tape && pair.second > head));
             if (pair.first == tape && pair.second > head) {
                 Color color = headsColors.removeV(pair);
                 pair.second--;
@@ -576,6 +571,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void build() {
+        player.buildIcon.setUnselected();
+        player.showPlayer();
         buildMode = true;
         this.playing = false;
         closeAllOptionRectangle();
@@ -586,6 +583,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void reinitMachine(){
+        player.buildIcon.setSelected();
+        player.hidePlayer();
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
@@ -682,8 +681,11 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void clearMachine(){
+        if(buildMode)
+            this.reinitMachine();
         this.machine.clear();
-        this.graphPane.reinit();
+        this.graphPane.clear();
+        this.tapesPane.clear();
     }
 
     void newMachine(){
@@ -717,8 +719,12 @@ public class TuringMachineDrawer extends Application {
         );
 
         File file = fileChooser.showOpenDialog(stage);
-        if(file != null)
-            saveAsMachine(file.getAbsolutePath());
+        if(file != null) {
+            String filename = file.getAbsolutePath();
+            if(!filename.endsWith(".tm"))
+                filename += ".tm";
+            saveAsMachine(filename);
+        }
     }
 
     private void saveAsMachine(String filename){

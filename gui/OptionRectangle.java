@@ -134,6 +134,8 @@ abstract class OptionRectangle extends Group{
     }
 
     protected abstract Node associatedNode();
+
+    public abstract void clear();
 }
 
 class MinimizedOptionRectangle extends Group{

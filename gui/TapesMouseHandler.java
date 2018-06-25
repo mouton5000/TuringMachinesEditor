@@ -306,7 +306,6 @@ public class TapesMouseHandler implements EventHandler<Event> {
         }
         else if(!drawer.buildMode && source instanceof RemoveSymbolIcon){
             drawer.removeSymbol(((RemoveSymbolIcon) source).optionRectangle.currentSymbolIndex);
-            mouseEvent.consume();
         }
     }
 
