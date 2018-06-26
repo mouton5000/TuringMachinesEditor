@@ -25,9 +25,15 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
         if(!drawer.playing && !drawer.manualMode && source instanceof BuildIcon){
             if(drawer.buildMode)
-                drawer.reinitMachine();
+                drawer.unbuild();
             else
                 drawer.build();
+        }
+        else if(!drawer.playing && !drawer.buildMode && source instanceof ManualIcon){
+            if(drawer.manualMode)
+                drawer.setNotManual();
+            else
+                drawer.setManual();
         }
         else if(!drawer.playing && !drawer.manualMode && source instanceof ParametersIcon){
             drawer.openParameters();
@@ -43,7 +49,10 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
             drawer.menu.setPlay();
             drawer.pause();
         }
-        else if(!drawer.playing && source instanceof OneFrameIcon){
+        else if(!drawer.playing && source instanceof PreviousFrameIcon){
+            drawer.goToPreviousConfiguration();
+        }
+        else if(!drawer.playing && source instanceof NextFrameIcon){
             drawer.tick();
         }
         else if(!drawer.playing && source instanceof LastFrameIcon){
@@ -60,12 +69,6 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
         }
         else if(!drawer.playing && !drawer.manualMode && source instanceof OpenFileIcon){
             drawer.loadMachine();
-        }
-        else if(!drawer.playing && source instanceof ManualIcon){
-            if(drawer.manualMode)
-                drawer.setNotManual();
-            else
-                drawer.setManual();
         }
 
 

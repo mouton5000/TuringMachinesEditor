@@ -351,6 +351,10 @@ class GraphPane extends Pane {
 
     }
 
+    Transition getTransition(TransitionArrowGroup transitionArrowGroup) {
+        return arrowGroupToTransition.getV(transitionArrowGroup);
+    }
+
     void toggleFinal(StateGroup stateGroup){
         Integer state = stateGroupToState.getV(stateGroup);
         if(stateGroup.isAccepting())
@@ -562,14 +566,6 @@ class GraphPane extends Pane {
             set.add(symbol);
         }
         return set;
-    }
-
-    void manualSelectCurrentState(StateGroup stateGroup) {
-        drawer.machine.manualSetCurrentState(stateGroupToState.getV(stateGroup));
-    }
-
-    void manualFireTransition(TransitionArrowGroup transitionArrowGroup) {
-        drawer.machine.manualFireTransition(arrowGroupToTransition.getV(transitionArrowGroup));
     }
 
     void translate(double dx, double dy) {

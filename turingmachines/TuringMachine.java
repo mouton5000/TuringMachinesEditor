@@ -1,6 +1,5 @@
 package turingmachines;
 
-import sun.security.krb5.Config;
 import util.Pair;
 import util.Subscriber;
 
@@ -73,7 +72,7 @@ public class TuringMachine {
     // Alphabet
     private List<String> symbols;
 
-    private Pair<LinkedList<Configuration>, LinkedList<Transition>> builtPath;
+    private Pair<List<Configuration>, List<Transition>> builtPath;
     private Pair<Integer, Integer> builtIndex;
 
 
@@ -348,7 +347,7 @@ public class TuringMachine {
         return children;
     }
 
-    private Pair<LinkedList<Configuration>, LinkedList<Transition>> exploreNonDeterministic(
+    private Pair<List<Configuration>, List<Transition>> exploreNonDeterministic(
             Set<Configuration> initialConfigurations){
         LinkedList<Configuration> toExplore = new LinkedList<>();
         Map<Configuration, Configuration> fathers = new HashMap<>();
@@ -399,7 +398,7 @@ public class TuringMachine {
             configuration = fathers.get(configuration);
         }
         toReturnC.addFirst(configuration);
-        return new Pair<>(toReturnC, toReturnT);
+        return new Pair<>(new ArrayList<>(toReturnC), new ArrayList<>(toReturnT));
 
     }
 
@@ -422,6 +421,7 @@ public class TuringMachine {
             initialConfigurations.add(saveConfiguration());
         }
         builtPath = this.exploreNonDeterministic(initialConfigurations);
+        builtIndex = new Pair<>(0, 0);
 
         if(builtPath == null)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot end computation.");
@@ -437,13 +437,31 @@ public class TuringMachine {
         }
 
         if(builtIndex.second < builtPath.second.size()){
-            Transition transition = builtPath.second.get(builtIndex.second.get());
-            builtPath.first.next();
+            Transition transition = builtPath.second.get(builtIndex.second);
+            builtIndex.first++;
+            builtIndex.second++;
             transition.fire(true);
             setCurrentState(transition.getOutput(), true);
             return true;
         }
         Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_END, this);
+        return false;
+    }
+
+    public boolean loadPreviousConfiguration(){
+        if(builtPath == null) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
+            return false;
+        }
+
+        if(builtIndex.second > 0){
+            builtIndex.first--;
+            builtIndex.second--;
+            this.loadConfiguration(builtPath.first.get(builtIndex.first), true);
+            return true;
+        }
+
+        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
         return false;
     }
 
@@ -455,7 +473,7 @@ public class TuringMachine {
 
         builtIndex.first = 0;
         builtIndex.second = 0;
-        this.loadConfiguration(builtPath.first.getFirst(), true);
+        this.loadConfiguration(builtPath.first.get(builtIndex.first), true);
     }
 
     public void loadLastConfiguration(){
@@ -465,8 +483,52 @@ public class TuringMachine {
         }
 
         builtIndex.first = builtIndex.second = builtPath.first.size() - 1;
-        this.loadConfiguration(builtPath.first.getLast(), true);
+        this.loadConfiguration(builtPath.first.get(builtIndex.first), true);
     }
+
+    public void buildManual(){
+        if(!isValid()) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Invalid machine. No initial and/or final state.");
+            return;
+        }
+
+        Subscriber.broadcast(SUBSCRIBER_MSG_COMPUTE_START, this);
+        for(Tape tape : tapes)
+            tape.reinit();
+
+        manualSetCurrentState(initialStates.iterator().next());
+    }
+
+    public void manualSetCurrentState(Integer state) {
+        this.setCurrentState(state, false);
+        Configuration configuration = this.saveConfiguration();
+        builtPath = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        builtPath.first.add(configuration);
+        builtIndex = new Pair<>(0, 0);
+    }
+
+    public void manualFireTransition(Transition transition){
+        if(!transition.getInput().equals(this.currentState)){
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot fire transition, invalid current state.");
+            return;
+        }
+        if(!transition.isCurrentlyValid()){
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot fire transition, symbols on tape do not match.");
+            return;
+        }
+
+        transition.fire(true);
+        setCurrentState(transition.getOutput(), true);
+
+        Configuration configuration = this.saveConfiguration();
+
+        builtPath.first.add(configuration);
+        builtPath.second.add(transition);
+        builtIndex.first++;
+        builtIndex.second++;
+
+    }
+
 
     public void clearBuild(){
         this.builtPath = null;
@@ -557,19 +619,6 @@ public class TuringMachine {
     public void execute(){
         this.build();
         while(this.tick()){}
-    }
-
-    public void buildManual(){
-        if(!isValid()) {
-            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Invalid machine. No initial and/or final state.");
-            return;
-        }
-    }
-
-    public void manualSetCurrentState(Integer state) {
-    }
-
-    public void manualFireTransition(Transition transition){
     }
 
     @Override

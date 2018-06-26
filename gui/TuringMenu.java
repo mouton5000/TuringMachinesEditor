@@ -7,6 +7,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * Created by dimitri.watel on 22/06/18.
@@ -22,13 +25,18 @@ class TuringMenu extends Group {
     private ManualIcon manualIcon;
 
     private StopIcon stopIcon;
+    private PreviousFrameIcon previousFrameIcon;
     private PlayIcon playIcon;
     private PauseIcon pauseIcon;
-    private OneFrameIcon oneFrameIcon;
+    private NextFrameIcon nextFrameIcon;
     private LastFrameIcon lastFrameIcon;
 
     private ParametersIcon parametersIcon;
     private BuildIcon buildIcon;
+
+    List<PlayerIcon> nonPlayerMenu;
+    List<PlayerIcon> playerMenu;
+    List<PlayerIcon> allMenu;
 
     TuringMenu(TuringMachineDrawer drawer){
         this.drawer = drawer;
@@ -48,27 +56,28 @@ class TuringMenu extends Group {
         manualIcon = new ManualIcon(this.drawer);
 
         stopIcon = new StopIcon(this.drawer);
+        previousFrameIcon = new PreviousFrameIcon(this.drawer);
         playIcon = new PlayIcon(this.drawer);
         pauseIcon = new PauseIcon(this.drawer);
-        oneFrameIcon = new OneFrameIcon(this.drawer);
+        nextFrameIcon = new NextFrameIcon(this.drawer);
         lastFrameIcon = new LastFrameIcon(this.drawer);
 
         parametersIcon = new ParametersIcon(this.drawer);
         buildIcon = new BuildIcon(this.drawer);
 
-        PlayerIcon[] nonPlayerMenu = {newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon};
-        PlayerIcon[] playerMenu = {stopIcon, playIcon, oneFrameIcon, lastFrameIcon};
-        PlayerIcon[] allMenu = {buildIcon};
+        nonPlayerMenu = Arrays.asList(newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, parametersIcon);
+        playerMenu = Arrays.asList(stopIcon, previousFrameIcon, playIcon, nextFrameIcon, lastFrameIcon);
+        allMenu = Arrays.asList(manualIcon, buildIcon);
 
-        int maxSize = Math.max(nonPlayerMenu.length, playerMenu.length) + allMenu.length;
-        for(int i = 0; i < nonPlayerMenu.length; i++)
-            nonPlayerMenu[i].setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 *
-                    (maxSize * 0.5 - allMenu.length - nonPlayerMenu.length + i));
-        for(int i = 0; i < playerMenu.length; i++)
-            playerMenu[i].setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 *
-                    (maxSize * 0.5 - allMenu.length - playerMenu.length + i));
-        for(int i = 0; i < allMenu.length; i++)
-            allMenu[i].setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 * (maxSize * 0.5 - allMenu.length + i));
+        int maxSize = Math.max(nonPlayerMenu.size(), playerMenu.size()) + allMenu.size();
+        for(int i = 0; i < nonPlayerMenu.size(); i++)
+            nonPlayerMenu.get(i).setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 *
+                    (maxSize * 0.5 - allMenu.size() - nonPlayerMenu.size() + i));
+        for(int i = 0; i < playerMenu.size(); i++)
+            playerMenu.get(i).setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 *
+                    (maxSize * 0.5 - allMenu.size() - playerMenu.size() + i));
+        for(int i = 0; i < allMenu.size(); i++)
+            allMenu.get(i).setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 * (maxSize * 0.5 - allMenu.size() + i));
 
         pauseIcon.setLayoutX(playIcon.getLayoutX());
 
@@ -80,9 +89,10 @@ class TuringMenu extends Group {
         parametersIcon.setSelected();
 
         stopIcon.setSelected();
+        previousFrameIcon.setUnselected();
         playIcon.setUnselected();
         pauseIcon.setUnselected();
-        oneFrameIcon.setUnselected();
+        nextFrameIcon.setUnselected();
         lastFrameIcon.setUnselected();
 
         buildIcon.setSelected();
@@ -93,7 +103,7 @@ class TuringMenu extends Group {
 
         this.getChildren().addAll(rectangle,
                 newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon,
-                stopIcon, playIcon, pauseIcon, oneFrameIcon, lastFrameIcon,
+                stopIcon, previousFrameIcon, playIcon, pauseIcon, nextFrameIcon, lastFrameIcon,
                 buildIcon);
 
 
@@ -103,20 +113,22 @@ class TuringMenu extends Group {
     void setPlay(){
         playIcon.setVisible(false);
         pauseIcon.setVisible(true);
+        previousFrameIcon.setUnselected();
         stopIcon.setUnselected();
         playIcon.setUnselected();
         pauseIcon.setSelected();
-        oneFrameIcon.setUnselected();
+        nextFrameIcon.setUnselected();
         lastFrameIcon.setUnselected();
     }
 
     void setPause(){
         playIcon.setVisible(true);
         pauseIcon.setVisible(false);
+        previousFrameIcon.setSelected();
         stopIcon.setSelected();
         playIcon.setSelected();
         pauseIcon.setUnselected();
-        oneFrameIcon.setSelected();
+        nextFrameIcon.setSelected();
         lastFrameIcon.setSelected();
     }
 
@@ -124,68 +136,74 @@ class TuringMenu extends Group {
         playIcon.setVisible(true);
         pauseIcon.setVisible(false);
         stopIcon.setUnselected();
+        previousFrameIcon.setUnselected();
         playIcon.setSelected();
         pauseIcon.setUnselected();
-        oneFrameIcon.setSelected();
+        nextFrameIcon.setSelected();
         lastFrameIcon.setSelected();
     }
 
     void setLastFrame() {
         playIcon.setVisible(true);
         pauseIcon.setVisible(false);
+        previousFrameIcon.setSelected();
         stopIcon.setSelected();
         playIcon.setUnselected();
         pauseIcon.setUnselected();
-        oneFrameIcon.setUnselected();
+        nextFrameIcon.setUnselected();
         lastFrameIcon.setUnselected();
     }
 
+    void setBuild(){
+        manualIcon.setUnselected();
+        showPlayer();
+    }
+
+    void setNotBuild(){
+        manualIcon.setSelected();
+        hidePlayer();
+    }
+
     void setManual() {
-        newFileIcon.setUnselected();
-        openFileIcon.setUnselected();
-        saveFileIcon.setUnselected();
-        saveAsFileIcon.setUnselected();
         buildIcon.setUnselected();
+        showPlayer();
     }
 
     void setNotManual() {
-        newFileIcon.setSelected();
-        openFileIcon.setSelected();
-        saveFileIcon.setSelected();
-        saveAsFileIcon.setSelected();
         buildIcon.setSelected();
+        hidePlayer();
     }
 
-    void showPlayer() {
+    private void showPlayer() {
 
         newFileIcon.setVisible(false);
         openFileIcon.setVisible(false);
         saveFileIcon.setVisible(false);
         saveAsFileIcon.setVisible(false);
-        manualIcon.setVisible(false);
         parametersIcon.setVisible(false);
 
         stopIcon.setVisible(true);
+        previousFrameIcon.setVisible(true);
         playIcon.setVisible(true);
         pauseIcon.setVisible(false);
-        oneFrameIcon.setVisible(true);
+        nextFrameIcon.setVisible(true);
         lastFrameIcon.setVisible(true);
         setFirstFrame();
     }
 
-    void hidePlayer(){
+    private void hidePlayer(){
 
         newFileIcon.setVisible(true);
         openFileIcon.setVisible(true);
         saveFileIcon.setVisible(true);
         saveAsFileIcon.setVisible(true);
-        manualIcon.setVisible(true);
         parametersIcon.setVisible(true);
 
         stopIcon.setVisible(false);
+        previousFrameIcon.setVisible(false);
         playIcon.setVisible(false);
         pauseIcon.setVisible(false);
-        oneFrameIcon.setVisible(false);
+        nextFrameIcon.setVisible(false);
         lastFrameIcon.setVisible(false);
     }
 }
@@ -409,8 +427,37 @@ class PauseIcon extends PlayerIcon{
     }
 }
 
-class OneFrameIcon extends PlayerIcon{
-    OneFrameIcon(TuringMachineDrawer drawer) {
+class PreviousFrameIcon extends PlayerIcon{
+    PreviousFrameIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
+        double height = Math.sqrt(3) * playEdgeLength / 2;
+
+        double rightX = height / 2;
+
+        Rectangle rectangle = new Rectangle(
+                rightX - height / 6, - playEdgeLength / 2,
+                height / 6, playEdgeLength);
+        rectangle.setArcHeight(3);
+        rectangle.setArcWidth(3);
+
+        Polygon triangle = new Polygon(
+                rightX - height / 3 , playEdgeLength / 2,
+                rightX - height * 4.0 / 3 , 0.0,
+                rightX - height / 3 , -playEdgeLength / 2
+        );
+
+        rectangle.setFill(Color.WHITE);
+        triangle.setFill(Color.WHITE);
+
+        this.getChildren().addAll(rectangle, triangle);
+    }
+}
+
+class NextFrameIcon extends PlayerIcon{
+    NextFrameIcon(TuringMachineDrawer drawer) {
         super(drawer);
 
 

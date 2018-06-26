@@ -516,7 +516,7 @@ class TapeBorderPane extends BorderPane {
                     String symbol = String.valueOf(c);
                     if((bottom == null || line >= bottom) && (top == null || line <= top)
                             && (left == null || column >= left) && (right == null || column <= right)
-                            && (symbol == null || drawer.machine.hasSymbol(symbol)))
+                            && (drawer.machine.hasSymbol(symbol)))
                         tape.writeInput(line, column, symbol);
                     column++;
                 }

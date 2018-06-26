@@ -541,15 +541,51 @@ public class TuringMachineDrawer extends Application {
     void setManual() {
         menu.setManual();
         manualMode = true;
+        this.playing = false;
+        closeAllOptionRectangle();
+        graphPaneMouseHandler.unselect();
+
+        this.machine.buildManual();
+        this.goToFirstConfiguration();
     }
 
     void setNotManual() {
         menu.setNotManual();
         manualMode = false;
+
+        this.playing = true;
+        this.directTimeline.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+
+        this.machine.loadFirstConfiguration();
+        this.machine.clearBuild();
+        Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
+        if(removeFirst != null)
+            toPlay.add(removeFirst);
+        this.flushDirect();
+
+    }
+
+    void manualSelectCurrentState(StateGroup stateGroup) {
+        machine.manualSetCurrentState(graphPane.getState(stateGroup));
+        this.goToFirstConfiguration();
+    }
+
+    void manualFireTransition(TransitionArrowGroup transitionArrowGroup) {
+        machine.manualFireTransition(graphPane.getTransition(transitionArrowGroup));
+
+        this.playing = true;
+        this.machineTimeLine.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+
+        this.menu.setPause();
+        flushTimeline();
     }
 
     void build() {
-        menu.showPlayer();
+        menu.setBuild();
         buildMode = true;
         this.playing = false;
         closeAllOptionRectangle();
@@ -559,19 +595,36 @@ public class TuringMachineDrawer extends Application {
         this.goToFirstConfiguration();
     }
 
-    void reinitMachine(){
-        menu.hidePlayer();
+    void unbuild(){
+        menu.setNotBuild();
+        buildMode = false;
+
+        this.playing = true;
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
-        buildMode = false;
-        this.playing = true;
+
         this.machine.loadFirstConfiguration();
         this.machine.clearBuild();
         Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
         if(removeFirst != null)
             toPlay.add(removeFirst);
         this.flushDirect();
+    }
+
+    void goToPreviousConfiguration(){
+        this.directTimeline.setOnFinished(actionEvent -> {
+            this.playing = false;
+        });
+        this.playing = true;
+        if(this.machine.loadPreviousConfiguration()) {
+            this.menu.setPause();
+            this.flushDirect();
+        }
+        else {
+            this.menu.setFirstFrame();
+            this.playing = false;
+        }
     }
 
     void goToFirstConfiguration() {
@@ -594,13 +647,16 @@ public class TuringMachineDrawer extends Application {
         this.menu.setLastFrame();
     }
 
+
     void tick(){
         this.playing = true;
         this.machineTimeLine.setOnFinished(actionEvent -> {
             this.playing = false;
         });
-        if(this.machine.tick())
+        if(this.machine.tick()) {
+            this.menu.setPause();
             flushTimeline();
+        }
         else {
             menu.setLastFrame();
             this.playing = false;
@@ -647,7 +703,7 @@ public class TuringMachineDrawer extends Application {
 
     private void clearMachine(){
         if(buildMode)
-            this.reinitMachine();
+            this.unbuild();
         this.machine.clear();
         this.graphPane.clear();
         this.tapesPane.clear();
@@ -694,7 +750,7 @@ public class TuringMachineDrawer extends Application {
 
     private void saveAsMachine(String filename){
         if(buildMode)
-            this.reinitMachine();
+            this.unbuild();
 
         lastSaveFilename = filename;
 
