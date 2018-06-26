@@ -828,12 +828,14 @@ public class TuringMachineDrawer extends Application {
     void openParameters() {
         Dialog<Settings> dialog = Settings.getDialog(
                 TuringMachineDrawer.ANIMATION_DURATION,
+                TuringMachine.MAXIMUM_NON_DETERMINISTIC_SEARCH,
                 tapesPane.getTapesString());
         Optional<Settings> result = dialog.showAndWait();
 
         if(result.isPresent()){
             Settings settings = result.get();
             ANIMATION_DURATION = settings.duration;
+            TuringMachine.MAXIMUM_NON_DETERMINISTIC_SEARCH = settings.nbIterations;
 
             if(settings.changeTapesCells)
                 tapesPane.eraseTapes(settings.tapesCellsDescription);
@@ -843,6 +845,7 @@ public class TuringMachineDrawer extends Application {
     private JSONObject getJSON(){
         JSONObject jsonOptions = new JSONObject();
         jsonOptions.put("animationDuration", ANIMATION_DURATION);
+        jsonOptions.put("maximumNonDeterministicSearch", TuringMachine.MAXIMUM_NON_DETERMINISTIC_SEARCH);
 
         JSONObject jsonGraph = graphPane.getJSON();
         JSONObject jsonTape = tapesPane.getJSON();
@@ -856,6 +859,7 @@ public class TuringMachineDrawer extends Application {
     private void loadJSON(JSONObject jsonObject){
         JSONObject jsonOptions = jsonObject.getJSONObject("options");
         ANIMATION_DURATION = jsonOptions.getLong("animationDuration");
+        TuringMachine.MAXIMUM_NON_DETERMINISTIC_SEARCH = jsonOptions.getInt("maximumNonDeterministicSearch");
 
         JSONObject jsonTapes = jsonObject.getJSONObject("tapes");
         tapesPane.loadJSON(jsonTapes);

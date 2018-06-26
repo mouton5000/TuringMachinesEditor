@@ -7,7 +7,7 @@ import java.util.*;
 
 public class TuringMachine {
 
-    private static final int MAXIMUM_NON_DETERMINISTIC_SEARCH = 10000;
+    public static int MAXIMUM_NON_DETERMINISTIC_SEARCH = 10000;
 
     public static final String SUBSCRIBER_MSG_FIRED_TRANSITION = "TMFireTransition";
     public static final String SUBSCRIBER_MSG_HEAD_WRITE = "TMHeadWrite";
