@@ -169,22 +169,27 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 this.drawer.removeTape(removeTapeIcon.tape);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect){
+        else if(source instanceof HeadMenuSelect){
 
             HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
 
-            if(headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized())
-                headMenuSelect.tapeHeadMenu.closeHeadOptionRectangle();
-            else {
-                boolean pressFinished = !headMenuSelect.animating;
-                headMenuSelect.stopTimeline();
-
-                if (!pressFinished)
-                    drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
-                else
-                    headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.getHead());
+            if(drawer.buildMode || drawer.manualMode){
+                drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
             }
-            mouseEvent.consume();
+            else {
+                if (headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized())
+                    headMenuSelect.tapeHeadMenu.closeHeadOptionRectangle();
+                else {
+                    boolean pressFinished = !headMenuSelect.animating;
+                    headMenuSelect.stopTimeline();
+
+                    if (!pressFinished)
+                        drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
+                    else
+                        headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.getHead());
+                }
+                mouseEvent.consume();
+            }
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveHeadIcon){
             RemoveHeadIcon removeHeadIcon = (RemoveHeadIcon) source;
