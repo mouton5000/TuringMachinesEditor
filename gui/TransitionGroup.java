@@ -10,10 +10,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.StrokeType;
+import javafx.scene.shape.*;
 import javafx.util.Duration;
 import org.json.JSONObject;
 import turingmachines.Tape;
@@ -60,10 +57,6 @@ public class TransitionGroup extends Group {
         this.centerY = new SimpleDoubleProperty();
 
         invisibleLine = new TransitionArrowInvisibleLine(this.drawer, this);
-        invisibleLine.setStrokeWidth(TuringMachineDrawer.TRANSITION_HITBOX_WIDTH);
-        invisibleLine.setStroke(Color.BLACK);
-        invisibleLine.setOpacity(0);
-        invisibleLine.setStrokeType(StrokeType.CENTERED);
 
         control1Key = new TransitionArrowControl1KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
         control2Key = new TransitionArrowControl2KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
@@ -517,16 +510,62 @@ public class TransitionGroup extends Group {
     }
 }
 
-class TransitionArrowInvisibleLine extends CubicCurve{
+class TransitionArrowInvisibleLine extends Path {
     TransitionGroup transitionGroup;
+
+    MoveTo moveTo;
+    CubicCurveTo cubicCurveTo1;
 
     TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionGroup transitionGroup) {
         super();
         this.transitionGroup = transitionGroup;
 
+        this.setFillRule(FillRule.EVEN_ODD);
+        this.setStrokeWidth(TuringMachineDrawer.TRANSITION_HITBOX_WIDTH);
+        this.setStroke(Color.BLACK);
+        this.setOpacity(0);
+
+        moveTo = new MoveTo();
+        cubicCurveTo1 = new CubicCurveTo();
+        this.getElements().addAll(moveTo, cubicCurveTo1);
+
+
         this.setOnMousePressed(drawer.graphPaneMouseHandler);
         this.setOnMouseDragged(drawer.graphPaneMouseHandler);
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+
+    }
+
+    void setStartX(double startX) {
+        moveTo.setX(startX);
+    }
+
+    void setStartY(double startY) {
+        moveTo.setY(startY);
+    }
+
+    void setEndX(double endX){
+        cubicCurveTo1.setX(endX);
+    }
+
+    void setEndY(double endY){
+        cubicCurveTo1.setY(endY);
+    }
+
+    void setControlX1(double controlX1){
+        cubicCurveTo1.setControlX1(controlX1);
+    }
+
+    void setControlY1(double controlY1){
+        cubicCurveTo1.setControlY1(controlY1);
+    }
+
+    void setControlX2(double controlX2){
+        cubicCurveTo1.setControlX2(controlX2);
+    }
+
+    void setControlY2(double controlY2){
+        cubicCurveTo1.setControlY2(controlY2);
     }
 }
 

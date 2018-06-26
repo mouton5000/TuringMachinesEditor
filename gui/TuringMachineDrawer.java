@@ -65,7 +65,7 @@ public class TuringMachineDrawer extends Application {
 
     static final double TRANSITION_ANGLE = Math.PI/6;
     static final double TRANSITION_SIZE = STATE_RADIUS;
-    static final double TRANSITION_HITBOX_WIDTH = STATE_RADIUS * 2.3;
+    static final double TRANSITION_HITBOX_WIDTH = STATE_RADIUS * 2;
     static final double TRANSITION_KEY_RADIUS = 8;
     static final Color TRANSITION_KEY_COLOR = Color.GREENYELLOW;
     static final Color TRANSITION_KEY_STROKE_COLOR = Color.BLACK;
