@@ -292,12 +292,15 @@ class TapeBorderPanesHBox extends HBox{
         closeAllOptionRectangle();
         for(TapeBorderPane tapeBorderPane : tapes.values())
             tapeBorderPane.clear();
+        tapes.clear();
     }
 
     void eraseTapes(String tapesCellsDescription) {
         String[] tapesCellsDescriptionAr = tapesCellsDescription.split(";");
+
         if(tapesCellsDescriptionAr.length != tapes.size())
             return;
+
 
         int i = 0;
         for(Node child: this.getChildren()) {
