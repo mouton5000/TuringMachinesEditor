@@ -40,7 +40,7 @@ class GraphPane extends Pane {
     private double graphOffsetY;
 
     private BidirMap<StateGroup, Integer> stateGroupToState;
-    private BidirMap<TransitionArrowGroup, Transition> arrowGroupToTransition;
+    private BidirMap<TransitionGroup, Transition> transitionGroupToTransition;
 
     private StringEnumerator stringEnumerator;
 
@@ -82,7 +82,7 @@ class GraphPane extends Pane {
         });
 
         stateGroupToState = new BidirMap<>();
-        arrowGroupToTransition = new BidirMap<>();
+        transitionGroupToTransition = new BidirMap<>();
 
         clear();
 
@@ -301,33 +301,33 @@ class GraphPane extends Pane {
         StateGroup start = stateGroupToState.getK(input);
         StateGroup end = stateGroupToState.getK(output);
 
-        TransitionArrowGroup transitionArrowGroup = new TransitionArrowGroup(this.drawer, start, end);
+        TransitionGroup transitionGroup = new TransitionGroup(this.drawer, start, end);
         if(nextControl1X != null)
-            transitionArrowGroup.setControl1(nextControl1X, nextControl1Y);
+            transitionGroup.setControl1(nextControl1X, nextControl1Y);
         if(nextControl2X != null)
-            transitionArrowGroup.setControl2(nextControl2X, nextControl2Y);
+            transitionGroup.setControl2(nextControl2X, nextControl2Y);
 
-        arrowGroupToTransition.put(transitionArrowGroup, transition);
-        this.getChildren().add(transitionArrowGroup);
-        transitionArrowGroup.toBack();
+        transitionGroupToTransition.put(transitionGroup, transition);
+        this.getChildren().add(transitionGroup);
+        transitionGroup.toBack();
 
         Iterator<Tape> it = drawer.machine.getTapes();
 
         while(it.hasNext()){
             Tape tape = it.next();
-            transitionArrowGroup.addTape(tape);
+            transitionGroup.addTape(tape);
 
             for(int head = 0; head < tape.getNbHeads(); head++)
-                transitionArrowGroup.addHead(tape, drawer.getColorOfHead(tape, head));
+                transitionGroup.addHead(tape, drawer.getColorOfHead(tape, head));
         }
     }
 
-    void removeTransition(TransitionArrowGroup transitionArrowGroup){
-        removeTransition(transitionArrowGroup, true);
+    void removeTransition(TransitionGroup transitionGroup){
+        removeTransition(transitionGroup, true);
     }
 
-    void removeTransition(TransitionArrowGroup transitionArrowGroup, boolean doConfirm){
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+    void removeTransition(TransitionGroup transitionGroup, boolean doConfirm){
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
 
         if(doConfirm){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -344,15 +344,15 @@ class GraphPane extends Pane {
     }
 
     void removeTransitionFromMachine(Transition transition){
-        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.removeV(transition);
+        TransitionGroup transitionGroup = transitionGroupToTransition.removeV(transition);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
-        this.getChildren().remove(transitionArrowGroup);
+        this.getChildren().remove(transitionGroup);
 
     }
 
-    Transition getTransition(TransitionArrowGroup transitionArrowGroup) {
-        return arrowGroupToTransition.getV(transitionArrowGroup);
+    Transition getTransition(TransitionGroup transitionGroup) {
+        return transitionGroupToTransition.getV(transitionGroup);
     }
 
     void toggleFinal(StateGroup stateGroup){
@@ -398,41 +398,41 @@ class GraphPane extends Pane {
         stateGroup.setInitial(isInitial);
     }
 
-    void addReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+    void addReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
         symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
                 null:symbol;
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
         transition.addReadSymbols(tape, head, symbol);
     }
 
-    void removeReadSymbol(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String symbol){
+    void removeReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
         symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
                 null:symbol;
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
         transition.removeReadSymbols(tape, head, symbol);
     }
 
     private void addReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
-        TransitionArrowGroup arrow = arrowGroupToTransition.getK(transition);
+        TransitionGroup arrow = transitionGroupToTransition.getK(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         arrow.addReadSymbol(tape, head, symbol);
 
-        if(transitionOptionRectangle.currentTransitionArrowGroup == arrow)
+        if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.addReadSymbol(tape, head, symbol);
     }
 
     private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
-        TransitionArrowGroup arrow = arrowGroupToTransition.getK(transition);
+        TransitionGroup arrow = transitionGroupToTransition.getK(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         arrow.removeReadSymbol(tape, head, symbol);
-        if(transitionOptionRectangle.currentTransitionArrowGroup == arrow)
+        if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.removeReadSymbol(tape, head, symbol);
     }
 
-    void addAction(TransitionArrowGroup transitionArrowGroup, Tape tape, int head, String actionSymbol) {
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+    void addAction(TransitionGroup transitionGroup, Tape tape, int head, String actionSymbol) {
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
 
         Action action;
         switch (actionSymbol){
@@ -458,13 +458,13 @@ class GraphPane extends Pane {
         transition.addAction(action);
     }
 
-    void removeAction(TransitionArrowGroup transitionArrowGroup){
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+    void removeAction(TransitionGroup transitionGroup){
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
         transition.removeAction(transition.getNbActions() - 1);
     }
 
     void addActionFromMachine(Transition transition, Tape tape, int head, ActionType type, Object value){
-        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
 
         String actionSymbol = null;
         switch (type){
@@ -495,17 +495,17 @@ class GraphPane extends Pane {
                 break;
         }
 
-        transitionArrowGroup.addAction(tape, head, actionSymbol);
+        transitionGroup.addAction(tape, head, actionSymbol);
 
-        if(transitionOptionRectangle.currentTransitionArrowGroup == transitionArrowGroup)
+        if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
             transitionOptionRectangle.addAction(tape, head, actionSymbol);
     }
 
     void removeActionFromMachine(Transition transition, int index){
-        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
-        transitionArrowGroup.removeAction(index);
+        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        transitionGroup.removeAction(index);
 
-        if(transitionOptionRectangle.currentTransitionArrowGroup == transitionArrowGroup)
+        if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
             transitionOptionRectangle.removeAction(index);
     }
 
@@ -514,49 +514,49 @@ class GraphPane extends Pane {
     }
 
     void editSymbol(int index, String previousSymbol, String symbol) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.editSymbol(previousSymbol, symbol);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.editSymbol(previousSymbol, symbol);
         this.transitionOptionRectangle.editSymbol(index, previousSymbol, symbol);
     }
 
     void removeSymbol(int index, String symbol) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.removeSymbol(symbol);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.removeSymbol(symbol);
         this.transitionOptionRectangle.removeSymbol(index, symbol);
     }
 
     void addTape(Tape tape) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.addTape(tape);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.addTape(tape);
         this.transitionOptionRectangle.addTape(tape);
     }
 
     void removeTape(Tape tape) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.removeTape(tape);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.removeTape(tape);
         this.transitionOptionRectangle.removeTape(tape);
     }
 
     void addHead(Tape tape, Color color) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.addHead(tape, color);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.addHead(tape, color);
         this.transitionOptionRectangle.addHead(tape, color);
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.editHeadColor(tape, head, color);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.editHeadColor(tape, head, color);
         this.transitionOptionRectangle.editHeadColor(tape, head, color);
     }
 
     void removeHead(Tape tape, int head) {
-        for(TransitionArrowGroup transitionArrowGroup : arrowGroupToTransition.keySet())
-            transitionArrowGroup.removeHead(tape, head);
+        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+            transitionGroup.removeHead(tape, head);
         this.transitionOptionRectangle.removeHead(tape, head);
     }
 
-    Set<String> getReadSymbols(TransitionArrowGroup transitionArrowGroup, Tape tape, int head) {
-        Transition transition = arrowGroupToTransition.getV(transitionArrowGroup);
+    Set<String> getReadSymbols(TransitionGroup transitionGroup, Tape tape, int head) {
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
 
         Iterator<String> it =  transition.getReadSymbols(tape, head);
         Set<String> set = new HashSet<>();
@@ -601,11 +601,11 @@ class GraphPane extends Pane {
         stateOptionRectangle.minimize(animate);
     }
 
-    void openTransitionOptionRectangle(TransitionArrowGroup transitionArrowGroup){
-        transitionOptionRectangle.setCurrentTransitionArrowGroup(null);
-        transitionOptionRectangle.setLayoutX(transitionArrowGroup.getCenterX());
-        transitionOptionRectangle.setLayoutY(transitionArrowGroup.getCenterY());
-        transitionOptionRectangle.setCurrentTransitionArrowGroup(transitionArrowGroup);
+    void openTransitionOptionRectangle(TransitionGroup transitionGroup){
+        transitionOptionRectangle.setCurrentTransitionGroup(null);
+        transitionOptionRectangle.setLayoutX(transitionGroup.getCenterX());
+        transitionOptionRectangle.setLayoutY(transitionGroup.getCenterY());
+        transitionOptionRectangle.setCurrentTransitionGroup(transitionGroup);
         transitionOptionRectangle.toFront();
         transitionOptionRectangle.setVisible(true);
         transitionOptionRectangle.maximize();
@@ -661,11 +661,11 @@ class GraphPane extends Pane {
     }
 
     Timeline getFiredTransitionTimeline(Transition transition) {
-        TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
 
         Timeline timeline = new Timeline();
 
-        KeyFrame keyFrame = transitionArrowGroup.getFiredKeyValue();
+        KeyFrame keyFrame = transitionGroup.getFiredKeyValue();
 
         timeline.setCycleCount(2);
         timeline.setAutoReverse(true);
@@ -680,7 +680,7 @@ class GraphPane extends Pane {
             jsonStates.put(stateGroupToState.getK(state).getJSON());
 
         JSONArray jsonTransition = new JSONArray();
-        for(Map.Entry<TransitionArrowGroup, Transition> entry: arrowGroupToTransition.entrySet())
+        for(Map.Entry<TransitionGroup, Transition> entry: transitionGroupToTransition.entrySet())
             jsonTransition.put(entry.getKey().getJSON());
 
         return new JSONObject().put("states", jsonStates).put("transitions", jsonTransition);
@@ -725,7 +725,7 @@ class GraphPane extends Pane {
             Transition transition = this.addTransition(inputStateGroup, outputStateGroup,
                     control1X, control1Y,
                     control2X, control2Y);
-            TransitionArrowGroup transitionArrowGroup = arrowGroupToTransition.getK(transition);
+            TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
 
             JSONObject jsonDisplay = jsonTransition.getJSONObject("display");
             JSONArray jsonReadSymbols = jsonDisplay.getJSONArray("readSymbols");
@@ -735,7 +735,7 @@ class GraphPane extends Pane {
                 for(int head = 0; head < jsonReadSymbolsOfTape.length(); head++){
                     JSONArray jsonReadSymbolsOfHead = jsonReadSymbolsOfTape.getJSONArray(head);
                     for(Object symbol : jsonReadSymbolsOfHead)
-                        this.addReadSymbol(transitionArrowGroup, tape, head, (String)symbol);
+                        this.addReadSymbol(transitionGroup, tape, head, (String)symbol);
                 }
             }
 
@@ -749,7 +749,7 @@ class GraphPane extends Pane {
                 Integer head = pair.second;
 
                 String actionSymbol = jsonAction.getString("actionSymbol");
-                this.addAction(transitionArrowGroup, tape, head, actionSymbol);
+                this.addAction(transitionGroup, tape, head, actionSymbol);
             }
 
         }

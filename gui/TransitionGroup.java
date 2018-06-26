@@ -22,7 +22,7 @@ import util.Vector;
 
 import java.util.List;
 
-public class TransitionArrowGroup extends Group {
+public class TransitionGroup extends Group {
     final TuringMachineDrawer drawer;
     private final StateGroup input;
     private final StateGroup output;
@@ -45,7 +45,7 @@ public class TransitionArrowGroup extends Group {
     boolean animating;
     private Timeline timeline;
 
-    TransitionArrowGroup(TuringMachineDrawer drawer, StateGroup input, StateGroup output) {
+    TransitionGroup(TuringMachineDrawer drawer, StateGroup input, StateGroup output) {
         this.drawer = drawer;
         this.input = input;
         this.output = output;
@@ -518,11 +518,11 @@ public class TransitionArrowGroup extends Group {
 }
 
 class TransitionArrowInvisibleLine extends CubicCurve{
-    TransitionArrowGroup transitionArrowGroup;
+    TransitionGroup transitionGroup;
 
-    TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionArrowGroup transitionArrowGroup) {
+    TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionGroup transitionGroup) {
         super();
-        this.transitionArrowGroup = transitionArrowGroup;
+        this.transitionGroup = transitionGroup;
 
         this.setOnMousePressed(drawer.graphPaneMouseHandler);
         this.setOnMouseDragged(drawer.graphPaneMouseHandler);
@@ -532,19 +532,19 @@ class TransitionArrowInvisibleLine extends CubicCurve{
 
 class TransitionArrowControl1KeyCircle extends Circle{
 
-    TransitionArrowGroup transitionArrowGroup;
+    TransitionGroup transitionGroup;
 
-    TransitionArrowControl1KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
+    TransitionArrowControl1KeyCircle(TransitionGroup transitionGroup, double v) {
         super(v);
-        this.transitionArrowGroup = transitionArrowGroup;
+        this.transitionGroup = transitionGroup;
     }
 }
 class TransitionArrowControl2KeyCircle extends Circle{
 
-    TransitionArrowGroup transitionArrowGroup;
+    TransitionGroup transitionGroup;
 
-    TransitionArrowControl2KeyCircle(TransitionArrowGroup transitionArrowGroup, double v) {
+    TransitionArrowControl2KeyCircle(TransitionGroup transitionGroup, double v) {
         super(v);
-        this.transitionArrowGroup = transitionArrowGroup;
+        this.transitionGroup = transitionGroup;
     }
 }

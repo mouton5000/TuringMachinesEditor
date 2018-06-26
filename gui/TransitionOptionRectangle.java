@@ -28,7 +28,7 @@ class TransitionOptionRectangle extends OptionRectangle {
     private final ActionDisplay actionsDisplay;
     private boolean readMenuSelected;
 
-    TransitionArrowGroup currentTransitionArrowGroup;
+    TransitionGroup currentTransitionGroup;
     GraphPane graphPane;
 
     private HeadOptionsGroup headOptionsGroup;
@@ -94,25 +94,25 @@ class TransitionOptionRectangle extends OptionRectangle {
         return TuringMachineDrawer.TRANSITION_OPTION_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
-    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+    void setCurrentTransitionGroup(TransitionGroup transitionGroup) {
 
-        if(this.currentTransitionArrowGroup != null){
+        if(this.currentTransitionGroup != null){
             this.layoutXProperty().unbind();
             this.layoutYProperty().unbind();
         }
 
-        this.currentTransitionArrowGroup = transitionArrowGroup;
+        this.currentTransitionGroup = transitionGroup;
 
-        if(transitionArrowGroup == null)
+        if(transitionGroup == null)
             return;
 
         chooseHead(currentTape, currentHead);
 
-        this.layoutXProperty().bind(transitionArrowGroup.centerXProperty());
-        this.layoutYProperty().bind(transitionArrowGroup.centerYProperty());
+        this.layoutXProperty().bind(transitionGroup.centerXProperty());
+        this.layoutYProperty().bind(transitionGroup.centerYProperty());
 
-        transitionOptionRectangleSymbolsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
-        actionsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
+        transitionOptionRectangleSymbolsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
+        actionsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
     }
 
     @Override
@@ -248,7 +248,7 @@ class TransitionOptionRectangle extends OptionRectangle {
     public void clear() {
         currentTape = null;
         currentHead = 0;
-        currentTransitionArrowGroup = null;
+        currentTransitionGroup = null;
     }
 }
 
@@ -542,9 +542,9 @@ class ReadSymbolMenu extends HBox{
 
         Set<String> selectedSymbols = new HashSet<>();
 
-        if(optionRectangle.currentTransitionArrowGroup != null) {
+        if(optionRectangle.currentTransitionGroup != null) {
             selectedSymbols = optionRectangle.drawer.graphPane.getReadSymbols(
-                    optionRectangle.currentTransitionArrowGroup, tape, head);
+                    optionRectangle.currentTransitionGroup, tape, head);
         }
 
         for(Node child : this.getChildren()){
@@ -665,8 +665,8 @@ class TransitionOptionRectangleSymbolsDisplay extends HBox {
     void addHead(Tape tape, Color color){
         TapeSymbolsDisplay transitionSymbolsLabels = tapes.get(tape);
         transitionSymbolsLabels.addHead(color);
-        if(optionRectangle.currentTransitionArrowGroup != null)
-            transitionSymbolsLabels.setCurrentTransitionArrowGroup(optionRectangle.currentTransitionArrowGroup);
+        if(optionRectangle.currentTransitionGroup != null)
+            transitionSymbolsLabels.setCurrentTransitionArrowGroup(optionRectangle.currentTransitionGroup);
     }
 
     void editHeadColor(Tape tape, int head, Color color){
@@ -679,9 +679,9 @@ class TransitionOptionRectangleSymbolsDisplay extends HBox {
         transitionSymbolsLabels.removeHead(head);
     }
 
-    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+    void setCurrentTransitionArrowGroup(TransitionGroup transitionGroup) {
         for(TapeSymbolsDisplay tapeSymbolsDisplay: tapes.values())
-            tapeSymbolsDisplay.setCurrentTransitionArrowGroup(transitionArrowGroup);
+            tapeSymbolsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
     }
 
     void translate(double dx){
@@ -723,11 +723,11 @@ class TapeSymbolsDisplay extends HBox {
         this.getChildren().remove(head);
     }
 
-    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+    void setCurrentTransitionArrowGroup(TransitionGroup transitionGroup) {
         int head = 0;
         for(Node child : this.getChildren()){
             HeadSymbolsLabelDisplay headSymbolsLabelDisplay = (HeadSymbolsLabelDisplay) child;
-            ObservableValue<String> property = transitionArrowGroup.getSymbolDisplayTextProperty(tape, head);
+            ObservableValue<String> property = transitionGroup.getSymbolDisplayTextProperty(tape, head);
             headSymbolsLabelDisplay.textProperty().bind(property);
             head++;
         }
@@ -944,9 +944,9 @@ class ActionDisplay extends HBox{
         this.getChildren().remove(index);
     }
 
-    void setCurrentTransitionArrowGroup(TransitionArrowGroup transitionArrowGroup) {
+    void setCurrentTransitionArrowGroup(TransitionGroup transitionGroup) {
         this.getChildren().clear();
-        for(Pair<String, Color> pair: transitionArrowGroup.getActionsDisplay()){
+        for(Pair<String, Color> pair: transitionGroup.getActionsDisplay()){
             this.addAction(pair.second, pair.first);
         }
     }

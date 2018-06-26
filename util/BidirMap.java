@@ -1,7 +1,5 @@
 package util;
 
-import gui.TransitionArrowGroup;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

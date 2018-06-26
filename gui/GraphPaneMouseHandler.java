@@ -66,10 +66,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 stateGroup.startTimeline();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowInvisibleLine){
-            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
-            if(!transitionArrowGroup.drawer.graphPane.stateOptionRectangle.isMaximized()
-                    && !transitionArrowGroup.drawer.graphPane.transitionOptionRectangle.isMaximized())
-                transitionArrowGroup.startTimeline();
+            TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
+            if(!transitionGroup.drawer.graphPane.stateOptionRectangle.isMaximized()
+                    && !transitionGroup.drawer.graphPane.transitionOptionRectangle.isMaximized())
+                transitionGroup.startTimeline();
         }
     }
 
@@ -172,21 +172,21 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && source instanceof TransitionArrowInvisibleLine){
-            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
+            TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
 
             if(drawer.manualMode){
-                drawer.manualFireTransition(transitionArrowGroup);
+                drawer.manualFireTransition(transitionGroup);
                 mouseEvent.consume();
             }
             else {
-                boolean pressFinished = !transitionArrowGroup.animating;
-                transitionArrowGroup.stopTimeline();
+                boolean pressFinished = !transitionGroup.animating;
+                transitionGroup.stopTimeline();
 
                 if (pressFinished) {
                     unselect();
-                    transitionArrowGroup.drawer.graphPane.openTransitionOptionRectangle(transitionArrowGroup);
+                    transitionGroup.drawer.graphPane.openTransitionOptionRectangle(transitionGroup);
                 } else
-                    select(transitionArrowGroup);
+                    select(transitionGroup);
 
                 mouseEvent.consume();
             }
@@ -201,7 +201,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveTransitionIcon){
-            drawer.graphPane.removeTransition(((RemoveTransitionIcon) source).optionRectangle.currentTransitionArrowGroup);
+            drawer.graphPane.removeTransition(((RemoveTransitionIcon) source).optionRectangle.currentTransitionGroup);
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionOptionRectangleChooseHead){
@@ -220,10 +220,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
             if(optionRectangle.currentTape != null) {
                 if(chooseSymbolOptionLabel.selected)
-                    drawer.graphPane.removeReadSymbol(optionRectangle.currentTransitionArrowGroup,
+                    drawer.graphPane.removeReadSymbol(optionRectangle.currentTransitionGroup,
                             optionRectangle.currentTape, optionRectangle.currentHead, symbol);
                 else
-                    drawer.graphPane.addReadSymbol(optionRectangle.currentTransitionArrowGroup,
+                    drawer.graphPane.addReadSymbol(optionRectangle.currentTransitionGroup,
                             optionRectangle.currentTape, optionRectangle.currentHead, symbol);
             }
 
@@ -236,7 +236,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             String actionSymbol = chooseActionOptionLabel.getText();
 
             if(optionRectangle.currentTape != null) {
-                drawer.graphPane.addAction(optionRectangle.currentTransitionArrowGroup,
+                drawer.graphPane.addAction(optionRectangle.currentTransitionGroup,
                         optionRectangle.currentTape, optionRectangle.currentHead, actionSymbol);
             }
             mouseEvent.consume();
@@ -246,7 +246,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             TransitionOptionRectangle optionRectangle = removeActionIcon.optionRectangle;
 
             if(optionRectangle.currentTape != null)
-                drawer.graphPane.removeAction(optionRectangle.currentTransitionArrowGroup);
+                drawer.graphPane.removeAction(optionRectangle.currentTransitionGroup);
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof OptionRectangle)
@@ -276,17 +276,17 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowControl1KeyCircle){
-            if(!(selected instanceof TransitionArrowGroup))
+            if(!(selected instanceof TransitionGroup))
                 return;
-            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl1KeyCircle) source).transitionArrowGroup;
-            transitionArrowGroup.setControl1(x, y);
+            TransitionGroup transitionGroup = ((TransitionArrowControl1KeyCircle) source).transitionGroup;
+            transitionGroup.setControl1(x, y);
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowControl2KeyCircle){
-            if(!(selected instanceof TransitionArrowGroup))
+            if(!(selected instanceof TransitionGroup))
                 return;
-            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowControl2KeyCircle) source).transitionArrowGroup;
-            transitionArrowGroup.setControl2(x, y);
+            TransitionGroup transitionGroup = ((TransitionArrowControl2KeyCircle) source).transitionGroup;
+            transitionGroup.setControl2(x, y);
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateGroup) {
@@ -297,9 +297,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && source instanceof TransitionArrowInvisibleLine) {
-            TransitionArrowGroup transitionArrowGroup = ((TransitionArrowInvisibleLine) source).transitionArrowGroup;
-            transitionArrowGroup.stopTimeline();
-            select(transitionArrowGroup);
+            TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
+            transitionGroup.stopTimeline();
+            select(transitionGroup);
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateOptionRectangle)
             mouseEvent.consume();
@@ -361,8 +361,8 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         unselect();
         selected = node;
 
-        if(node instanceof TransitionArrowGroup)
-            ((TransitionArrowGroup) node).setSelected(true);
+        if(node instanceof TransitionGroup)
+            ((TransitionGroup) node).setSelected(true);
         else if(node instanceof StateGroup)
             ((StateGroup) node).setSelected();
     }
@@ -371,9 +371,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         if(selected == null)
             return;
 
-        if(selected instanceof TransitionArrowGroup) {
-            TransitionArrowGroup transitionArrowGroup = (TransitionArrowGroup) selected;
-            transitionArrowGroup.setSelected(false);
+        if(selected instanceof TransitionGroup) {
+            TransitionGroup transitionGroup = (TransitionGroup) selected;
+            transitionGroup.setSelected(false);
             selected = null;
         }
         else if(selected instanceof StateGroup){

@@ -580,12 +580,16 @@ public class TuringMachineDrawer extends Application {
     }
 
     void manualSelectCurrentState(StateGroup stateGroup) {
+        if(this.playing)
+            return;
         machine.manualSetCurrentState(graphPane.getState(stateGroup));
         this.goToFirstConfiguration();
     }
 
-    void manualFireTransition(TransitionArrowGroup transitionArrowGroup) {
-        machine.manualFireTransition(graphPane.getTransition(transitionArrowGroup));
+    void manualFireTransition(TransitionGroup transitionGroup) {
+        if(this.playing)
+            return;
+        machine.manualFireTransition(graphPane.getTransition(transitionGroup));
 
         this.playing = true;
         this.machineTimeLine.setOnFinished(actionEvent -> {
@@ -608,6 +612,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void unbuild(){
+        if(this.playing)
+            return;
         menu.setNotBuild();
         buildMode = false;
 
@@ -625,6 +631,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void goToPreviousConfiguration(){
+        if(this.playing)
+            return;
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
@@ -640,6 +648,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void goToFirstConfiguration() {
+        if(this.playing)
+            return;
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
@@ -650,6 +660,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void goToLastConfiguration() {
+        if(this.playing)
+            return;
         this.directTimeline.setOnFinished(actionEvent -> {
             this.playing = false;
         });
@@ -661,6 +673,8 @@ public class TuringMachineDrawer extends Application {
 
 
     void tick(){
+        if(this.playing)
+            return;
         this.playing = true;
         this.machineTimeLine.setOnFinished(actionEvent -> {
             this.playing = false;
@@ -693,6 +707,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     void pause(){
+        if(!this.playing)
+            return;
         this.menu.setPause();
         this.playing = false;
     }
