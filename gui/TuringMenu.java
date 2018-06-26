@@ -113,8 +113,6 @@ class TuringMenu extends Group {
 
 
     void setPlay(){
-        playIcon.setVisible(false);
-        pauseIcon.setVisible(true);
         previousFrameIcon.setUnselected();
         stopIcon.setUnselected();
         playIcon.setUnselected();
@@ -124,8 +122,6 @@ class TuringMenu extends Group {
     }
 
     void setPause(){
-        playIcon.setVisible(true);
-        pauseIcon.setVisible(false);
         previousFrameIcon.setSelected();
         stopIcon.setSelected();
         playIcon.setSelected();
@@ -135,8 +131,6 @@ class TuringMenu extends Group {
     }
 
     void setFirstFrame() {
-        playIcon.setVisible(true);
-        pauseIcon.setVisible(false);
         stopIcon.setUnselected();
         previousFrameIcon.setUnselected();
         playIcon.setSelected();
@@ -146,8 +140,6 @@ class TuringMenu extends Group {
     }
 
     void setLastFrame() {
-        playIcon.setVisible(true);
-        pauseIcon.setVisible(false);
         previousFrameIcon.setSelected();
         stopIcon.setSelected();
         playIcon.setUnselected();
