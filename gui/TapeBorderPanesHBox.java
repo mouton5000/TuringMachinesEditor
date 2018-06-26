@@ -440,11 +440,9 @@ class TapeBorderPane extends BorderPane {
     }
 
     void centerOn(int head){
-        int line = tapePane.lineOf(head);
-        int column = tapePane.columnOf(head);
 
-        double x = getXOf(column);
-        double y = getYOf(line);
+        double x = tapePane.currentHeadX(head);
+        double y = tapePane.currentHeadY(head);
 
         translate(-x + offsetX, -y + offsetY);
     }
@@ -1111,6 +1109,14 @@ class TapePane extends Pane {
                 Interpolator.EASE_BOTH);
 
         return new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), kX, kY);
+    }
+
+    double currentHeadX(int head){
+        return heads.get(head).getLayoutX();
+    }
+
+    double currentHeadY(int head){
+        return heads.get(head).getLayoutY();
     }
 
     Timeline getWriteSymbolTimeline(Integer line, Integer column, String symbol) {
