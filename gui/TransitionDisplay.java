@@ -313,8 +313,8 @@ class TransitionDisplaySymbolsByHeadLabel extends Label {
     }
 
     void editSymbol(String previousSymbol, String symbol){
-        if(symbols.remove(symbol))
-            symbols.add(previousSymbol);
+        if(symbols.remove(previousSymbol))
+            symbols.add(symbol);
         reinitText();
     }
 

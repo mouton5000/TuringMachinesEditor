@@ -280,6 +280,8 @@ public class TuringMachineDrawer extends Application {
                         Integer line = (Integer) parameters[2];
                         Integer column = (Integer) parameters[3];
                         String symbol = (String) parameters[4];
+                        if(symbol == null)
+                            symbol = "";
                         Timeline timeline = tapesPane.getWriteSymbolTimeline(tape, line, column, symbol);
                         if(timeline != null)
                             toPlay.add(timeline);

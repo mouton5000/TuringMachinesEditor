@@ -1114,7 +1114,7 @@ class TapePane extends Pane {
         Map<Integer, Label> h = cellLabels.computeIfAbsent(line, k -> new HashMap<>());
         Label cellLabel = h.get(column);
         if(cellLabel == null){
-            cellLabel = new Label("");
+            cellLabel = new Label(null);
             cellLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                     TuringMachineDrawer.TAPE_CELL_SYMBOL_FONT_SIZE));
 
@@ -1167,11 +1167,17 @@ class TapePane extends Pane {
                 if(entry2.getValue().getText() == null)
                     continue;
                 int column = entry2.getKey();
+                String symbol = entry2.getValue().getText();
+                if(symbol != null && symbol.equals(""))
+                    symbol = null;
+
+                if(symbol == null)
+                    continue;
 
                 jsonCells.put(new JSONObject()
                 .put("line", line)
                 .put("column", column)
-                .put("symbol", entry2.getValue().getText())
+                .put("symbol", symbol)
                 );
             }
         }

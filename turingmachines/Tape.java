@@ -372,10 +372,11 @@ public class Tape{
 
         for(Map.Entry<Integer, Map<Integer, String>> entry: configuration.cells.entrySet()) {
             cells.put(entry.getKey(), new HashMap<>(entry.getValue()));
-            for (Map.Entry<Integer, String> entry2 : entry.getValue().entrySet()) {
-                Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN, this.machine, this,
-                        entry2.getKey(), entry.getKey(), entry2.getValue());
-            }
+            if(log)
+                for (Map.Entry<Integer, String> entry2 : entry.getValue().entrySet()) {
+                    Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN, this.machine, this,
+                            entry2.getKey(), entry.getKey(), entry2.getValue());
+                }
         }
 
     }
@@ -391,7 +392,7 @@ public class Tape{
         Integer minLine = Integer.MAX_VALUE;
         Integer maxLine = Integer.MIN_VALUE;
 
-        for(Integer column : cells.keySet()){
+        for(Integer column: cells.keySet()){
             minColumn = Math.min(minColumn, column);
             maxColumn = Math.max(maxColumn, column);
             for(Integer line : cells.get(column).keySet()){
@@ -449,4 +450,70 @@ class TapeConfiguration {
         this.headsColumn = headsColumn;
         this.headsLine = headsLine;
     }
+
+    public String toString() {
+        int nbHeads = headsColumn.size();
+
+        if(cells.isEmpty() && nbHeads == 0)
+            return "--";
+
+        StringBuilder s = new StringBuilder();
+
+        Integer minColumn = Integer.MAX_VALUE;
+        Integer maxColumn = Integer.MIN_VALUE;
+        Integer minLine = Integer.MAX_VALUE;
+        Integer maxLine = Integer.MIN_VALUE;
+
+        for(Integer column : cells.keySet()){
+            minColumn = Math.min(minColumn, column);
+            maxColumn = Math.max(maxColumn, column);
+            for(Integer line : cells.get(column).keySet()){
+                minLine = Math.min(minLine, line);
+                maxLine = Math.max(maxLine, line);
+            }
+        }
+
+        for(int i = 0; i < nbHeads; i++){
+            Integer column = headsColumn.get(i);
+            Integer line = headsLine.get(i);
+            minColumn = Math.min(minColumn, column);
+            maxColumn = Math.max(maxColumn, column);
+            minLine = Math.min(minLine, line);
+            maxLine = Math.max(maxLine, line);
+        }
+
+        int headDigits = (int)Math.log10(nbHeads) + 1;
+        String headFormat = "H%"+headDigits+"d";
+
+        for(int line = maxLine; line >= minLine; line--){
+            for(int column = minColumn; column <= maxColumn; column++){
+                boolean head = false;
+                for(int i = 0; i < nbHeads; i++){
+                    if(column == headsColumn.get(i) && line == headsLine.get(i)) {
+                        s.append(String.format(headFormat, i));
+                        head = true;
+                        break;
+                    }
+                }
+                if(!head)
+                    for(int i = 0; i < headDigits + 1; i++)
+                        s.append(" ");
+
+                String symbol;
+                try {
+                    symbol = this.cells.get(column).get(line);
+                }
+                catch (NullPointerException e){
+                    symbol = null;
+                }
+                s.append(" ");
+                s.append((symbol == null?"":symbol));
+                s.append(" | ");
+            }
+            s.append("\n");
+        }
+
+        return s.toString();
+    }
+
 }

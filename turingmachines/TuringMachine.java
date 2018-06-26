@@ -1,5 +1,6 @@
 package turingmachines;
 
+import sun.security.krb5.Config;
 import util.Pair;
 import util.Subscriber;
 
@@ -362,6 +363,7 @@ public class TuringMachine {
         while(!toExplore.isEmpty() && iteration < MAXIMUM_NON_DETERMINISTIC_SEARCH){
             iteration++;
             configuration = toExplore.pollFirst();
+            System.out.println(configuration);
 
             if(this.isAcceptingConfiguration(configuration)) {
                 accepting = true;
@@ -381,6 +383,8 @@ public class TuringMachine {
             arcFathers.putAll(children);
 
         }
+
+        System.out.println(iteration+" "+MAXIMUM_NON_DETERMINISTIC_SEARCH);
 
         if(!accepting) {
             if (firstFinalConfiguration == null)
@@ -448,6 +452,7 @@ public class TuringMachine {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
             return;
         }
+
         this.loadConfiguration(builtPath.first.first, true);
         while(builtPath.second.hasPrevious())
             builtPath.second.previous();
@@ -785,6 +790,17 @@ class Configuration {
         this.tapeConfigurations = tapeConfigurations;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(state);
+        sb.append("\n");
+        for(Tape tape : tapeConfigurations.keySet()){
+            sb.append(tapeConfigurations.get(tape));
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }
 
 
