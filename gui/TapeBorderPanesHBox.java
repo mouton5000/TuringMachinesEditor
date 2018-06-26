@@ -495,7 +495,7 @@ class TapeBorderPane extends BorderPane {
             String[] tapeCellsDescriptionAr = tapeCellsDescription.split("\n");
 
             String[] lineColumn = tapeCellsDescriptionAr[0].trim().split(" ");
-            int line = Integer.valueOf(lineColumn[0]);
+            int line = Integer.valueOf(lineColumn[0]) + tapeCellsDescriptionAr.length - 2;
             int firstColumn = Integer.valueOf(lineColumn[1]);
 
             tapePane.clear();
@@ -516,7 +516,7 @@ class TapeBorderPane extends BorderPane {
                         tape.writeInput(line, column, symbol);
                     column++;
                 }
-                line++;
+                line--;
             }
         }
         catch (Exception e){
@@ -1226,7 +1226,7 @@ class TapePane extends Pane {
         sb.append(minColumn);
         sb.append('\n');
 
-        for(int line = minLine; line <= maxLine; line++){
+        for(int line = maxLine; line >= minLine; line--){
             Map<Integer, Label> v1 = cellLabels.get(line);
             for(int column = minColumn; column <= maxColumn; column++){
                 if(v1 == null) {
