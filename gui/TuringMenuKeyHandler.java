@@ -17,7 +17,12 @@ public class TuringMenuKeyHandler implements EventHandler<KeyEvent> {
     public void handle(KeyEvent keyEvent) {
         if(drawer.animating)
             return;
-
+        if(drawer.buildMode)
+            return;
+        if(drawer.manualMode)
+            return;
+        if(drawer.playing)
+            return;
         if(!keyEvent.isControlDown())
             return;
 

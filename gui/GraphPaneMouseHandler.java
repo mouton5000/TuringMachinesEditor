@@ -112,27 +112,31 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         }
         else if(!drawer.buildMode && source instanceof StateGroup){
 
-            StateGroup circle = ((StateGroup) source);
+            StateGroup stateGroup = ((StateGroup) source);
 
-            boolean pressFinished = !circle.animating;
-            circle.stopTimeline();
-
-            if(pressFinished){
-                unselect();
-                circle.drawer.graphPane.openStateOptionRectangle(circle);
+            if(drawer.manualMode){
+                drawer.graphPane.manualSelectCurrentState(stateGroup);
+                mouseEvent.consume();
             }
-            else{
-                if(selected == null)
-                    select(circle);
-                else if(selected instanceof StateGroup){
-                    drawer.graphPane.addTransition((StateGroup) selected, circle);
+            else {
+                boolean pressFinished = !stateGroup.animating;
+                stateGroup.stopTimeline();
+
+                if (pressFinished) {
                     unselect();
+                    stateGroup.drawer.graphPane.openStateOptionRectangle(stateGroup);
+                } else {
+                    if (selected == null)
+                        select(stateGroup);
+                    else if (selected instanceof StateGroup) {
+                        drawer.graphPane.addTransition((StateGroup) selected, stateGroup);
+                        unselect();
+                    } else
+                        unselect();
                 }
-                else
-                    unselect();
-            }
 
-            mouseEvent.consume();
+                mouseEvent.consume();
+            }
 
         }
         else if(!drawer.buildMode && source instanceof FinalStateOption){

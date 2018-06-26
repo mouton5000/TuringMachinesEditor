@@ -564,6 +564,14 @@ class GraphPane extends Pane {
         return set;
     }
 
+    void manualSelectCurrentState(StateGroup stateGroup) {
+        drawer.machine.manualSetCurrentState(stateGroupToState.getV(stateGroup));
+    }
+
+    void manualFireTransition(TransitionArrowGroup transitionArrowGroup) {
+        drawer.machine.manualFireTransition(arrowGroupToTransition.getV(transitionArrowGroup));
+    }
+
     void translate(double dx, double dy) {
         for(Node child : getChildren()) {
             if(child instanceof StateGroup) {

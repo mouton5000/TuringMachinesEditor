@@ -73,7 +73,8 @@ public class TuringMachine {
     // Alphabet
     private List<String> symbols;
 
-    private Pair<Pair<Configuration, Configuration>, ListIterator<Transition>> builtPath;
+    private Pair<LinkedList<Configuration>, LinkedList<Transition>> builtPath;
+    private Pair<Integer, Integer> builtIndex;
 
 
     public TuringMachine(){
@@ -347,7 +348,7 @@ public class TuringMachine {
         return children;
     }
 
-    private Pair<Pair<Configuration, Configuration>, ListIterator<Transition>> exploreNonDeterministic(
+    private Pair<LinkedList<Configuration>, LinkedList<Transition>> exploreNonDeterministic(
             Set<Configuration> initialConfigurations){
         LinkedList<Configuration> toExplore = new LinkedList<>();
         Map<Configuration, Configuration> fathers = new HashMap<>();
@@ -363,7 +364,6 @@ public class TuringMachine {
         while(!toExplore.isEmpty() && iteration < MAXIMUM_NON_DETERMINISTIC_SEARCH){
             iteration++;
             configuration = toExplore.pollFirst();
-            System.out.println(configuration);
 
             if(this.isAcceptingConfiguration(configuration)) {
                 accepting = true;
@@ -384,22 +384,22 @@ public class TuringMachine {
 
         }
 
-        System.out.println(iteration+" "+MAXIMUM_NON_DETERMINISTIC_SEARCH);
-
         if(!accepting) {
             if (firstFinalConfiguration == null)
                 return null;
             else
                 configuration = firstFinalConfiguration;
         }
-        Configuration lastConfiguration = configuration;
 
-        LinkedList<Transition> toReturn = new LinkedList<>();
+        LinkedList<Configuration> toReturnC = new LinkedList<>();
+        LinkedList<Transition> toReturnT = new LinkedList<>();
         while(!initialConfigurations.contains(configuration)){
-            toReturn.addFirst(arcFathers.get(configuration));
+            toReturnC.addFirst(configuration);
+            toReturnT.addFirst(arcFathers.get(configuration));
             configuration = fathers.get(configuration);
         }
-        return new Pair<>(new Pair<>(configuration, lastConfiguration), toReturn.listIterator(0));
+        toReturnC.addFirst(configuration);
+        return new Pair<>(toReturnC, toReturnT);
 
     }
 
@@ -436,9 +436,9 @@ public class TuringMachine {
             return false;
         }
 
-        Iterator<Transition> it = builtPath.second;
-        if(it.hasNext()){
-            Transition transition = it.next();
+        if(builtIndex.second < builtPath.second.size()){
+            Transition transition = builtPath.second.get(builtIndex.second.get());
+            builtPath.first.next();
             transition.fire(true);
             setCurrentState(transition.getOutput(), true);
             return true;
@@ -453,9 +453,9 @@ public class TuringMachine {
             return;
         }
 
-        this.loadConfiguration(builtPath.first.first, true);
-        while(builtPath.second.hasPrevious())
-            builtPath.second.previous();
+        builtIndex.first = 0;
+        builtIndex.second = 0;
+        this.loadConfiguration(builtPath.first.getFirst(), true);
     }
 
     public void loadLastConfiguration(){
@@ -463,13 +463,14 @@ public class TuringMachine {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation not built. Cannot execute.");
             return;
         }
-        this.loadConfiguration(builtPath.first.second, true);
-        while(builtPath.second.hasNext())
-            builtPath.second.next();
+
+        builtIndex.first = builtIndex.second = builtPath.first.size() - 1;
+        this.loadConfiguration(builtPath.first.getLast(), true);
     }
 
     public void clearBuild(){
         this.builtPath = null;
+        this.builtIndex = null;
     }
 
     private boolean isDeterministic(int state){
@@ -556,6 +557,19 @@ public class TuringMachine {
     public void execute(){
         this.build();
         while(this.tick()){}
+    }
+
+    public void buildManual(){
+        if(!isValid()) {
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Invalid machine. No initial and/or final state.");
+            return;
+        }
+    }
+
+    public void manualSetCurrentState(Integer state) {
+    }
+
+    public void manualFireTransition(Transition transition){
     }
 
     @Override
@@ -779,6 +793,7 @@ public class TuringMachine {
     public static void main(String[] args){
         testNonDeterministic();
     }
+
 }
 
 class Configuration {

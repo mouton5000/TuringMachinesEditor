@@ -23,13 +23,13 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
         Object source = mouseEvent.getSource();
 
-        if(!drawer.playing && source instanceof BuildIcon){
+        if(!drawer.playing && !drawer.manualMode && source instanceof BuildIcon){
             if(drawer.buildMode)
                 drawer.reinitMachine();
             else
                 drawer.build();
         }
-        else if(!drawer.playing && source instanceof ParametersIcon){
+        else if(!drawer.playing && !drawer.manualMode && source instanceof ParametersIcon){
             drawer.openParameters();
         }
         else if(!drawer.playing && source instanceof StopIcon){
@@ -49,17 +49,23 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
         else if(!drawer.playing && source instanceof LastFrameIcon){
             drawer.goToLastConfiguration();
         }
-        else if(!drawer.playing && source instanceof NewFileIcon){
+        else if(!drawer.playing && !drawer.manualMode && source instanceof NewFileIcon){
             drawer.newMachine();
         }
-        else if(!drawer.playing && source instanceof SaveFileIcon){
+        else if(!drawer.playing && !drawer.manualMode && source instanceof SaveFileIcon){
             drawer.saveMachine();
         }
-        else if(!drawer.playing && source instanceof SaveAsFileIcon){
+        else if(!drawer.playing && !drawer.manualMode && source instanceof SaveAsFileIcon){
             drawer.saveAsMachine();
         }
-        else if(!drawer.playing && source instanceof OpenFileIcon){
+        else if(!drawer.playing && !drawer.manualMode && source instanceof OpenFileIcon){
             drawer.loadMachine();
+        }
+        else if(!drawer.playing && source instanceof ManualIcon){
+            if(drawer.manualMode)
+                drawer.setNotManual();
+            else
+                drawer.setManual();
         }
 
 

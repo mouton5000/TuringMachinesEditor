@@ -152,6 +152,7 @@ public class TuringMachineDrawer extends Application {
     static final Color MENU_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
 
     boolean animating;
+    boolean manualMode;
     boolean buildMode;
     boolean playing;
 
@@ -188,6 +189,7 @@ public class TuringMachineDrawer extends Application {
 
         this.stage = stage;
         this.animating = false;
+        this.manualMode = false;
         this.buildMode = false;
         this.playing = false;
 
@@ -534,6 +536,16 @@ public class TuringMachineDrawer extends Application {
 
     void notifyMsg(String msg){
         notification.notifyMsg(msg);
+    }
+
+    void setManual() {
+        menu.setManual();
+        manualMode = true;
+    }
+
+    void setNotManual() {
+        menu.setNotManual();
+        manualMode = false;
     }
 
     void build() {
