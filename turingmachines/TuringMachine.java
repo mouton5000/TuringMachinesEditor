@@ -74,6 +74,7 @@ public class TuringMachine {
 
     private Pair<List<Configuration>, List<Transition>> builtPath;
     private Pair<Integer, Integer> builtIndex;
+    private Configuration manualInitialConfiguration;
 
 
     public TuringMachine(){
@@ -486,6 +487,11 @@ public class TuringMachine {
         this.loadConfiguration(builtPath.first.get(builtIndex.first), true);
     }
 
+    public void clearBuild(){
+        this.builtPath = null;
+        this.builtIndex = null;
+    }
+
     public void buildManual(){
         if(!isValid()) {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Invalid machine. No initial and/or final state.");
@@ -497,6 +503,7 @@ public class TuringMachine {
             tape.reinit();
 
         manualSetCurrentState(initialStates.iterator().next());
+        manualInitialConfiguration = builtPath.first.get(0);
     }
 
     public void manualSetCurrentState(Integer state) {
@@ -529,10 +536,11 @@ public class TuringMachine {
 
     }
 
-
-    public void clearBuild(){
+    public void clearManual(){
+        this.loadConfiguration(manualInitialConfiguration, true);
         this.builtPath = null;
         this.builtIndex = null;
+        this.manualInitialConfiguration = null;
     }
 
     private boolean isDeterministic(int state){

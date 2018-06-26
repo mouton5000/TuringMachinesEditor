@@ -558,8 +558,7 @@ public class TuringMachineDrawer extends Application {
             this.playing = false;
         });
 
-        this.machine.loadFirstConfiguration();
-        this.machine.clearBuild();
+        this.machine.clearManual();
         Timeline removeFirst = graphPane.getRemoveCurrentStateTimeline();
         if(removeFirst != null)
             toPlay.add(removeFirst);
