@@ -1230,7 +1230,7 @@ class TapePane extends Pane {
                     continue;
                 }
                 Label label = v1.get(column);
-                if(label == null)
+                if(label == null || label.getText() == null)
                     sb.append(' ');
                 else
                     sb.append(label.getText());
