@@ -209,11 +209,15 @@ class GraphPane extends Pane {
     }
 
     int addState(double x, double y){
+        if(!drawer.editGraphMode)
+            return -1;
         String name = stringEnumerator.next();
         return this.addState(x, y, name);
     }
 
     int addState(double x, double y, String name){
+        if(!drawer.editGraphMode)
+            return -1;
         nextX = x;
         nextY = y;
         return drawer.machine.addState(name);
@@ -234,6 +238,8 @@ class GraphPane extends Pane {
     }
 
     void removeState(StateGroup stateGroup, boolean doConfirm){
+        if(!drawer.editGraphMode)
+            return;
         Integer state = stateGroupToState.getV(stateGroup);
 
         if(doConfirm){
@@ -275,6 +281,8 @@ class GraphPane extends Pane {
     }
 
     Transition addTransition(StateGroup start, StateGroup end){
+        if(!drawer.editGraphMode)
+            return null;
         return addTransition(start, end, null, null, null, null);
     }
 
@@ -283,6 +291,8 @@ class GraphPane extends Pane {
                              Double control1X, Double control1Y,
                              Double control2X, Double control2Y
     ){
+        if(!drawer.editGraphMode)
+            return null;
         Integer input = stateGroupToState.getV(start);
         Integer output = stateGroupToState.getV(end);
 
@@ -327,6 +337,9 @@ class GraphPane extends Pane {
     }
 
     void removeTransition(TransitionGroup transitionGroup, boolean doConfirm){
+        if(!drawer.editGraphMode)
+            return;
+
         Transition transition = transitionGroupToTransition.getV(transitionGroup);
 
         if(doConfirm){

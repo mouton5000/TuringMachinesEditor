@@ -64,7 +64,7 @@ class Notification extends Group {
 
     void notifyMsg(String msg){
         if(animating)
-            return;
+            this.timeline.stop();
         label.setText(msg);
         this.setOpacity(1);
 

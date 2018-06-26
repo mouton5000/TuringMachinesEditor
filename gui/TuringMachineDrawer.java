@@ -152,6 +152,7 @@ public class TuringMachineDrawer extends Application {
     static final Color MENU_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
 
     boolean animating;
+    boolean editGraphMode;
     boolean manualMode;
     boolean buildMode;
     boolean playing;
@@ -189,6 +190,7 @@ public class TuringMachineDrawer extends Application {
 
         this.stage = stage;
         this.animating = false;
+        this.editGraphMode = false;
         this.manualMode = false;
         this.buildMode = false;
         this.playing = false;
@@ -375,7 +377,7 @@ public class TuringMachineDrawer extends Application {
         tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
 
         notification.setLayoutX(WIDTH / 2);
-        menu.setLayoutX(WIDTH - MENU_WIDTH / 2);
+        menu.setLayoutX(WIDTH - menu.getBoundsInLocal().getWidth() / 2);
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){
@@ -551,7 +553,20 @@ public class TuringMachineDrawer extends Application {
         notification.notifyMsg(msg);
     }
 
+    void setEditGraph(){
+        notification.notifyMsg("Enter \"Add/remove node/transitions\" mode");
+        this.editGraphMode = true;
+        menu.setEditGraph();
+    }
+
+    void setNotEditGraph(){
+        notification.notifyMsg("Quit \"Add/remove node/transitions\" mode");
+        this.editGraphMode = false;
+        menu.setNotEditGraph();
+    }
+
     void setManual() {
+        notification.notifyMsg("Enter \"Manual firing \" mode");
         menu.setManual();
         manualMode = true;
         this.playing = false;
@@ -563,6 +578,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     void setNotManual() {
+        notification.notifyMsg("Quit \"Manual firing \" mode");
         menu.setNotManual();
         manualMode = false;
 
@@ -601,6 +617,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     void build() {
+        notification.notifyMsg("Enter \"Automatic firing \" mode");
         menu.setBuild();
         buildMode = true;
         this.playing = false;
@@ -612,6 +629,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     void unbuild(){
+        notification.notifyMsg("Quit \"Automatic firing \" mode");
         if(this.playing)
             return;
         menu.setNotBuild();
@@ -857,6 +875,8 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void loadJSON(JSONObject jsonObject){
+        setEditGraph();
+
         JSONObject jsonOptions = jsonObject.getJSONObject("options");
         ANIMATION_DURATION = jsonOptions.getLong("animationDuration");
         TuringMachine.MAXIMUM_NON_DETERMINISTIC_SEARCH = jsonOptions.getInt("maximumNonDeterministicSearch");
@@ -867,6 +887,8 @@ public class TuringMachineDrawer extends Application {
 
         JSONObject jsonGraph =  jsonObject.getJSONObject("graph");
         graphPane.loadJSON(jsonGraph);
+
+        setNotEditGraph();
 
     }
 

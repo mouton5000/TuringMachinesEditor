@@ -18,6 +18,8 @@ class TuringMenu extends Group {
     TuringMachineDrawer drawer;
 
     private Rectangle rectangle;
+
+    private EditGraphIcon editGraphIcon;
     private NewFileIcon newFileIcon;
     private OpenFileIcon openFileIcon;
     private SaveFileIcon saveFileIcon;
@@ -41,14 +43,7 @@ class TuringMenu extends Group {
     TuringMenu(TuringMachineDrawer drawer){
         this.drawer = drawer;
 
-        rectangle = new Rectangle(
-                - TuringMachineDrawer.MENU_WIDTH / 2,
-                - TuringMachineDrawer.MENU_HEIGHT / 2,
-                TuringMachineDrawer.MENU_WIDTH,
-                TuringMachineDrawer.MENU_HEIGHT
-        );
-        rectangle.setFill(Color.TRANSPARENT);
-
+        editGraphIcon = new EditGraphIcon(this.drawer);
         newFileIcon = new NewFileIcon(this.drawer);
         openFileIcon = new OpenFileIcon(this.drawer);
         saveFileIcon = new SaveFileIcon(this.drawer);
@@ -65,8 +60,8 @@ class TuringMenu extends Group {
         parametersIcon = new ParametersIcon(this.drawer);
         buildIcon = new BuildIcon(this.drawer);
 
-        nonPlayerMenu = Arrays.asList(newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, parametersIcon);
-        playerMenu = Arrays.asList(stopIcon, previousFrameIcon, playIcon, nextFrameIcon, lastFrameIcon);
+        nonPlayerMenu = Arrays.asList(editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, parametersIcon);
+        playerMenu = Arrays.asList(stopIcon, previousFrameIcon, pauseIcon, playIcon, nextFrameIcon, lastFrameIcon);
         allMenu = Arrays.asList(manualIcon, buildIcon);
 
         int maxSize = Math.max(nonPlayerMenu.size(), playerMenu.size()) + allMenu.size();
@@ -79,8 +74,15 @@ class TuringMenu extends Group {
         for(int i = 0; i < allMenu.size(); i++)
             allMenu.get(i).setLayoutX(TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 * (maxSize * 0.5 - allMenu.size() + i));
 
-        pauseIcon.setLayoutX(playIcon.getLayoutX());
+        rectangle = new Rectangle(
+                - TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 * maxSize / 2,
+                - TuringMachineDrawer.MENU_HEIGHT / 2,
+                - TuringMachineDrawer.MENU_ICON_RADIUS * 2.5 * maxSize,
+                TuringMachineDrawer.MENU_HEIGHT
+        );
+        rectangle.setFill(Color.TRANSPARENT);
 
+        editGraphIcon.setSelected();
         newFileIcon.setSelected();
         openFileIcon.setSelected();
         saveFileIcon.setSelected();
@@ -102,7 +104,7 @@ class TuringMenu extends Group {
         hidePlayer();
 
         this.getChildren().addAll(rectangle,
-                newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon,
+                editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon,
                 stopIcon, previousFrameIcon, playIcon, pauseIcon, nextFrameIcon, lastFrameIcon,
                 buildIcon);
 
@@ -174,37 +176,31 @@ class TuringMenu extends Group {
         hidePlayer();
     }
 
+    void setEditGraph(){
+        manualIcon.setUnselected();
+        buildIcon.setUnselected();
+    }
+
+    void setNotEditGraph(){
+        manualIcon.setSelected();
+        buildIcon.setSelected();
+    }
+
     private void showPlayer() {
 
-        newFileIcon.setVisible(false);
-        openFileIcon.setVisible(false);
-        saveFileIcon.setVisible(false);
-        saveAsFileIcon.setVisible(false);
-        parametersIcon.setVisible(false);
-
-        stopIcon.setVisible(true);
-        previousFrameIcon.setVisible(true);
-        playIcon.setVisible(true);
-        pauseIcon.setVisible(false);
-        nextFrameIcon.setVisible(true);
-        lastFrameIcon.setVisible(true);
+        for(PlayerIcon playerIcon : this.nonPlayerMenu)
+            playerIcon.setVisible(false);
+        for(PlayerIcon playerIcon : this.playerMenu)
+            playerIcon.setVisible(true);
         setFirstFrame();
     }
 
     private void hidePlayer(){
 
-        newFileIcon.setVisible(true);
-        openFileIcon.setVisible(true);
-        saveFileIcon.setVisible(true);
-        saveAsFileIcon.setVisible(true);
-        parametersIcon.setVisible(true);
-
-        stopIcon.setVisible(false);
-        previousFrameIcon.setVisible(false);
-        playIcon.setVisible(false);
-        pauseIcon.setVisible(false);
-        nextFrameIcon.setVisible(false);
-        lastFrameIcon.setVisible(false);
+        for(PlayerIcon playerIcon : this.nonPlayerMenu)
+            playerIcon.setVisible(true);
+        for(PlayerIcon playerIcon : this.playerMenu)
+            playerIcon.setVisible(false);
     }
 }
 
@@ -230,6 +226,20 @@ abstract class PlayerIcon extends Group{
     }
     void setUnselected(){
         circle.setFill(TuringMachineDrawer.MENU_UNSELECTED_ICON_COLOR);
+    }
+}
+
+class EditGraphIcon extends PlayerIcon {
+
+    EditGraphIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        ImageView imageView = new ImageView("images/edit_graph_icon.png");
+        imageView.setFitHeight(1.5 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setFitWidth(1.5 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
+        imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
+        this.getChildren().add(imageView);
     }
 }
 

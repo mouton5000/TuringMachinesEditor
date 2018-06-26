@@ -23,17 +23,23 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
         Object source = mouseEvent.getSource();
 
-        if(!drawer.playing && !drawer.manualMode && source instanceof BuildIcon){
+        if(!drawer.playing && !drawer.manualMode && !drawer.editGraphMode && source instanceof BuildIcon){
             if(drawer.buildMode)
                 drawer.unbuild();
             else
                 drawer.build();
         }
-        else if(!drawer.playing && !drawer.buildMode && source instanceof ManualIcon){
+        else if(!drawer.playing && !drawer.buildMode && !drawer.editGraphMode && source instanceof ManualIcon){
             if(drawer.manualMode)
                 drawer.setNotManual();
             else
                 drawer.setManual();
+        }
+        else if(!drawer.playing && !drawer.buildMode &&!drawer.manualMode && source instanceof EditGraphIcon){
+            if(drawer.editGraphMode)
+                drawer.setNotEditGraph();
+            else
+                drawer.setEditGraph();
         }
         else if(!drawer.playing && !drawer.manualMode && source instanceof ParametersIcon){
             drawer.openParameters();
