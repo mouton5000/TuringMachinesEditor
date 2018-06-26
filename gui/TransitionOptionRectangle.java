@@ -937,8 +937,6 @@ class ActionDisplay extends HBox{
 
         label.setTranslateX(-offsetX);
 
-        System.out.println(color);
-
         this.getChildren().add(label);
     }
 

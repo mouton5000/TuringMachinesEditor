@@ -537,6 +537,8 @@ public class TuringMachine {
     }
 
     public void clearManual(){
+        if(manualInitialConfiguration == null)
+            return;
         this.loadConfiguration(manualInitialConfiguration, true);
         this.builtPath = null;
         this.builtIndex = null;

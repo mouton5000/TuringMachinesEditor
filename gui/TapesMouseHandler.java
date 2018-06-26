@@ -29,7 +29,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
         if(drawer.animating)
             return;
 
-        System.out.println(event.getEventType()+" "+event.getClass()+" "+event.getSource().getClass());
+//        System.out.println(event.getEventType()+" "+event.getClass()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);

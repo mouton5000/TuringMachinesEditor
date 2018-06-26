@@ -1,10 +1,9 @@
 package gui;
 
-import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 class Settings {
     int duration;
@@ -49,6 +48,7 @@ class Settings {
         TextArea tapeEditTextArea = new TextArea();
         tapeEditTextArea.setDisable(true);
         tapeEditTextArea.setText(tapesCellsDescription);
+        tapeEditTextArea.setFont(Font.font("monospace"));
 
         CheckBox tapeEditCheckBox = new CheckBox("Edit tape manually.");
         tapeEditCheckBox.setOnMouseClicked(mouseEvent -> {
