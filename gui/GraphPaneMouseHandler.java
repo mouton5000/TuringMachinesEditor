@@ -296,7 +296,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             drawer.graphPane.moveStateGroup(stateGroup, stateGroup.getLayoutX() + x, stateGroup.getLayoutY() + y);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof TransitionArrowInvisibleLine) {
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowInvisibleLine) {
             TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
             transitionGroup.stopTimeline();
             select(transitionGroup);

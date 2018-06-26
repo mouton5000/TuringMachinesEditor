@@ -56,13 +56,13 @@ public class TapesMouseHandler implements EventHandler<Event> {
             dragY = y;
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof HeadMenuSelect){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect){
             HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
             if(!headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized()){
                 headMenuSelect.startTimeline();
             }
         }
-        else if(!drawer.buildMode && source instanceof TapePane){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
             if(!tapePane.cellOptionRectangle.isMaximized() && !tapePane.tapeOptionRectangle.isMaximized()) {
                 Integer line = tapePane.getLine(y);
@@ -70,7 +70,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 tapePane.startTimeline(line, column);
             }
         }
-        else if(!drawer.buildMode && source instanceof SymbolLabel){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel){
             SymbolLabel symbolLabel = (SymbolLabel) source;
             if(!symbolLabel.symbolsMenu.symbolOptionRectangle.isMaximized()){
                 symbolLabel.startTimeline();
@@ -87,7 +87,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
         Object source = mouseEvent.getSource();
-        if(!drawer.buildMode && source instanceof TapePane){
+        if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
 
             if(tapePane.cellOptionRectangle.isMaximized())
@@ -108,7 +108,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof MinimizedOptionRectangle){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof MinimizedOptionRectangle){
             MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
             if(minimizedOptionRectangle.optionRectangle instanceof CellOptionRectangle) {
                 TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
@@ -128,7 +128,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof CellOptionRectangleChooseSymbolOptionLabel){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleChooseSymbolOptionLabel){
             CellOptionRectangleChooseSymbolOptionLabel label = (CellOptionRectangleChooseSymbolOptionLabel) source;
             CellOptionRectangle optionRectangle = label.optionRectangle;
             int line = optionRectangle.currentLine;
@@ -140,7 +140,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof CellOptionRectangleChooseHead){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleChooseHead){
             CellOptionRectangleChooseHead chooseHeadRectangle = (CellOptionRectangleChooseHead) source;
             CellOptionRectangle optionRectangle = chooseHeadRectangle.optionRectangle;
             Color color = (Color) chooseHeadRectangle.getStroke();
@@ -151,17 +151,17 @@ public class TapesMouseHandler implements EventHandler<Event> {
             drawer.moveHead(pair.first, line, column, pair.second);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof AddTapeIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof AddTapeIcon){
             this.drawer.addTape();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof TapeHeadMenu){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapeHeadMenu){
             TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) source;
             if(tapeHeadMenu.headOptionRectangle.isMaximized())
                 tapeHeadMenu.closeHeadOptionRectangle();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof RemoveTapeIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveTapeIcon){
             RemoveTapeIcon removeTapeIcon = (RemoveTapeIcon) source;
             if(removeTapeIcon.tapeHeadMenu.headOptionRectangle.isMaximized())
                 removeTapeIcon.tapeHeadMenu.closeHeadOptionRectangle();
@@ -169,7 +169,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 this.drawer.removeTape(removeTapeIcon.tape);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof HeadMenuSelect){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect){
 
             HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
 
@@ -186,7 +186,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof RemoveHeadIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveHeadIcon){
             RemoveHeadIcon removeHeadIcon = (RemoveHeadIcon) source;
             Tape tape = removeHeadIcon.optionRectangle.tape;
             int head = removeHeadIcon.optionRectangle.currentHead;
@@ -198,9 +198,9 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof OptionRectangle)
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof OptionRectangle)
             mouseEvent.consume();
-        else if(!drawer.buildMode && source instanceof TapeOptionIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapeOptionIcon){
             TapeOptionIcon tapeOptionIcon = (TapeOptionIcon) source;
             TapeBorderPane tapeBorderPane = tapeOptionIcon.optionRectangle.tapeBorderPane;
             int line = tapeOptionIcon.optionRectangle.currentLine;
@@ -260,12 +260,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
                     break;
             }
         }
-        else if(!drawer.buildMode && source instanceof SymbolsMenu){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolsMenu){
             if(((SymbolsMenu) source).symbolOptionRectangle.isMaximized())
                 ((SymbolsMenu) source).closeSymbolOptionRectangle();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof SymbolLabel){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel){
 
             SymbolLabel symbolLabel = (SymbolLabel) source;
 
@@ -280,7 +280,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof AddSymbolIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof AddSymbolIcon){
 
             VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
             virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
@@ -292,7 +292,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof EditSymbolIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof EditSymbolIcon){
 
             VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
             virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
@@ -304,7 +304,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof RemoveSymbolIcon){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveSymbolIcon){
             drawer.removeSymbol(((RemoveSymbolIcon) source).optionRectangle.currentSymbolIndex);
         }
     }
@@ -330,7 +330,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof CellOptionRectangleHeadOptionsGroup){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleHeadOptionsGroup){
             if(dragX == null)
                 dragX = x;
             else {
@@ -340,7 +340,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof CellOptionRectangleSymbolsOptionsGroup){
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleSymbolsOptionsGroup){
             if(dragX == null)
                 dragX = x;
             else {
@@ -370,13 +370,13 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof HeadMenuSelect) {
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect) {
             ((HeadMenuSelect) source).stopTimeline();
         }
-        else if(!drawer.buildMode && source instanceof SymbolLabel) {
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel) {
             ((SymbolLabel) source).stopTimeline();
         }
-        else if(!drawer.buildMode && source instanceof TapePane) {
+        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane) {
             ((TapePane) source).stopTimeline();
         }
     }
