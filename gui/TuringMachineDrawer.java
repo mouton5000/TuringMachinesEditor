@@ -405,7 +405,22 @@ public class TuringMachineDrawer extends Application {
     }
 
     void removeSymbol(int index){
-        this.machine.removeSymbol(index);
+        this.removeSymbol(index, true);
+    }
+
+    private void removeSymbol(int index, boolean doConfirm){
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer le symbole?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    this.machine.removeSymbol(index);
+            });
+        }
+        else
+            this.machine.removeSymbol(index);
     }
 
     private void removeSymbolFromMachine(int index, String symbol){
