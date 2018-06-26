@@ -385,7 +385,7 @@ class TapeBorderPane extends BorderPane {
             verticalCoordinates.setMaxHeight(height);
 
 
-            this.checkLinesAndColumns(width, height);
+            this.checkLinesAndColumns(width, height, false);
         });
 
         this.setTop(horizontalCoordinates);
@@ -427,16 +427,14 @@ class TapeBorderPane extends BorderPane {
         offsetX -= dx;
         offsetY -= dy;
 
-        double width = Math.max(Math.abs(-2 * offsetX - this.getMaxWidth()), -2 * offsetX + this.getMaxWidth());
-        double height = Math.max(Math.abs(-2 * offsetY - this.getMaxHeight()), -2 * offsetY + this.getMaxHeight());
+        double width = Math.max(Math.abs(-2 * offsetX - this.getMaxWidth()), Math.abs(-2 * offsetX + this.getMaxWidth()));
+        double height = Math.max(Math.abs(-2 * offsetY - this.getMaxHeight()), Math.abs(-2 * offsetY + this.getMaxHeight()));
 
         tapePane.translate(dx, dy);
         horizontalCoordinates.translate(dx);
         verticalCoordinates.translate(dy);
 
-        tapePane.checkLinesAndColumns(width, height, false);
-        horizontalCoordinates.checkColumn(width);
-        verticalCoordinates.checkLines(height);
+        this.checkLinesAndColumns(width, height, true);
     }
 
     void centerOn(int head){
@@ -447,8 +445,8 @@ class TapeBorderPane extends BorderPane {
         translate(-x + offsetX, -y + offsetY);
     }
 
-    void checkLinesAndColumns(double width, double height){
-        tapePane.checkLinesAndColumns(width, height, false);
+    void checkLinesAndColumns(double width, double height, boolean forceChange){
+        tapePane.checkLinesAndColumns(width, height, forceChange);
         horizontalCoordinates.checkColumn(width);
         verticalCoordinates.checkLines(height);
         maxWidth = Math.max(maxWidth, width);
@@ -882,8 +880,8 @@ class TapePane extends Pane {
 
         for (int i = columns.size() / 2; i < nbColumns / 2; i++) {
             w = TuringMachineDrawer.TAPE_CELL_WIDTH * (0.5 + i);
-            Line columnPos = new Line(w, -bottomHeight, w, topHeight);
-            Line columnNeg = new Line(-w, -bottomHeight, -w, topHeight);
+            Line columnPos = new Line(w, bottomHeight, w, topHeight);
+            Line columnNeg = new Line(-w, bottomHeight, -w, topHeight);
 
             columns.add(columnPos);
             columns.add(0, columnNeg);
