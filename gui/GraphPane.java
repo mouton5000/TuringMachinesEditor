@@ -231,6 +231,8 @@ class GraphPane extends Pane {
         stateGroupToState.put(circle, state);
         this.getChildren().add(circle);
 
+        drawer.setEnableToSave();
+
     }
 
     void removeState(StateGroup stateGroup) {
@@ -267,6 +269,7 @@ class GraphPane extends Pane {
             if(entry.getValue() >= state)
                 stateGroupToState.put(entry.getKey(), entry.getValue() - 1);
         }
+        drawer.setEnableToSave();
     }
 
     void moveStateGroup(StateGroup stateGroup, double x, double y){
@@ -274,6 +277,7 @@ class GraphPane extends Pane {
         int yg = gridClosest(y);
         stateGroup.setLayoutX(xg + graphOffsetX);
         stateGroup.setLayoutY(yg + graphOffsetY);
+        drawer.setEnableToSave();
     }
 
     Integer getState(StateGroup stateGroup) {
@@ -330,6 +334,7 @@ class GraphPane extends Pane {
             for(int head = 0; head < tape.getNbHeads(); head++)
                 transitionGroup.addHead(tape, drawer.getColorOfHead(tape, head));
         }
+        drawer.setEnableToSave();
     }
 
     void removeTransition(TransitionGroup transitionGroup){
@@ -361,7 +366,7 @@ class GraphPane extends Pane {
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
         this.getChildren().remove(transitionGroup);
-
+        drawer.setEnableToSave();
     }
 
     Transition getTransition(TransitionGroup transitionGroup) {
@@ -399,16 +404,19 @@ class GraphPane extends Pane {
     private void setFinalStateFromMachine(Integer state, boolean isFinal){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setFinal(isFinal);
+        drawer.setEnableToSave();
     }
 
     private void setAcceptingStateFromMachine(Integer state, boolean isAccepting){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setAccepting(isAccepting);
+        drawer.setEnableToSave();
     }
 
     private void setInitialStateFromMachine(Integer state, boolean isInitial){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setInitial(isInitial);
+        drawer.setEnableToSave();
     }
 
     void addReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
@@ -433,6 +441,7 @@ class GraphPane extends Pane {
 
         if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.addReadSymbol(tape, head, symbol);
+        drawer.setEnableToSave();
     }
 
     private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
@@ -442,6 +451,7 @@ class GraphPane extends Pane {
         arrow.removeReadSymbol(tape, head, symbol);
         if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.removeReadSymbol(tape, head, symbol);
+        drawer.setEnableToSave();
     }
 
     void addAction(TransitionGroup transitionGroup, Tape tape, int head, String actionSymbol) {
@@ -512,6 +522,7 @@ class GraphPane extends Pane {
 
         if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
             transitionOptionRectangle.addAction(tape, head, actionSymbol);
+        drawer.setEnableToSave();
     }
 
     void removeActionFromMachine(Transition transition, int index){
@@ -520,6 +531,7 @@ class GraphPane extends Pane {
 
         if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
             transitionOptionRectangle.removeAction(index);
+        drawer.setEnableToSave();
     }
 
     void addSymbol(String symbol) {
@@ -570,6 +582,9 @@ class GraphPane extends Pane {
 
     Set<String> getReadSymbols(TransitionGroup transitionGroup, Tape tape, int head) {
         Transition transition = transitionGroupToTransition.getV(transitionGroup);
+
+        if(transition == null)
+            return new HashSet<>();
 
         Iterator<String> it =  transition.getReadSymbols(tape, head);
         Set<String> set = new HashSet<>();

@@ -163,8 +163,10 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             virtualKeyboard.setY(mouseEvent.getScreenY());
 
             Optional<String> result = virtualKeyboard.showAndWait();
-            if(result.isPresent())
+            if(result.isPresent()) {
                 stateGroup.setName(result.get());
+                drawer.setEnableToSave();
+            }
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveStateOptionIcon){
@@ -280,6 +282,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 return;
             TransitionGroup transitionGroup = ((TransitionArrowControl1KeyCircle) source).transitionGroup;
             transitionGroup.setControl1(x, y);
+            drawer.setEnableToSave();
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowControl2KeyCircle){
@@ -287,6 +290,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 return;
             TransitionGroup transitionGroup = ((TransitionArrowControl2KeyCircle) source).transitionGroup;
             transitionGroup.setControl2(x, y);
+            drawer.setEnableToSave();
             mouseEvent.consume();
         }
         else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateGroup) {

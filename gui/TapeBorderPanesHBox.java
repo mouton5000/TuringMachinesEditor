@@ -191,6 +191,7 @@ class TapeBorderPanesHBox extends HBox{
     private void moveHeadFromMachine(Tape tape, int line, int column, int head){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.moveHead(line, column, head);
+        drawer.setEnableToSave();
     }
 
     void addHead(Tape tape, int line, int column, Color color){
@@ -211,26 +212,31 @@ class TapeBorderPanesHBox extends HBox{
     private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.drawSymbol(line, column, symbol);
+        drawer.setEnableToSave();
     }
 
     private void setLeftFromMachine(Tape tape, Integer left){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeLeftBound(left);
+        drawer.setEnableToSave();
     }
 
     private void setRightFromMachine(Tape tape, Integer right){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeRightBound(right);
+        drawer.setEnableToSave();
     }
 
     private void setBottomFromMachine(Tape tape, Integer bottom){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeBottomBound(bottom);
+        drawer.setEnableToSave();
     }
 
     private void setTopFromMachine(Tape tape, Integer top){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeTopBound(top);
+        drawer.setEnableToSave();
     }
 
     void centerOn(Tape tape, int head) {

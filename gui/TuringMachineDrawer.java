@@ -152,6 +152,9 @@ public class TuringMachineDrawer extends Application {
     static final Color MENU_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
 
     boolean animating;
+
+    boolean enableToSave;
+
     boolean editGraphMode;
     boolean manualMode;
     boolean buildMode;
@@ -189,6 +192,9 @@ public class TuringMachineDrawer extends Application {
         this.headsColors = new BidirMap<>();
 
         this.stage = stage;
+
+        enableToSave = false;
+
         this.animating = false;
         this.editGraphMode = false;
         this.manualMode = false;
@@ -359,7 +365,6 @@ public class TuringMachineDrawer extends Application {
         Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
         scene.setOnKeyPressed(turingMenuKeyHandler);
 
-        stage.setTitle("Turing Machine Editor");
         stage.setScene(scene);
 
 
@@ -395,6 +400,7 @@ public class TuringMachineDrawer extends Application {
     private void addSymbolFromMachine(String symbol){
         graphPane.addSymbol(symbol);
         tapesPane.addSymbol(symbol);
+        setEnableToSave();
     }
 
     void editSymbol(int index, String symbol){
@@ -404,6 +410,7 @@ public class TuringMachineDrawer extends Application {
     private void editSymbolFromMachine(int index, String prevSymbol, String symbol){
         graphPane.editSymbol(index, prevSymbol, symbol);
         tapesPane.editSymbol(index, prevSymbol, symbol);
+        setEnableToSave();
     }
 
     void removeSymbol(int index){
@@ -428,6 +435,7 @@ public class TuringMachineDrawer extends Application {
     private void removeSymbolFromMachine(int index, String symbol){
         graphPane.removeSymbol(index, symbol);
         tapesPane.removeSymbol(index, symbol);
+        setEnableToSave();
     }
 
     void addTape(){
@@ -437,6 +445,7 @@ public class TuringMachineDrawer extends Application {
     private void addTapeFromMachine(Tape tape){
         graphPane.addTape(tape);
         tapesPane.addTape(tape);
+        setEnableToSave();
     }
 
     void removeTape(Tape tape){ removeTape(tape, true);}
@@ -459,11 +468,13 @@ public class TuringMachineDrawer extends Application {
     private void removeTapeFromMachine(Tape tape){
         graphPane.removeTape(tape);
         tapesPane.removeTape(tape);
+        setEnableToSave();
     }
 
     void moveHead(Tape tape, int line, int column, int head) {
         tape.setInitialHeadColumn(head, column);
         tape.setInitialHeadLine(head, line);
+        setEnableToSave();
     }
 
     void addHead(Tape tape, int line, int column, Color color) {
@@ -489,6 +500,7 @@ public class TuringMachineDrawer extends Application {
         headsColors.put(color, new Pair<>(tape, head));
         graphPane.addHead(tape, color);
         tapesPane.addHead(tape, color, line, column);
+        setEnableToSave();
     }
 
     private boolean isAvailable(Color color) {
@@ -503,6 +515,7 @@ public class TuringMachineDrawer extends Application {
         graphPane.editHeadColor(tape, head, color);
         tapesPane.editHeadColor(tape, head, color);
         this.headsColors.put(color, new Pair<>(tape, head));
+        setEnableToSave();
     }
 
     Pair<Tape, Integer> getHead(Color color){
@@ -538,6 +551,7 @@ public class TuringMachineDrawer extends Application {
 
         graphPane.removeHead(tape, head);
         tapesPane.removeHead(tape, head);
+        setEnableToSave();
     }
 
     void centerOn(Tape tape, int head) {
@@ -762,6 +776,26 @@ public class TuringMachineDrawer extends Application {
         this.addHead(this.machine.getTape(0), 0, 0, Color.BLACK);
         this.addSymbol("0");
         this.addSymbol("1");
+
+        lastSaveFilename = null;
+        this.setNotEnableToSave();
+        this.stage.setTitle("Turing Machine Editor");
+    }
+
+    void setEnableToSave(){
+        if(enableToSave)
+            return;
+        enableToSave = true;
+        this.stage.setTitle(this.stage.getTitle() + " *");
+    }
+
+    private void setNotEnableToSave(){
+        if(!enableToSave)
+            return;
+        enableToSave = false;
+        if(this.stage.getTitle().endsWith(" *"))
+            this.stage.setTitle(this.stage.getTitle().substring(0, this.stage.getTitle().length() - 2));
+
     }
 
     void saveMachine(){
@@ -772,6 +806,9 @@ public class TuringMachineDrawer extends Application {
     }
 
     void saveAsMachine() {
+        if(!enableToSave)
+            return;
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose save file");
 
@@ -795,16 +832,20 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void saveAsMachine(String filename){
+        if(!enableToSave)
+            return;
         if(buildMode)
             this.unbuild();
 
         lastSaveFilename = filename;
+        this.stage.setTitle(lastSaveFilename);
 
         JSONObject jsonMachine = getJSON();
         try {
             FileWriter fw = new FileWriter(filename, false);
             jsonMachine.write(fw);
             fw.close();
+            setNotEnableToSave();
         } catch (IOException ignored) {
         }
     }
@@ -836,6 +877,9 @@ public class TuringMachineDrawer extends Application {
             loadJSON(jsonObject);
 
             br.close();
+            lastSaveFilename = filename;
+            this.stage.setTitle(lastSaveFilename);
+            setNotEnableToSave();
         } catch (IOException ignored) {
 
         }
@@ -857,6 +901,8 @@ public class TuringMachineDrawer extends Application {
 
             if(settings.changeTapesCells)
                 tapesPane.eraseTapes(settings.tapesCellsDescription);
+
+            this.setEnableToSave();
         }
     }
 
