@@ -1045,7 +1045,8 @@ class TapePane extends Pane {
             Iterator<Map.Entry<Integer, Label>> itLines = entry.getValue().entrySet().iterator();
             while(itLines.hasNext()){
                 Map.Entry<Integer, Label> entry2 = itLines.next();
-                if(entry2.getValue().getText().equals(symbol)) {
+                if((entry2.getValue().getText() == symbol) || (entry2.getValue().getText() != null &&
+                        entry2.getValue().getText().equals(symbol)  )) {
                     tapeLinesGroup.getChildren().remove(entry2.getValue());
                     itLines.remove();
                 }
