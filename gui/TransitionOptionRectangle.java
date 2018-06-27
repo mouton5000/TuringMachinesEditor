@@ -96,10 +96,8 @@ class TransitionOptionRectangle extends OptionRectangle {
 
     void setCurrentTransitionGroup(TransitionGroup transitionGroup) {
 
-        if(this.currentTransitionGroup != null){
-            this.layoutXProperty().unbind();
-            this.layoutYProperty().unbind();
-        }
+        this.layoutXProperty().unbind();
+        this.layoutYProperty().unbind();
 
         this.currentTransitionGroup = transitionGroup;
 

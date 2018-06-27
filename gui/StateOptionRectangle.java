@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -26,10 +25,10 @@ class StateOptionRectangle extends OptionRectangle{
         this.setOnMouseClicked(drawer.graphPaneMouseHandler);
 
         changeListener = (observableValue, oldVal, newVal) ->
-                StateOptionRectangle.this.setLayoutY(newVal.doubleValue()
+                StateOptionRectangle.this.setLayoutY(
+                        currentState.getLayoutY()
                 - TuringMachineDrawer.STATE_RADIUS
                 * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
-
 
         VBox vbox = new VBox();
         vbox.setSpacing(0);
@@ -82,8 +81,9 @@ class StateOptionRectangle extends OptionRectangle{
 
     void setCurrentState(StateGroup state) {
 
-        if (state == null && this.currentState != null){
-            this.currentState.layoutYProperty().removeListener(changeListener);
+        if (state == null){
+            if(this.currentState != null)
+                this.currentState.layoutYProperty().removeListener(changeListener);
             this.layoutXProperty().unbind();
             this.translateXProperty().unbind();
             this.translateYProperty().unbind();
