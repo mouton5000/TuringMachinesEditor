@@ -328,6 +328,40 @@ public class TuringMachineDrawer extends Application {
             resizePanes();
         });
 
+        stage.setOnCloseRequest(event -> {
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+            alert.setTitle("Exit Turing machine editor.");
+            alert.setHeaderText(null);
+            if(enableToSave)
+                alert.setContentText("The current file has not been save. Do you want to save before closing?");
+            else
+                alert.setContentText("Do you want to exit?");
+
+
+            ButtonType yes = ButtonType.YES;
+            ButtonType no = ButtonType.NO;
+            ButtonType cancel = ButtonType.CANCEL;
+
+            if(enableToSave)
+                alert.getButtonTypes().setAll(yes, no, cancel);
+            else
+                alert.getButtonTypes().setAll(yes, no);
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.get() == yes){
+                if(enableToSave)
+                    if(!saveMachine())
+                        event.consume();
+            } else if (result.get() == no) {
+                if(!enableToSave)
+                    event.consume();
+            } else if (result.get() == cancel)
+                event.consume();
+        });
+
         newMachine();
 
         stage.show();
@@ -798,16 +832,16 @@ public class TuringMachineDrawer extends Application {
 
     }
 
-    void saveMachine(){
+    boolean saveMachine(){
         if(lastSaveFilename != null)
-            saveAsMachine(lastSaveFilename);
+            return saveAsMachine(lastSaveFilename);
         else
-            saveAsMachine();
+            return saveAsMachine();
     }
 
-    void saveAsMachine() {
+    boolean saveAsMachine() {
         if(!enableToSave)
-            return;
+            return false;
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose save file");
@@ -827,13 +861,14 @@ public class TuringMachineDrawer extends Application {
             String filename = file.getAbsolutePath();
             if(!filename.endsWith(".tm"))
                 filename += ".tm";
-            saveAsMachine(filename);
+            return saveAsMachine(filename);
         }
+        return false;
     }
 
-    private void saveAsMachine(String filename){
+    private boolean saveAsMachine(String filename){
         if(!enableToSave)
-            return;
+            return false;
         if(buildMode)
             this.unbuild();
 
@@ -846,7 +881,9 @@ public class TuringMachineDrawer extends Application {
             jsonMachine.write(fw);
             fw.close();
             setNotEnableToSave();
+            return true;
         } catch (IOException ignored) {
+            return false;
         }
     }
 
