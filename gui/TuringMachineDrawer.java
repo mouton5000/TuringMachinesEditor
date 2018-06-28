@@ -193,7 +193,7 @@ public class TuringMachineDrawer extends Application {
 
         this.stage = stage;
 
-        enableToSave = false;
+        enableToSave = true;
 
         this.animating = false;
         this.editGraphMode = false;
@@ -416,7 +416,7 @@ public class TuringMachineDrawer extends Application {
         tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
 
         notification.setLayoutX(WIDTH / 2);
-        menu.setLayoutX(WIDTH - menu.getBoundsInLocal().getWidth() / 2);
+        menu.setLayoutX(WIDTH - menu.getWidth() / 2);
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){
@@ -812,8 +812,8 @@ public class TuringMachineDrawer extends Application {
         this.addSymbol("1");
 
         lastSaveFilename = null;
-        this.setNotEnableToSave();
         this.stage.setTitle("Turing Machine Editor");
+        this.setNotEnableToSave();
     }
 
     void setEnableToSave(){
@@ -821,6 +821,7 @@ public class TuringMachineDrawer extends Application {
             return;
         enableToSave = true;
         this.stage.setTitle(this.stage.getTitle() + " *");
+        menu.setSave(true);
     }
 
     private void setNotEnableToSave(){
@@ -829,6 +830,7 @@ public class TuringMachineDrawer extends Application {
         enableToSave = false;
         if(this.stage.getTitle().endsWith(" *"))
             this.stage.setTitle(this.stage.getTitle().substring(0, this.stage.getTitle().length() - 2));
+        menu.setSave(false);
 
     }
 

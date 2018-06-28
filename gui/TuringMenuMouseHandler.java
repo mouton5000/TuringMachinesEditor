@@ -76,6 +76,12 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
         else if(!drawer.playing && !drawer.manualMode && source instanceof OpenFileIcon){
             drawer.loadMachine();
         }
+        else if(source instanceof ShowIcon){
+            drawer.menu.showMenu();
+        }
+        else if(source instanceof HideIcon){
+            drawer.menu.hideMenu();
+        }
 
 
         mouseEvent.consume();
