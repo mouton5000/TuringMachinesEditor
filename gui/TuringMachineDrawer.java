@@ -148,8 +148,10 @@ public class TuringMachineDrawer extends Application {
     static final double MENU_ICON_RADIUS = 20;
     static final double MENU_WIDTH = MENU_ICON_RADIUS * 15;
     static final double MENU_HEIGHT = MENU_ICON_RADIUS * 3;
-    static final Color MENU_SELECTED_ICON_COLOR = Color.BLACK;
-    static final Color MENU_UNSELECTED_ICON_COLOR = Color.LIGHTGRAY;
+    static final double MENU_SELECTED_OPACITY = 0.75;
+    static final double MENU_UNSELECTED_OPACITY = 0.5;
+    static final Color MENU_CLICKABLE_ICON_COLOR = Color.BLACK;
+    static final Color MENU_NON_CLICKABLE_ICON_COLOR = Color.LIGHTGRAY;
 
     boolean animating;
 

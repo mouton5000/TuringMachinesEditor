@@ -163,37 +163,42 @@ class TuringMenu extends Group {
     }
 
     void setBuild(){
+        buildIcon.setSelected();
         manualIcon.setNonClickable();
         showPlayer();
     }
 
     void setNotBuild(){
+        buildIcon.setUnselected();
         manualIcon.setClickable();
         hidePlayer();
     }
 
     void setManual() {
+        manualIcon.setSelected();
         buildIcon.setNonClickable();
         showPlayer();
     }
 
     void setNotManual() {
+        manualIcon.setUnselected();
         buildIcon.setClickable();
         hidePlayer();
     }
 
     void setEditGraph(){
+        editGraphIcon.setSelected();
         manualIcon.setNonClickable();
         buildIcon.setNonClickable();
     }
 
     void setNotEditGraph(){
+        editGraphIcon.setUnselected();
         manualIcon.setClickable();
         buildIcon.setClickable();
     }
 
     private void showPlayer() {
-
         for(PlayerIcon playerIcon : this.nonPlayerMenu)
             playerIcon.setVisible(false);
         for(PlayerIcon playerIcon : this.playerMenu)
@@ -202,7 +207,6 @@ class TuringMenu extends Group {
     }
 
     private void hidePlayer(){
-
         for(PlayerIcon playerIcon : this.nonPlayerMenu)
             playerIcon.setVisible(true);
         for(PlayerIcon playerIcon : this.playerMenu)
@@ -266,17 +270,25 @@ abstract class PlayerIcon extends Group{
 
         circle = new Circle();
         circle.setRadius(TuringMachineDrawer.MENU_ICON_RADIUS);
-        this.setOpacity(0.5);
+        setUnselected();
         this.getChildren().add(circle);
 
     }
 
+    void setSelected(){
+        this.setOpacity(TuringMachineDrawer.MENU_SELECTED_OPACITY);
+    }
+
+    void setUnselected(){
+        this.setOpacity(TuringMachineDrawer.MENU_UNSELECTED_OPACITY);
+    }
+
     void setClickable(){
-        circle.setFill(TuringMachineDrawer.MENU_SELECTED_ICON_COLOR);
+        circle.setFill(TuringMachineDrawer.MENU_CLICKABLE_ICON_COLOR);
         this.setOnMouseClicked(drawer.turingMenuMouseHandler);
     }
     void setNonClickable(){
-        circle.setFill(TuringMachineDrawer.MENU_UNSELECTED_ICON_COLOR);
+        circle.setFill(TuringMachineDrawer.MENU_NON_CLICKABLE_ICON_COLOR);
         this.setOnMouseClicked(null);
 
     }
