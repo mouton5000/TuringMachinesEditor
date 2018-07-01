@@ -384,6 +384,10 @@ public class TuringMachine {
 
         }
 
+        if(iteration == MAXIMUM_NON_DETERMINISTIC_SEARCH){
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Reached maximum number of iterations.");
+        }
+
         if(!accepting) {
             if (firstFinalConfiguration == null)
                 return null;
