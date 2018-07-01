@@ -167,6 +167,7 @@ public class TuringMachineDrawer extends Application {
     protected TapesVBox tapesPane;
     Notification notification;
     TuringMenu menu;
+    HelpMessages help;
 
     public TuringMachine machine;
 
@@ -381,6 +382,7 @@ public class TuringMachineDrawer extends Application {
         tapesPane = new TapesVBox(this);
         notification = new Notification();
         menu = new TuringMenu(this);
+        help = new HelpMessages();
 
         notification.setLayoutY(NOTIFICATION_HEIGHT / 2);
         menu.setLayoutY(MENU_HEIGHT / 2);
@@ -397,7 +399,7 @@ public class TuringMachineDrawer extends Application {
         VBox box = new VBox();
         box.getChildren().addAll(graphPane, separator, tapesPane);
 
-        mainPane.getChildren().addAll(box, menu, notification);
+        mainPane.getChildren().addAll(box, menu, notification, help);
         Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
         scene.setOnKeyPressed(turingMenuKeyHandler);
 
@@ -419,6 +421,7 @@ public class TuringMachineDrawer extends Application {
 
         notification.setLayoutX(WIDTH / 2);
         menu.setLayoutX(WIDTH - menu.getWidth() / 2);
+        help.resize(WIDTH, HEIGHT);
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){
