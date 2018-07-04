@@ -532,7 +532,11 @@ public class TuringMachine {
         setCurrentState(transition.getOutput(), true);
 
         Configuration configuration = this.saveConfiguration();
-
+        
+        if(builtIndex.first != builtPath.first.size() - 1) {
+            builtPath.first = builtPath.first.subList(0, builtIndex.first + 1);
+            builtPath.second = builtPath.second.subList(0, builtIndex.second);
+        }
         builtPath.first.add(configuration);
         builtPath.second.add(transition);
         builtIndex.first++;
