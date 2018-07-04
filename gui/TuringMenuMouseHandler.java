@@ -76,6 +76,9 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
         else if(!drawer.playing && source instanceof OpenFileIcon){
             drawer.loadMachine();
         }
+        else if(!drawer.playing && source instanceof HelpIcon){
+            drawer.help.setVisible(true);
+        }
         else if(source instanceof ShowIcon){
             drawer.menu.showMenu();
         }

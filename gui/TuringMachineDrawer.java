@@ -34,8 +34,8 @@ public class TuringMachineDrawer extends Application {
 
     private static final int SEPARATOR_WIDTH = 2;
     private static final int MARGIN = 30;
-    private static int WIDTH;
-    private static int HEIGHT;
+    static int WIDTH;
+    static int HEIGHT;
     static final int GRAPH_GRID_WIDTH = 10;
     private static final double RATIO_HEIGHT_GRAPH_TAPES = 1.0/2;
     static final String SYMBOL_FONT_NAME = "Cambria";
@@ -385,6 +385,11 @@ public class TuringMachineDrawer extends Application {
         help = new HelpMessages();
 
         notification.setLayoutY(NOTIFICATION_HEIGHT / 2);
+
+        help.setLayoutX(0);
+        help.setLayoutY(0);
+        help.setVisible(false);
+
         menu.setLayoutY(MENU_HEIGHT / 2);
         resizePanes();
 
@@ -421,7 +426,8 @@ public class TuringMachineDrawer extends Application {
 
         notification.setLayoutX(WIDTH / 2);
         menu.setLayoutX(WIDTH - menu.getWidth() / 2);
-        help.resize(WIDTH, HEIGHT);
+        help.setFitWidth(WIDTH);
+        help.setFitHeight(HEIGHT);
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){

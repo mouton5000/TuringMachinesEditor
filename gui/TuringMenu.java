@@ -1,11 +1,14 @@
 package gui;
 
+import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +41,7 @@ class TuringMenu extends Group {
 
     private ShowIcon showIcon;
     private HideIcon hideIcon;
-//    private HelpIcon helpIcon;
+    private HelpIcon helpIcon;
 
     List<PlayerIcon> nonPlayerMenu;
     List<PlayerIcon> playerMenu;
@@ -52,7 +55,7 @@ class TuringMenu extends Group {
         openFileIcon = new OpenFileIcon(this.drawer);
         saveFileIcon = new SaveFileIcon(this.drawer);
         saveAsFileIcon = new SaveAsFileIcon(this.drawer);
-        manualIcon = new ManualIcon(this.drawer);
+        parametersIcon = new ParametersIcon(this.drawer);
 
         stopIcon = new StopIcon(this.drawer);
         previousFrameIcon = new PreviousFrameIcon(this.drawer);
@@ -61,14 +64,18 @@ class TuringMenu extends Group {
         nextFrameIcon = new NextFrameIcon(this.drawer);
         lastFrameIcon = new LastFrameIcon(this.drawer);
 
-        parametersIcon = new ParametersIcon(this.drawer);
         buildIcon = new BuildIcon(this.drawer);
+        manualIcon = new ManualIcon(this.drawer);
+        helpIcon = new HelpIcon(this.drawer);
+
         showIcon = new ShowIcon(this.drawer);
         hideIcon = new HideIcon(this.drawer);
 
+
+
         nonPlayerMenu = Arrays.asList(editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, parametersIcon);
         playerMenu = Arrays.asList(stopIcon, previousFrameIcon, pauseIcon, playIcon, nextFrameIcon, lastFrameIcon);
-        allMenu = Arrays.asList(manualIcon, buildIcon);
+        allMenu = Arrays.asList(manualIcon, buildIcon, helpIcon);
 
         int menuSize = getMenuSize();
         for(int i = 0; i < nonPlayerMenu.size(); i++)
@@ -109,6 +116,7 @@ class TuringMenu extends Group {
 
         buildIcon.setClickable();
 
+        helpIcon.setClickable();
         showIcon.setClickable();
         hideIcon.setClickable();
 
@@ -120,7 +128,7 @@ class TuringMenu extends Group {
         this.getChildren().addAll(rectangle,
                 editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon,
                 stopIcon, previousFrameIcon, playIcon, pauseIcon, nextFrameIcon, lastFrameIcon,
-                buildIcon, showIcon, hideIcon);
+                buildIcon, helpIcon, showIcon, hideIcon);
 
 
     }
@@ -647,5 +655,24 @@ class ShowIcon extends PlayerIcon{
         arrow.setFill(Color.WHITE);
 
         this.getChildren().add(arrow);
+    }
+}
+
+class HelpIcon extends PlayerIcon{
+    HelpIcon(TuringMachineDrawer drawer) {
+        super(drawer);
+
+        Label label = new Label("?");
+        label.setTextFill(Color.WHITE);
+        label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME, 2 * TuringMachineDrawer.MENU_ICON_RADIUS));
+        label.setMinWidth(2 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        label.setMaxWidth(2 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        label.setMinHeight(2 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        label.setMaxHeight(2 * TuringMachineDrawer.MENU_ICON_RADIUS);
+        label.setLayoutX( - TuringMachineDrawer.MENU_ICON_RADIUS);
+        label.setLayoutY( - TuringMachineDrawer.MENU_ICON_RADIUS - 3);
+        label.setAlignment(Pos.CENTER);
+
+        this.getChildren().add(label);
     }
 }
