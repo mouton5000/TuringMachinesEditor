@@ -328,6 +328,7 @@ class TapeBorderPanesHBox extends HBox{
 
             sb.append(((TapeBorderPane)child).getTapeString());
             sb.append(';');
+            sb.append('\n');
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
