@@ -71,9 +71,8 @@ class Settings {
             tapeEditTextArea.setDisable(!tapeEditCheckBox.isSelected());
         });
 
-        Label tapeEditHelp = new Label("(?)");
 
-        hbox2.getChildren().addAll(tapeEditCheckBox, tapeEditHelp);
+        hbox2.getChildren().addAll(tapeEditCheckBox);
 
 
         vbox2.getChildren().addAll(hbox2, tapeEditTextArea);
