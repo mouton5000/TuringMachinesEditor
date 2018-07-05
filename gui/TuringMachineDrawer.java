@@ -16,19 +16,14 @@ import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.json.JSONObject;
-import turingmachines.Tape;
-import turingmachines.Transition;
-import turingmachines.TuringMachine;
+import turingmachines.*;
 import util.BidirMap;
 import util.Colors;
 import util.Pair;
 import util.Subscriber;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class TuringMachineDrawer extends Application {
 
@@ -171,7 +166,7 @@ public class TuringMachineDrawer extends Application {
 
     private Stage stage;
     GraphPane graphPane;
-    protected TapesVBox tapesPane;
+    TapesVBox tapesPane;
     Notification notification;
     TuringMenu menu;
     HelpMessages help;
@@ -182,6 +177,14 @@ public class TuringMachineDrawer extends Application {
     private BidirMap<Color, Pair<Tape, Integer>> headsColors;
     private static List<Color> defaultColors = Colors.allColors();
     private int defaultColorsIndex;
+
+    private Double nextX;
+    private Double nextY;
+
+    private Double nextControl1X;
+    private Double nextControl1Y;
+    private Double nextControl2X;
+    private Double nextControl2Y;
 
     GraphPaneMouseHandler graphPaneMouseHandler;
     TapesMouseHandler tapesMouseHandler;
@@ -312,6 +315,87 @@ public class TuringMachineDrawer extends Application {
                             toPlay.add(timeline);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        addStateFromMachine(state);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        removeStateFromMachine(state);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
+                        Transition transition = (Transition) parameters[1];
+                        addTransitionFromMachine(transition);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION:{
+                        Transition transition = (Transition) parameters[1];
+                        removeTransitionFromMachine(transition);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        String symbol = (String)parameters[4];
+                        addReadSymbolFromMachine(transition, tape, head, symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        String symbol = (String)parameters[4];
+                        removeReadSymbolFromMachine(transition, tape, head, symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_ADD_ACTION:{
+                        Transition transition = (Transition) parameters[1];
+                        Tape tape = (Tape)parameters[2];
+                        Integer head = (Integer)parameters[3];
+                        ActionType type = (ActionType) parameters[4];
+                        Object value = parameters[5];
+                        addActionFromMachine(transition, tape, head, type, value);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION:{
+                        Transition transition = (Transition) parameters[1];
+                        Integer index = (Integer) parameters[2];
+                        removeActionFromMachine(transition, index);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setFinalStateFromMachine(state, true);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setFinalStateFromMachine(state, false);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setAcceptingStateFromMachine(state, true);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setAcceptingStateFromMachine(state, false);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setInitialStateFromMachine(state, true);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setInitialStateFromMachine(state, false);
+                    }
+                    break;
                 }
             }
         };
@@ -330,6 +414,21 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_MOVED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_WRITE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN);
+
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_ACTION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
 
         this.machine = new TuringMachine();
 
@@ -624,6 +723,206 @@ public class TuringMachineDrawer extends Application {
 
     void notifyMsg(String msg){
         notification.notifyMsg(msg);
+    }
+
+    int addState(double x, double y){
+        if(!editGraphMode)
+            return -1;
+        String name = graphPane.nextStateName();
+        return this.addState(x, y, name);
+    }
+
+    int addState(double x, double y, String name){
+        if(!editGraphMode)
+            return -1;
+        nextX = x;
+        nextY = y;
+        return machine.addState(name);
+    }
+
+    void addStateFromMachine(Integer state){
+        graphPane.addState(nextX, nextY, state);
+        setEnableToSave();
+    }
+
+    void removeState(Integer state) {
+        removeState(state, true);
+    }
+
+    void removeState(Integer state, boolean doConfirm){
+        if(!editGraphMode)
+            return;
+
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer l'état?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    TuringMachineDrawer.getInstance().machine.removeState(state);
+            });
+        }
+        else
+            TuringMachineDrawer.getInstance().machine.removeState(state);
+    }
+
+    void removeStateFromMachine(Integer state){
+        graphPane.removeState(state);
+        this.setEnableToSave();
+    }
+
+    Transition addTransition(Integer input, Integer output){
+        if(!TuringMachineDrawer.getInstance().editGraphMode)
+            return null;
+        return addTransition(input, output, null, null, null, null);
+    }
+
+
+    Transition addTransition(Integer input, Integer output,
+                             Double control1X, Double control1Y,
+                             Double control2X, Double control2Y
+    ){
+        if(!editGraphMode)
+            return null;
+
+        this.nextControl1X = control1X;
+        this.nextControl1Y = control1Y;
+        this.nextControl2X = control2X;
+        this.nextControl2Y = control2Y;
+
+        return TuringMachineDrawer.getInstance().machine.addTransition(input, output);
+    }
+
+    private void addTransitionFromMachine(Transition transition){
+        graphPane.addTransition(transition, nextControl1X, nextControl1Y, nextControl2X, nextControl2Y);
+
+        this.setEnableToSave();
+    }
+
+    void removeTransition(Transition transition){
+        removeTransition(transition, true);
+    }
+
+    void removeTransition(Transition transition, boolean doConfirm){
+        if(!editGraphMode)
+            return;
+
+        if(doConfirm){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Supprimer la transition?");
+            alert.setHeaderText("");
+            alert.setContentText("Confirmer la suppression.");
+            alert.showAndWait().ifPresent(buttonType -> {
+                if(buttonType == ButtonType.OK)
+                    machine.removeTransition(transition);
+            });
+        }
+        else
+            machine.removeTransition(transition);
+    }
+
+    void removeTransitionFromMachine(Transition transition){
+        graphPane.removeTransition(transition);
+        setEnableToSave();
+    }
+
+    void setFinalState(Integer state, boolean isFinal){
+        if(isFinal)
+            machine.setFinalState(state);
+        else
+            machine.unsetFinalState(state);
+    }
+
+    private void setFinalStateFromMachine(Integer state, boolean isFinal){
+        graphPane.setFinalState(state, isFinal);
+        setEnableToSave();
+    }
+
+    void setAcceptingState(Integer state, boolean isAccepting){
+        if(isAccepting)
+            machine.setAcceptingState(state);
+        else
+            machine.unsetAcceptingState(state);
+    }
+
+    private void setAcceptingStateFromMachine(Integer state, boolean isAccepting){
+        graphPane.setAcceptingState(state, isAccepting);
+        setEnableToSave();
+    }
+
+    void setInitialState(Integer state, boolean isInitial){
+        if(isInitial)
+            machine.setInitialState(state);
+        else
+            machine.unsetInitialState(state);
+    }
+
+    private void setInitialStateFromMachine(Integer state, boolean isInitial){
+        graphPane.setInitialState(state, isInitial);
+        setEnableToSave();
+    }
+
+    void addReadSymbol(Transition transition, Tape tape, int head, String symbol){
+        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                null:symbol;
+        transition.addReadSymbols(tape, head, symbol);
+    }
+
+    private void addReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+        graphPane.addReadSymbol(transition, tape, head, symbol);
+        TuringMachineDrawer.getInstance().setEnableToSave();
+    }
+
+    void removeReadSymbol(Transition transition, Tape tape, int head, String symbol){
+        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
+                null:symbol;
+        transition.removeReadSymbols(tape, head, symbol);
+    }
+
+    private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+        graphPane.removeReadSymbol(transition, tape, head, symbol);
+        TuringMachineDrawer.getInstance().setEnableToSave();
+    }
+
+    void addAction(Transition transition, Tape tape, int head, String actionSymbol) {
+
+        Action action;
+        switch (actionSymbol){
+            case TuringMachineDrawer.LEFT_SYMBOL:
+                action = new MoveAction(tape, head, Direction.LEFT);
+                break;
+            case TuringMachineDrawer.RIGHT_SYMBOL:
+                action = new MoveAction(tape, head, Direction.RIGHT);
+                break;
+            case TuringMachineDrawer.DOWN_SYMBOL:
+                action = new MoveAction(tape, head, Direction.DOWN);
+                break;
+            case TuringMachineDrawer.UP_SYMBOL:
+                action = new MoveAction(tape, head, Direction.UP);
+                break;
+            case TuringMachineDrawer.BLANK_SYMBOL:
+                actionSymbol = null;
+            default:
+                action = new WriteAction(tape, head, actionSymbol);
+                break;
+        }
+
+        transition.addAction(action);
+    }
+
+    void addActionFromMachine(Transition transition, Tape tape, int head, ActionType type, Object value){
+        graphPane.addAction(transition, tape, head, type, value);
+        setEnableToSave();
+    }
+
+    void removeAction(Transition transition){
+        transition.removeAction(transition.getNbActions() - 1);
+    }
+
+    void removeActionFromMachine(Transition transition, int index){
+        graphPane.removeAction(transition, index);
+        setEnableToSave();
     }
 
     void setEditGraph(){

@@ -106,7 +106,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             if(selected != null)
                 unselect();
             else
-                TuringMachineDrawer.getInstance().graphPane.addState(x, y);
+                TuringMachineDrawer.getInstance().addState(x, y);
 
         }
         else if(!TuringMachineDrawer.getInstance().buildMode && source instanceof StateGroup){

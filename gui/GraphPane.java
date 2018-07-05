@@ -5,8 +5,6 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -16,11 +14,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import turingmachines.*;
+import turingmachines.ActionType;
+import turingmachines.Direction;
+import turingmachines.Tape;
+import turingmachines.Transition;
 import util.BidirMap;
 import util.Pair;
 import util.StringEnumerator;
-import util.Subscriber;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,21 +35,13 @@ class GraphPane extends Pane {
     StateOptionRectangle stateOptionRectangle;
     TransitionOptionRectangle transitionOptionRectangle;
 
+    StringEnumerator stringEnumerator;
+
     private double graphOffsetX;
     private double graphOffsetY;
 
     private BidirMap<StateGroup, Integer> stateGroupToState;
     private BidirMap<TransitionGroup, Transition> transitionGroupToTransition;
-
-    private StringEnumerator stringEnumerator;
-
-    private Double nextX;
-    private Double nextY;
-
-    private Double nextControl1X;
-    private Double nextControl1Y;
-    private Double nextControl2X;
-    private Double nextControl2Y;
 
     private StateGroup lastCurrentStateGroup;
 
@@ -83,117 +75,13 @@ class GraphPane extends Pane {
         transitionGroupToTransition = new BidirMap<>();
 
         clear();
-
-        Subscriber s = new Subscriber() {
-            @Override
-            public void read(String msg, Object... parameters) {
-                switch (msg){
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        addStateFromMachine(state);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        removeStateFromMachine(state);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION:{
-                        Transition transition = (Transition) parameters[1];
-                        addTransitionFromMachine(transition);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION:{
-                        Transition transition = (Transition) parameters[1];
-                        removeTransitionFromMachine(transition);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL:{
-                        Transition transition = (Transition) parameters[1];
-                        Tape tape = (Tape)parameters[2];
-                        Integer head = (Integer)parameters[3];
-                        String symbol = (String)parameters[4];
-                        addReadSymbolFromMachine(transition, tape, head, symbol);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL:{
-                        Transition transition = (Transition) parameters[1];
-                        Tape tape = (Tape)parameters[2];
-                        Integer head = (Integer)parameters[3];
-                        String symbol = (String)parameters[4];
-                        removeReadSymbolFromMachine(transition, tape, head, symbol);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_ADD_ACTION:{
-                        Transition transition = (Transition) parameters[1];
-                        Tape tape = (Tape)parameters[2];
-                        Integer head = (Integer)parameters[3];
-                        ActionType type = (ActionType) parameters[4];
-                        Object value = parameters[5];
-                        addActionFromMachine(transition, tape, head, type, value);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION:{
-                        Transition transition = (Transition) parameters[1];
-                        Integer index = (Integer) parameters[2];
-                        removeActionFromMachine(transition, index);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setFinalStateFromMachine(state, true);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setFinalStateFromMachine(state, false);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setAcceptingStateFromMachine(state, true);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setAcceptingStateFromMachine(state, false);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setInitialStateFromMachine(state, true);
-                    }
-                    break;
-                    case TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE:{
-                        Integer state = (Integer) parameters[1];
-                        setInitialStateFromMachine(state, false);
-                    }
-                    break;
-                }
-            }
-        };
-
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_ACTION);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_ACTION);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_FINAL_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_FINAL_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_ACCEPTING_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
     }
 
     void clear() {
         graphOffsetX = 0;
         graphOffsetY = 0;
-        stringEnumerator = new StringEnumerator();
         lastCurrentStateGroup = null;
+        stringEnumerator = new StringEnumerator();
 
         closeStateOptionRectangle();
         closeTransitionOptionRectangle();
@@ -206,57 +94,24 @@ class GraphPane extends Pane {
         return ((int)value / TuringMachineDrawer.GRAPH_GRID_WIDTH) * TuringMachineDrawer.GRAPH_GRID_WIDTH;
     }
 
-    int addState(double x, double y){
-        if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return -1;
-        String name = stringEnumerator.next();
-        return this.addState(x, y, name);
+    String nextStateName(){
+        return stringEnumerator.next();
     }
 
-    int addState(double x, double y, String name){
-        if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return -1;
-        nextX = x;
-        nextY = y;
-        return TuringMachineDrawer.getInstance().machine.addState(name);
-    }
-
-    void addStateFromMachine(Integer state){
+    void addState(double x, double y, Integer state){
         String name = TuringMachineDrawer.getInstance().machine.getStateName(state);
         StateGroup circle = new StateGroup(name);
-        this.moveStateGroup(circle, nextX, nextY);
+        this.moveStateGroup(circle, x, y);
 
         stateGroupToState.put(circle, state);
         this.getChildren().add(circle);
-
-        TuringMachineDrawer.getInstance().setEnableToSave();
-
     }
 
     void removeState(StateGroup stateGroup) {
-        removeState(stateGroup, true);
+        TuringMachineDrawer.getInstance().removeState(stateGroupToState.getV(stateGroup));
     }
 
-    void removeState(StateGroup stateGroup, boolean doConfirm){
-        if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return;
-        Integer state = stateGroupToState.getV(stateGroup);
-
-        if(doConfirm){
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Supprimer l'état?");
-            alert.setHeaderText("");
-            alert.setContentText("Confirmer la suppression.");
-            alert.showAndWait().ifPresent(buttonType -> {
-                if(buttonType == ButtonType.OK)
-                    TuringMachineDrawer.getInstance().machine.removeState(state);
-            });
-        }
-        else
-            TuringMachineDrawer.getInstance().machine.removeState(state);
-    }
-
-    void removeStateFromMachine(Integer state){
+    void removeState(Integer state){
         StateGroup stateGroup = stateGroupToState.removeV(state);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
@@ -267,7 +122,6 @@ class GraphPane extends Pane {
             if(entry.getValue() >= state)
                 stateGroupToState.put(entry.getKey(), entry.getValue() - 1);
         }
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void moveStateGroup(StateGroup stateGroup, double x, double y){
@@ -285,28 +139,14 @@ class GraphPane extends Pane {
     Transition addTransition(StateGroup start, StateGroup end){
         if(!TuringMachineDrawer.getInstance().editGraphMode)
             return null;
-        return addTransition(start, end, null, null, null, null);
-    }
-
-
-    Transition addTransition(StateGroup start, StateGroup end,
-                             Double control1X, Double control1Y,
-                             Double control2X, Double control2Y
-    ){
-        if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return null;
         Integer input = stateGroupToState.getV(start);
         Integer output = stateGroupToState.getV(end);
-
-        this.nextControl1X = control1X;
-        this.nextControl1Y = control1Y;
-        this.nextControl2X = control2X;
-        this.nextControl2Y = control2Y;
-
-        return TuringMachineDrawer.getInstance().machine.addTransition(input, output);
+        return TuringMachineDrawer.getInstance().addTransition(input, output);
     }
 
-    private void addTransitionFromMachine(Transition transition){
+    void addTransition(Transition transition,
+                                          Double control1X, Double control1Y,
+                                          Double control2X, Double control2Y){
         Integer input = transition.getInput();
         Integer output = transition.getOutput();
 
@@ -314,10 +154,10 @@ class GraphPane extends Pane {
         StateGroup end = stateGroupToState.getK(output);
 
         TransitionGroup transitionGroup = new TransitionGroup(start, end);
-        if(nextControl1X != null)
-            transitionGroup.setControl1(nextControl1X, nextControl1Y);
-        if(nextControl2X != null)
-            transitionGroup.setControl2(nextControl2X, nextControl2Y);
+        if(control1X != null)
+            transitionGroup.setControl1(control1X, control1Y);
+        if(control2X != null)
+            transitionGroup.setControl2(control2X, control2Y);
 
         transitionGroupToTransition.put(transitionGroup, transition);
         this.getChildren().add(transitionGroup);
@@ -332,39 +172,18 @@ class GraphPane extends Pane {
             for(int head = 0; head < tape.getNbHeads(); head++)
                 transitionGroup.addHead(tape, TuringMachineDrawer.getInstance().getColorOfHead(tape, head));
         }
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void removeTransition(TransitionGroup transitionGroup){
-        removeTransition(transitionGroup, true);
-    }
-
-    void removeTransition(TransitionGroup transitionGroup, boolean doConfirm){
-        if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return;
-
         Transition transition = transitionGroupToTransition.getV(transitionGroup);
-
-        if(doConfirm){
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Supprimer la transition?");
-            alert.setHeaderText("");
-            alert.setContentText("Confirmer la suppression.");
-            alert.showAndWait().ifPresent(buttonType -> {
-                if(buttonType == ButtonType.OK)
-                    TuringMachineDrawer.getInstance().machine.removeTransition(transition);
-            });
-        }
-        else
-            TuringMachineDrawer.getInstance().machine.removeTransition(transition);
+        TuringMachineDrawer.getInstance().removeTransition(transition);
     }
 
-    void removeTransitionFromMachine(Transition transition){
+    void removeTransition(Transition transition){
         TransitionGroup transitionGroup = transitionGroupToTransition.removeV(transition);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
         this.getChildren().remove(transitionGroup);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     Transition getTransition(TransitionGroup transitionGroup) {
@@ -374,64 +193,45 @@ class GraphPane extends Pane {
     void toggleFinal(StateGroup stateGroup){
         Integer state = stateGroupToState.getV(stateGroup);
         if(stateGroup.isAccepting())
-            TuringMachineDrawer.getInstance().machine.unsetAcceptingState(state);
-        else {
-            if(stateGroup.isFinal())
-                TuringMachineDrawer.getInstance().machine.unsetFinalState(state);
-            else
-                TuringMachineDrawer.getInstance().machine.setFinalState(state);
-        }
+            TuringMachineDrawer.getInstance().setAcceptingState(state, false);
+        else
+            TuringMachineDrawer.getInstance().setFinalState(state, !stateGroup.isFinal());
     }
 
     void toggleAccepting(StateGroup stateGroup){
         Integer state = stateGroupToState.getV(stateGroup);
         if(stateGroup.isAccepting())
-            TuringMachineDrawer.getInstance().machine.unsetFinalState(state);
+            TuringMachineDrawer.getInstance().setFinalState(state, false);
         else
-            TuringMachineDrawer.getInstance().machine.setAcceptingState(state);
+            TuringMachineDrawer.getInstance().setAcceptingState(state, true);
     }
 
     void toggleInitial(StateGroup stateGroup){
         Integer state = stateGroupToState.getV(stateGroup);
-        if(stateGroup.isInitial())
-            TuringMachineDrawer.getInstance().machine.unsetInitialState(state);
-        else
-            TuringMachineDrawer.getInstance().machine.setInitialState(state);
+        TuringMachineDrawer.getInstance().setInitialState(state, !stateGroup.isInitial());
     }
 
-    private void setFinalStateFromMachine(Integer state, boolean isFinal){
+    void setFinalState(Integer state, boolean isFinal){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setFinal(isFinal);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setAcceptingStateFromMachine(Integer state, boolean isAccepting){
+    void setAcceptingState(Integer state, boolean isAccepting){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setAccepting(isAccepting);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setInitialStateFromMachine(Integer state, boolean isInitial){
+    void setInitialState(Integer state, boolean isInitial){
         StateGroup stateGroup = stateGroupToState.getK(state);
         stateGroup.setInitial(isInitial);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void addReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
-        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
-                null:symbol;
         Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        transition.addReadSymbols(tape, head, symbol);
+        TuringMachineDrawer.getInstance().addReadSymbol(transition, tape, head, symbol);
     }
 
-    void removeReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
-        symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
-                null:symbol;
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        transition.removeReadSymbols(tape, head, symbol);
-    }
-
-    private void addReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+    void addReadSymbol(Transition transition, Tape tape, int head, String symbol){
         TransitionGroup arrow = transitionGroupToTransition.getK(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
@@ -439,52 +239,28 @@ class GraphPane extends Pane {
 
         if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.addReadSymbol(tape, head, symbol);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
+    void removeReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
+        TuringMachineDrawer.getInstance().removeReadSymbol(transition, tape, head, symbol);
+    }
+
+    void removeReadSymbol(Transition transition, Tape tape, int head, String symbol){
         TransitionGroup arrow = transitionGroupToTransition.getK(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         arrow.removeReadSymbol(tape, head, symbol);
         if(transitionOptionRectangle.currentTransitionGroup == arrow)
             transitionOptionRectangle.removeReadSymbol(tape, head, symbol);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void addAction(TransitionGroup transitionGroup, Tape tape, int head, String actionSymbol) {
         Transition transition = transitionGroupToTransition.getV(transitionGroup);
-
-        Action action;
-        switch (actionSymbol){
-            case TuringMachineDrawer.LEFT_SYMBOL:
-                action = new MoveAction(tape, head, Direction.LEFT);
-                break;
-            case TuringMachineDrawer.RIGHT_SYMBOL:
-                action = new MoveAction(tape, head, Direction.RIGHT);
-                break;
-            case TuringMachineDrawer.DOWN_SYMBOL:
-                action = new MoveAction(tape, head, Direction.DOWN);
-                break;
-            case TuringMachineDrawer.UP_SYMBOL:
-                action = new MoveAction(tape, head, Direction.UP);
-                break;
-            case TuringMachineDrawer.BLANK_SYMBOL:
-                actionSymbol = null;
-            default:
-                action = new WriteAction(tape, head, actionSymbol);
-                break;
-        }
-
-        transition.addAction(action);
+        TuringMachineDrawer.getInstance().addAction(transition, tape, head, actionSymbol);
     }
 
-    void removeAction(TransitionGroup transitionGroup){
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        transition.removeAction(transition.getNbActions() - 1);
-    }
-
-    void addActionFromMachine(Transition transition, Tape tape, int head, ActionType type, Object value){
+    void addAction(Transition transition, Tape tape, int head, ActionType type, Object value){
         TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
 
         String actionSymbol = null;
@@ -523,7 +299,12 @@ class GraphPane extends Pane {
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    void removeActionFromMachine(Transition transition, int index){
+    void removeAction(TransitionGroup transitionGroup){
+        Transition transition = transitionGroupToTransition.getV(transitionGroup);
+        TuringMachineDrawer.getInstance().removeAction(transition);
+    }
+
+    void removeAction(Transition transition, int index){
         TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
         transitionGroup.removeAction(index);
 
@@ -720,7 +501,7 @@ class GraphPane extends Pane {
             double y = jsonState.getDouble("y");
             String name = jsonState.getString("name");
 
-            int state = this.addState(x, y, name);
+            int state = TuringMachineDrawer.getInstance().addState(x, y, name);
             StateGroup stateGroup = stateGroupToState.getK(state);
 
             if(jsonState.getBoolean("isInitial"))
@@ -740,15 +521,13 @@ class GraphPane extends Pane {
 
             int inputState = jsonTransition.getInt("input");
             int outputState = jsonTransition.getInt("output");
-            StateGroup inputStateGroup = stateGroupToState.getK(inputState);
-            StateGroup outputStateGroup = stateGroupToState.getK(outputState);
 
             double control1X = jsonTransition.getDouble("control1X");
             double control1Y = jsonTransition.getDouble("control1Y");
             double control2X = jsonTransition.getDouble("control2X");
             double control2Y = jsonTransition.getDouble("control2Y");
 
-            Transition transition = this.addTransition(inputStateGroup, outputStateGroup,
+            Transition transition = TuringMachineDrawer.getInstance().addTransition(inputState, outputState,
                     control1X, control1Y,
                     control2X, control2Y);
             TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
