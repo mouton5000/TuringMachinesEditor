@@ -17,17 +17,15 @@ import util.Pair;
 import java.util.*;
 
 class TransitionDisplay extends HBox {
-    TuringMachineDrawer drawer;
 
     TransitionDisplaySymbolsHBox transitionDisplaySymbolsHBox;
     TransitionDisplayActionsHBox transitionDisplayActionsHBox;
 
-    TransitionDisplay(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
+    TransitionDisplay() {
 
 
-        transitionDisplaySymbolsHBox = new TransitionDisplaySymbolsHBox(drawer);
-        transitionDisplayActionsHBox = new TransitionDisplayActionsHBox(drawer);
+        transitionDisplaySymbolsHBox = new TransitionDisplaySymbolsHBox();
+        transitionDisplayActionsHBox = new TransitionDisplayActionsHBox();
 
         this.setAlignment(Pos.CENTER);
         this.setMinWidth(TuringMachineDrawer.TRANSITION_DISPLAY_MAX_WIDTH);
@@ -103,13 +101,11 @@ class TransitionDisplay extends HBox {
 }
 
 class TransitionDisplaySymbolsHBox extends HBox {
-    TuringMachineDrawer drawer;
 
     Map<Tape, TransitionDisplaySymbolsByTapeHBox> tapes;
     Label starLabel;
 
-    TransitionDisplaySymbolsHBox(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
+    TransitionDisplaySymbolsHBox() {
         this.tapes = new HashMap<>();
         this.setSpacing(TuringMachineDrawer.TRANSITION_DISPLAY_SPACING);
 
@@ -347,11 +343,9 @@ class TransitionDisplaySymbolsByHeadLabel extends Label {
 
 class TransitionDisplayActionsHBox extends HBox{
 
-    TuringMachineDrawer drawer;
     Label noActionLabel;
 
-    TransitionDisplayActionsHBox(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
+    TransitionDisplayActionsHBox() {
         noActionLabel = new Label(TuringMachineDrawer.NO_ACTION_SYMBOL);
         noActionLabel.managedProperty().bind(noActionLabel.visibleProperty());
 
@@ -366,7 +360,7 @@ class TransitionDisplayActionsHBox extends HBox{
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
-        Color previousColor = drawer.getColorOfHead(tape, head);
+        Color previousColor = TuringMachineDrawer.getInstance().getColorOfHead(tape, head);
         for(Node child: this.getChildren()){
             if(!(child instanceof  TransitionDisplayActionLabel))
                 continue;
@@ -400,7 +394,7 @@ class TransitionDisplayActionsHBox extends HBox{
     }
 
     void addAction(Tape tape, int head, String actionSymbol){
-        Color color = drawer.getColorOfHead(tape, head);
+        Color color = TuringMachineDrawer.getInstance().getColorOfHead(tape, head);
         TransitionDisplayActionLabel label = new TransitionDisplayActionLabel(actionSymbol, color);
         this.getChildren().add(label);
         noActionLabel.setVisible(false);

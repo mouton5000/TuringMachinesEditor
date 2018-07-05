@@ -20,7 +20,6 @@ import util.Vector;
 import java.util.List;
 
 public class TransitionGroup extends Group {
-    final TuringMachineDrawer drawer;
     private final StateGroup input;
     private final StateGroup output;
 
@@ -42,12 +41,11 @@ public class TransitionGroup extends Group {
     boolean animating;
     private Timeline timeline;
 
-    TransitionGroup(TuringMachineDrawer drawer, StateGroup input, StateGroup output) {
-        this.drawer = drawer;
+    TransitionGroup(StateGroup input, StateGroup output) {
         this.input = input;
         this.output = output;
 
-        this.transitionDisplay = new TransitionDisplay(drawer);
+        this.transitionDisplay = new TransitionDisplay();
 
         this.animating = false;
         this.timeline = new Timeline();
@@ -56,7 +54,7 @@ public class TransitionGroup extends Group {
         this.centerX = new SimpleDoubleProperty();
         this.centerY = new SimpleDoubleProperty();
 
-        invisibleLine = new TransitionArrowInvisibleLine(this.drawer, this);
+        invisibleLine = new TransitionArrowInvisibleLine( this);
 
         control1Key = new TransitionArrowControl1KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
         control2Key = new TransitionArrowControl2KeyCircle(this, TuringMachineDrawer.TRANSITION_KEY_RADIUS);
@@ -72,8 +70,8 @@ public class TransitionGroup extends Group {
         control1Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
         control2Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
 
-        control1Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
-        control2Key.setOnMouseDragged(drawer.graphPaneMouseHandler);
+        control1Key.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        control2Key.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         centerLine = new CubicCurve();
         centerLine.setFill(Color.TRANSPARENT);
@@ -500,8 +498,8 @@ public class TransitionGroup extends Group {
 
     JSONObject getJSON() {
         return new JSONObject()
-                .put("input", drawer.graphPane.getState(input))
-                .put("output", drawer.graphPane.getState(output))
+                .put("input", TuringMachineDrawer.getInstance().graphPane.getState(input))
+                .put("output", TuringMachineDrawer.getInstance().graphPane.getState(output))
                 .put("control1X", centerLine.getControlX1())
                 .put("control1Y", centerLine.getControlY1())
                 .put("control2X", centerLine.getControlX2())
@@ -516,7 +514,7 @@ class TransitionArrowInvisibleLine extends Path {
     MoveTo moveTo;
     CubicCurveTo cubicCurveTo1;
 
-    TransitionArrowInvisibleLine(TuringMachineDrawer drawer, TransitionGroup transitionGroup) {
+    TransitionArrowInvisibleLine(TransitionGroup transitionGroup) {
         super();
         this.transitionGroup = transitionGroup;
 
@@ -530,9 +528,9 @@ class TransitionArrowInvisibleLine extends Path {
         this.getElements().addAll(moveTo, cubicCurveTo1);
 
 
-        this.setOnMousePressed(drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(drawer.graphPaneMouseHandler);
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
     }
 

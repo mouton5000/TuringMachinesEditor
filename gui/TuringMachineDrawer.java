@@ -32,6 +32,13 @@ import java.util.Optional;
 
 public class TuringMachineDrawer extends Application {
 
+    private static TuringMachineDrawer instance;
+
+    static TuringMachineDrawer getInstance(){
+        return instance;
+    }
+
+
     private static final int SEPARATOR_WIDTH = 2;
     private static final int MARGIN = 30;
     static int WIDTH;
@@ -187,8 +194,15 @@ public class TuringMachineDrawer extends Application {
 
     private String lastSaveFilename;
 
+
+
     @Override
     public void start(Stage stage) throws Exception{
+        if(instance != null)
+            return;
+
+        instance = this;
+
         WIDTH = (int) Screen.getPrimary().getVisualBounds().getWidth() * 3 / 4;
         HEIGHT = (int) Screen.getPrimary().getVisualBounds().getHeight()* 3 / 4;
 
@@ -372,16 +386,16 @@ public class TuringMachineDrawer extends Application {
 
     private void initDraw(){
 
-        graphPaneMouseHandler = new GraphPaneMouseHandler(this);
-        tapesMouseHandler = new TapesMouseHandler(this);
-        turingMenuMouseHandler = new TuringMenuMouseHandler(this);
-        turingMenuKeyHandler = new TuringMenuKeyHandler(this);
+        graphPaneMouseHandler = new GraphPaneMouseHandler();
+        tapesMouseHandler = new TapesMouseHandler();
+        turingMenuMouseHandler = new TuringMenuMouseHandler();
+        turingMenuKeyHandler = new TuringMenuKeyHandler();
 
 
-        graphPane = new GraphPane(this);
-        tapesPane = new TapesVBox(this);
+        graphPane = new GraphPane();
+        tapesPane = new TapesVBox();
         notification = new Notification();
-        menu = new TuringMenu(this);
+        menu = new TuringMenu();
         help = new HelpMessages();
 
         notification.setLayoutY(NOTIFICATION_HEIGHT / 2);
@@ -438,8 +452,8 @@ public class TuringMachineDrawer extends Application {
         return this.stage.heightProperty();
     }
 
-    void addSymbol(String symbol){
-        this.machine.addSymbol(symbol);
+    static void addSymbol(String symbol){
+        instance.machine.addSymbol(symbol);
     }
 
     private void addSymbolFromMachine(String symbol){

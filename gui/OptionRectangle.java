@@ -16,8 +16,6 @@ import javafx.util.Duration;
  */
 abstract class OptionRectangle extends Group{
 
-    final TuringMachineDrawer drawer;
-
     private MinimizedOptionRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;
 
@@ -25,8 +23,7 @@ abstract class OptionRectangle extends Group{
 
     private boolean maximized;
 
-    OptionRectangle(TuringMachineDrawer drawer, EventHandler<Event> mouseHandler){
-        this.drawer = drawer;
+    OptionRectangle(EventHandler<Event> mouseHandler){
 
         minimizedRectangle = new MinimizedOptionRectangle(this);
         minimizedRectangle.setOnMouseClicked(mouseHandler);
@@ -68,7 +65,7 @@ abstract class OptionRectangle extends Group{
         minimizedRectangle.toFront();
 
         timeline.setOnFinished(actionEvent -> {
-            drawer.animating = false;
+            TuringMachineDrawer.getInstance().animating = false;
         });
 
         animateSize(
@@ -101,7 +98,7 @@ abstract class OptionRectangle extends Group{
 
         if(animate) {
             timeline.setOnFinished(actionEvent -> {
-                drawer.animating = false;
+                TuringMachineDrawer.getInstance().animating = false;
                 this.setVisible(false);
             });
             animateSize(minimizedRectangle.getLayoutX() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2,
@@ -119,9 +116,9 @@ abstract class OptionRectangle extends Group{
     }
 
     private void animateSize(double x, double y, double width, double height){
-        if(drawer.animating)
+        if(TuringMachineDrawer.getInstance().animating)
             return;
-        drawer.animating = true;
+        TuringMachineDrawer.getInstance().animating = true;
         timeline.getKeyFrames().clear();
         KeyValue kx = new KeyValue(maximizedRectangle.xProperty(), x, Interpolator.EASE_BOTH);
         KeyValue ky = new KeyValue(maximizedRectangle.yProperty(), y, Interpolator.EASE_BOTH);

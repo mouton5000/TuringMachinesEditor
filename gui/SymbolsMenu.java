@@ -15,19 +15,15 @@ import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONArray;
 
-import java.util.Iterator;
-
 class SymbolsMenu extends HBox {
 
-    private final TuringMachineDrawer drawer;
     SymbolOptionRectangle symbolOptionRectangle;
     AddSymbolIcon addSymbolIcon;
     private double offsetX;
 
-    SymbolsMenu(TuringMachineDrawer drawer){
-        this.drawer = drawer;
-        this.symbolOptionRectangle = new SymbolOptionRectangle(drawer, this);
-        this.addSymbolIcon = new AddSymbolIcon(drawer);
+    SymbolsMenu(){
+        this.symbolOptionRectangle = new SymbolOptionRectangle(this);
+        this.addSymbolIcon = new AddSymbolIcon();
         this.offsetX = 0;
 
         this.setMinHeight(TuringMachineDrawer.TAPES_MENU_HEIGHT);
@@ -36,15 +32,15 @@ class SymbolsMenu extends HBox {
         this.setAlignment(Pos.CENTER_LEFT);
 
         symbolOptionRectangle.managedProperty().bind(symbolOptionRectangle.visibleProperty());
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         this.getChildren().addAll(addSymbolIcon);
     }
 
     void addSymbol(String symbol){
-        SymbolLabel label = new SymbolLabel(drawer, this, symbol);
+        SymbolLabel label = new SymbolLabel(this, symbol);
         this.getChildren().add(label);
     }
 
@@ -131,18 +127,14 @@ class SymbolsMenu extends HBox {
 
 class AddSymbolIcon extends ImageView {
 
-    TuringMachineDrawer drawer;
-
-    AddSymbolIcon(TuringMachineDrawer drawer) {
+    AddSymbolIcon() {
         super("./images/add_symbol.png");
-        this.drawer = drawer;
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }
 
 class SymbolLabel extends Group {
 
-    TuringMachineDrawer drawer;
     SymbolsMenu symbolsMenu;
     boolean animating;
     private Timeline timeline;
@@ -150,8 +142,7 @@ class SymbolLabel extends Group {
     private Rectangle backgroundRectangle;
     private Label symbolLabel;
 
-    SymbolLabel(TuringMachineDrawer drawer, SymbolsMenu symbolsMenu, String symbol) {
-        this.drawer = drawer;
+    SymbolLabel(SymbolsMenu symbolsMenu, String symbol) {
         this.symbolsMenu = symbolsMenu;
         this.animating = false;
 
@@ -179,9 +170,9 @@ class SymbolLabel extends Group {
 
         this.getChildren().addAll(backgroundRectangle, symbolLabel);
 
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 
     String getText(){ return symbolLabel.getText(); }

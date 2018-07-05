@@ -15,21 +15,16 @@ import java.util.Optional;
  */
 public class TapesMouseHandler implements EventHandler<Event> {
 
-    private TuringMachineDrawer drawer;
-
     private Double dragX;
     private Double dragY;
 
-    public TapesMouseHandler(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
-    }
+    public TapesMouseHandler() {
+        }
 
     @Override
     public void handle(Event event) {
-        if(drawer.animating)
+        if(TuringMachineDrawer.getInstance().animating)
             return;
-
-//        System.out.println(event.getEventType()+" "+event.getClass()+" "+event.getSource().getClass());
 
         if(event.getEventType() == MouseEvent.MOUSE_CLICKED)
             this.handleClickedEvent((MouseEvent) event);
@@ -56,13 +51,13 @@ public class TapesMouseHandler implements EventHandler<Event> {
             dragY = y;
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof HeadMenuSelect){
             HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
             if(!headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized()){
                 headMenuSelect.startTimeline();
             }
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
             if(!tapePane.cellOptionRectangle.isMaximized() && !tapePane.tapeOptionRectangle.isMaximized()) {
                 Integer line = tapePane.getLine(y);
@@ -70,7 +65,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
                 tapePane.startTimeline(line, column);
             }
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof SymbolLabel){
             SymbolLabel symbolLabel = (SymbolLabel) source;
             if(!symbolLabel.symbolsMenu.symbolOptionRectangle.isMaximized()){
                 symbolLabel.startTimeline();
@@ -87,7 +82,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
         Object source = mouseEvent.getSource();
-        if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane){
+        if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TapePane){
             TapePane tapePane = (TapePane) source;
 
             if(tapePane.cellOptionRectangle.isMaximized())
@@ -108,7 +103,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof MinimizedOptionRectangle){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof MinimizedOptionRectangle){
             MinimizedOptionRectangle minimizedOptionRectangle = (MinimizedOptionRectangle) source;
             if(minimizedOptionRectangle.optionRectangle instanceof CellOptionRectangle) {
                 TapePane tapePane = (TapePane)minimizedOptionRectangle.optionRectangle.associatedNode();
@@ -128,7 +123,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleChooseSymbolOptionLabel){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof CellOptionRectangleChooseSymbolOptionLabel){
             CellOptionRectangleChooseSymbolOptionLabel label = (CellOptionRectangleChooseSymbolOptionLabel) source;
             CellOptionRectangle optionRectangle = label.optionRectangle;
             int line = optionRectangle.currentLine;
@@ -140,41 +135,41 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleChooseHead){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof CellOptionRectangleChooseHead){
             CellOptionRectangleChooseHead chooseHeadRectangle = (CellOptionRectangleChooseHead) source;
             CellOptionRectangle optionRectangle = chooseHeadRectangle.optionRectangle;
             Color color = (Color) chooseHeadRectangle.getStroke();
 
             int line = optionRectangle.currentLine;
             int column = optionRectangle.currentColumn;
-            Pair<Tape, Integer> pair = drawer.getHead(color);
-            drawer.moveHead(pair.first, line, column, pair.second);
+            Pair<Tape, Integer> pair = TuringMachineDrawer.getInstance().getHead(color);
+            TuringMachineDrawer.getInstance().moveHead(pair.first, line, column, pair.second);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof AddTapeIcon){
-            this.drawer.addTape();
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof AddTapeIcon){
+            TuringMachineDrawer.getInstance().addTape();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapeHeadMenu){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TapeHeadMenu){
             TapeHeadMenu tapeHeadMenu = (TapeHeadMenu) source;
             if(tapeHeadMenu.headOptionRectangle.isMaximized())
                 tapeHeadMenu.closeHeadOptionRectangle();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveTapeIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveTapeIcon){
             RemoveTapeIcon removeTapeIcon = (RemoveTapeIcon) source;
             if(removeTapeIcon.tapeHeadMenu.headOptionRectangle.isMaximized())
                 removeTapeIcon.tapeHeadMenu.closeHeadOptionRectangle();
             else
-                this.drawer.removeTape(removeTapeIcon.tape);
+                TuringMachineDrawer.getInstance().removeTape(removeTapeIcon.tape);
             mouseEvent.consume();
         }
         else if(source instanceof HeadMenuSelect){
 
             HeadMenuSelect headMenuSelect = (HeadMenuSelect) source;
 
-            if(drawer.buildMode || drawer.manualMode){
-                drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
+            if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode){
+                TuringMachineDrawer.getInstance().centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
             }
             else {
                 if (headMenuSelect.tapeHeadMenu.headOptionRectangle.isMaximized())
@@ -184,28 +179,28 @@ public class TapesMouseHandler implements EventHandler<Event> {
                     headMenuSelect.stopTimeline();
 
                     if (!pressFinished)
-                        drawer.centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
+                        TuringMachineDrawer.getInstance().centerOn(headMenuSelect.tapeHeadMenu.tape, headMenuSelect.getHead());
                     else
                         headMenuSelect.tapeHeadMenu.openHeadOptionRectangle(headMenuSelect.getHead());
                 }
                 mouseEvent.consume();
             }
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveHeadIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveHeadIcon){
             RemoveHeadIcon removeHeadIcon = (RemoveHeadIcon) source;
             Tape tape = removeHeadIcon.optionRectangle.tape;
             int head = removeHeadIcon.optionRectangle.currentHead;
-            removeHeadIcon.drawer.removeHead(tape, head, true);
+            TuringMachineDrawer.getInstance().removeHead(tape, head, true);
         }
         else if(source instanceof TranslateTapesArrow){
             TranslateTapesArrow translateTapesArrow = ((TranslateTapesArrow) source);
-            drawer.tapesPane.centerOn(translateTapesArrow.tapeBorderPane.tape);
+            TuringMachineDrawer.getInstance().tapesPane.centerOn(translateTapesArrow.tapeBorderPane.tape);
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof OptionRectangle)
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof OptionRectangle)
             mouseEvent.consume();
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapeOptionIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TapeOptionIcon){
             TapeOptionIcon tapeOptionIcon = (TapeOptionIcon) source;
             TapeBorderPane tapeBorderPane = tapeOptionIcon.optionRectangle.tapeBorderPane;
             int line = tapeOptionIcon.optionRectangle.currentLine;
@@ -265,12 +260,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
                     break;
             }
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolsMenu){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof SymbolsMenu){
             if(((SymbolsMenu) source).symbolOptionRectangle.isMaximized())
                 ((SymbolsMenu) source).closeSymbolOptionRectangle();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof SymbolLabel){
 
             SymbolLabel symbolLabel = (SymbolLabel) source;
 
@@ -285,7 +280,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof AddSymbolIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof AddSymbolIcon){
 
             VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
             virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
@@ -293,11 +288,11 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             Optional<String> result = virtualKeyboard.showAndWait();
             if(result.isPresent()){
-                drawer.addSymbol(result.get());
+                TuringMachineDrawer.getInstance().addSymbol(result.get());
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof EditSymbolIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof EditSymbolIcon){
 
             VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
             virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
@@ -305,12 +300,12 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             Optional<String> result = virtualKeyboard.showAndWait();
             if(result.isPresent())
-                drawer.editSymbol(((EditSymbolIcon) source).optionRectangle.currentSymbolIndex, result.get());
+                TuringMachineDrawer.getInstance().editSymbol(((EditSymbolIcon) source).optionRectangle.currentSymbolIndex, result.get());
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveSymbolIcon){
-            drawer.removeSymbol(((RemoveSymbolIcon) source).optionRectangle.currentSymbolIndex);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveSymbolIcon){
+            TuringMachineDrawer.getInstance().removeSymbol(((RemoveSymbolIcon) source).optionRectangle.currentSymbolIndex);
         }
     }
 
@@ -335,7 +330,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleHeadOptionsGroup){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof CellOptionRectangleHeadOptionsGroup){
             if(dragX == null)
                 dragX = x;
             else {
@@ -345,7 +340,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof CellOptionRectangleSymbolsOptionsGroup){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof CellOptionRectangleSymbolsOptionsGroup){
             if(dragX == null)
                 dragX = x;
             else {
@@ -375,13 +370,13 @@ public class TapesMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadMenuSelect) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof HeadMenuSelect) {
             ((HeadMenuSelect) source).stopTimeline();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof SymbolLabel) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof SymbolLabel) {
             ((SymbolLabel) source).stopTimeline();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TapePane) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TapePane) {
             ((TapePane) source).stopTimeline();
         }
     }

@@ -13,11 +13,9 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONObject;
-import turingmachines.TuringMachine;
 
 class StateGroup extends Group{
 
-    TuringMachineDrawer drawer;
     boolean animating;
 
     private Circle outerCircle;
@@ -30,14 +28,13 @@ class StateGroup extends Group{
 
     private Timeline timeline;
 
-    StateGroup(TuringMachineDrawer drawer, String name){
-        this.drawer = drawer;
+    StateGroup(String name){
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
 
-        this.setOnMousePressed(drawer.graphPaneMouseHandler);
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         outerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         outerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);

@@ -14,8 +14,8 @@ class HeadOptionRectangle extends OptionRectangle{
     Tape tape;
     int currentHead;
 
-    HeadOptionRectangle(TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu, Tape tape) {
-        super(drawer, drawer.tapesMouseHandler);
+    HeadOptionRectangle(TapeHeadMenu tapeHeadMenu, Tape tape) {
+        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
         this.tapeHeadMenu = tapeHeadMenu;
         this.tape = tape;
 
@@ -24,7 +24,7 @@ class HeadOptionRectangle extends OptionRectangle{
         ColorPicker changeColorPicker = new ColorPicker();
         changeColorPicker.setOpacity(0);
 
-        RemoveHeadIcon removeHeadIcon = new RemoveHeadIcon(drawer, this, "./images/remove_head.png");
+        RemoveHeadIcon removeHeadIcon = new RemoveHeadIcon( this, "./images/remove_head.png");
 
 
         changeColorPicker.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
@@ -63,7 +63,7 @@ class HeadOptionRectangle extends OptionRectangle{
 
         changeColorPicker.setOnAction(actionEvent ->
         {
-            drawer.editHeadColor(this.tape, this.currentHead, changeColorPicker.getValue());
+            TuringMachineDrawer.getInstance().editHeadColor(this.tape, this.currentHead, changeColorPicker.getValue());
         });
 
         this.getChildren().addAll(changeColorIcon, changeColorPicker, removeHeadIcon);
@@ -106,14 +106,12 @@ class HeadOptionRectangle extends OptionRectangle{
 
 class RemoveHeadIcon extends ImageView{
 
-    TuringMachineDrawer drawer;
     HeadOptionRectangle optionRectangle;
 
-    public RemoveHeadIcon(TuringMachineDrawer drawer, HeadOptionRectangle headOptionRectangle, String s) {
+    public RemoveHeadIcon(HeadOptionRectangle headOptionRectangle, String s) {
         super(s);
-        this.drawer = drawer;
         this.optionRectangle = headOptionRectangle;
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }

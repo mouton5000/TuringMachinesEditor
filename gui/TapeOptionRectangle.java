@@ -35,8 +35,8 @@ class TapeOptionRectangle extends OptionRectangle{
     int currentLine;
     int currentColumn;
 
-    TapeOptionRectangle(TuringMachineDrawer drawer, TapeBorderPane tapeBorderPane) {
-        super(drawer, drawer.tapesMouseHandler);
+    TapeOptionRectangle(TapeBorderPane tapeBorderPane) {
+        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
         this.tapeBorderPane = tapeBorderPane;
 
         this.currentTape = tapeBorderPane.tape;
@@ -307,7 +307,7 @@ class TapeOptionIcon extends ImageView{
         this.optionRectangle = optionRectangle;
         this.tapeOptionIconAction = tapeOptionIconAction;
         this.tapeOptionIconDirection = tapeOptionIconDirection;
-        this.setOnMouseClicked(optionRectangle.tapeBorderPane.drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
 
     }

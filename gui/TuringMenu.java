@@ -18,7 +18,6 @@ import java.util.List;
  * Created by dimitri.watel on 22/06/18.
  */
 class TuringMenu extends Group {
-    TuringMachineDrawer drawer;
 
     private Rectangle rectangle;
 
@@ -47,29 +46,28 @@ class TuringMenu extends Group {
     List<PlayerIcon> playerMenu;
     List<PlayerIcon> allMenu;
 
-    TuringMenu(TuringMachineDrawer drawer){
-        this.drawer = drawer;
+    TuringMenu(){
 
-        editGraphIcon = new EditGraphIcon(this.drawer);
-        newFileIcon = new NewFileIcon(this.drawer);
-        openFileIcon = new OpenFileIcon(this.drawer);
-        saveFileIcon = new SaveFileIcon(this.drawer);
-        saveAsFileIcon = new SaveAsFileIcon(this.drawer);
-        parametersIcon = new ParametersIcon(this.drawer);
+        editGraphIcon = new EditGraphIcon();
+        newFileIcon = new NewFileIcon();
+        openFileIcon = new OpenFileIcon();
+        saveFileIcon = new SaveFileIcon();
+        saveAsFileIcon = new SaveAsFileIcon();
+        parametersIcon = new ParametersIcon();
 
-        stopIcon = new StopIcon(this.drawer);
-        previousFrameIcon = new PreviousFrameIcon(this.drawer);
-        playIcon = new PlayIcon(this.drawer);
-        pauseIcon = new PauseIcon(this.drawer);
-        nextFrameIcon = new NextFrameIcon(this.drawer);
-        lastFrameIcon = new LastFrameIcon(this.drawer);
+        stopIcon = new StopIcon();
+        previousFrameIcon = new PreviousFrameIcon();
+        playIcon = new PlayIcon();
+        pauseIcon = new PauseIcon();
+        nextFrameIcon = new NextFrameIcon();
+        lastFrameIcon = new LastFrameIcon();
 
-        buildIcon = new BuildIcon(this.drawer);
-        manualIcon = new ManualIcon(this.drawer);
-        helpIcon = new HelpIcon(this.drawer);
+        buildIcon = new BuildIcon();
+        manualIcon = new ManualIcon();
+        helpIcon = new HelpIcon();
 
-        showIcon = new ShowIcon(this.drawer);
-        hideIcon = new HideIcon(this.drawer);
+        showIcon = new ShowIcon();
+        hideIcon = new HideIcon();
 
 
 
@@ -269,12 +267,10 @@ class TuringMenu extends Group {
 
 abstract class PlayerIcon extends Group{
 
-    TuringMachineDrawer drawer;
     private Circle circle;
     private boolean wasVisible;
 
-    PlayerIcon(TuringMachineDrawer drawer){
-        this.drawer = drawer;
+    PlayerIcon(){
 
         circle = new Circle();
         circle.setRadius(TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -293,7 +289,7 @@ abstract class PlayerIcon extends Group{
 
     void setClickable(){
         circle.setFill(TuringMachineDrawer.MENU_CLICKABLE_ICON_COLOR);
-        this.setOnMouseClicked(drawer.turingMenuMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().turingMenuMouseHandler);
     }
     void setNonClickable(){
         circle.setFill(TuringMachineDrawer.MENU_NON_CLICKABLE_ICON_COLOR);
@@ -314,8 +310,8 @@ abstract class PlayerIcon extends Group{
 
 class EditGraphIcon extends PlayerIcon {
 
-    EditGraphIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    EditGraphIcon() {
+        
 
         ImageView imageView = new ImageView("images/edit_graph_icon.png");
         imageView.setFitHeight(1.5 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -328,8 +324,8 @@ class EditGraphIcon extends PlayerIcon {
 
 class NewFileIcon extends PlayerIcon {
 
-    NewFileIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    NewFileIcon() {
+        
 
         ImageView imageView = new ImageView("./images/new_file.png");
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -342,8 +338,8 @@ class NewFileIcon extends PlayerIcon {
 
 class OpenFileIcon extends PlayerIcon {
 
-    OpenFileIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    OpenFileIcon() {
+        
 
         ImageView imageView = new ImageView("./images/open_file.png");
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -356,8 +352,8 @@ class OpenFileIcon extends PlayerIcon {
 
 class SaveFileIcon extends PlayerIcon {
 
-    SaveFileIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    SaveFileIcon() {
+        
 
         ImageView imageView = new ImageView("./images/save_file.png");
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -370,8 +366,8 @@ class SaveFileIcon extends PlayerIcon {
 
 class SaveAsFileIcon extends PlayerIcon {
 
-    SaveAsFileIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    SaveAsFileIcon() {
+        
 
         ImageView imageView = new ImageView("./images/saveas_file.png");
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -384,8 +380,8 @@ class SaveAsFileIcon extends PlayerIcon {
 
 class ManualIcon extends PlayerIcon{
 
-    ManualIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    ManualIcon() {
+        
 
         ImageView imageView = new ImageView("./images/manual_icon.png");
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
@@ -398,8 +394,8 @@ class ManualIcon extends PlayerIcon{
 
 class ParametersIcon extends PlayerIcon {
 
-    ParametersIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    ParametersIcon() {
+        
 
         double smallRadius = TuringMachineDrawer.STATE_RADIUS / 6;
 
@@ -419,8 +415,8 @@ class ParametersIcon extends PlayerIcon {
 
 class BuildIcon extends PlayerIcon{
 
-    BuildIcon(TuringMachineDrawer drawer){
-        super(drawer);
+    BuildIcon(){
+        
 
         double outerRadius = TuringMachineDrawer.MENU_ICON_RADIUS * 7 / 12;
         double circleStroke = TuringMachineDrawer.MENU_ICON_RADIUS / 6;
@@ -459,8 +455,8 @@ class BuildIcon extends PlayerIcon{
 
 class StopIcon extends PlayerIcon{
 
-    StopIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    StopIcon() {
+        
 
         Rectangle rectangle = new Rectangle(
                 - TuringMachineDrawer.MENU_ICON_RADIUS * 3.0 / 8,
@@ -476,8 +472,8 @@ class StopIcon extends PlayerIcon{
 
 class PlayIcon extends PlayerIcon{
 
-    PlayIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    PlayIcon() {
+        
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
@@ -495,8 +491,8 @@ class PlayIcon extends PlayerIcon{
 
 class PauseIcon extends PlayerIcon{
 
-    PauseIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    PauseIcon() {
+        
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
@@ -521,8 +517,8 @@ class PauseIcon extends PlayerIcon{
 }
 
 class PreviousFrameIcon extends PlayerIcon{
-    PreviousFrameIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    PreviousFrameIcon() {
+        
 
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
@@ -550,8 +546,8 @@ class PreviousFrameIcon extends PlayerIcon{
 }
 
 class NextFrameIcon extends PlayerIcon{
-    NextFrameIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    NextFrameIcon() {
+        
 
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
@@ -579,8 +575,8 @@ class NextFrameIcon extends PlayerIcon{
 }
 
 class LastFrameIcon extends PlayerIcon{
-    LastFrameIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    LastFrameIcon() {
+        
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
@@ -615,8 +611,8 @@ class LastFrameIcon extends PlayerIcon{
 }
 
 class HideIcon extends PlayerIcon{
-    HideIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    HideIcon() {
+        
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
@@ -637,8 +633,8 @@ class HideIcon extends PlayerIcon{
 }
 
 class ShowIcon extends PlayerIcon{
-    ShowIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    ShowIcon() {
+        
 
         double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
         double height = Math.sqrt(3) * playEdgeLength / 2;
@@ -659,8 +655,8 @@ class ShowIcon extends PlayerIcon{
 }
 
 class HelpIcon extends PlayerIcon{
-    HelpIcon(TuringMachineDrawer drawer) {
-        super(drawer);
+    HelpIcon() {
+        
 
         Label label = new Label("?");
         label.setTextFill(Color.WHITE);

@@ -8,12 +8,12 @@ class SymbolOptionRectangle extends OptionRectangle {
     SymbolsMenu symbolsMenu;
     int currentSymbolIndex;
 
-    SymbolOptionRectangle(TuringMachineDrawer drawer, SymbolsMenu symbolsMenu) {
-        super(drawer, drawer.tapesMouseHandler);
+    SymbolOptionRectangle(SymbolsMenu symbolsMenu) {
+        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
         this.symbolsMenu = symbolsMenu;
 
-        EditSymbolIcon editSymbolIcon = new EditSymbolIcon(drawer, this);
-        RemoveSymbolIcon removeSymbolIcon = new RemoveSymbolIcon(drawer, this);
+        EditSymbolIcon editSymbolIcon = new EditSymbolIcon(this);
+        RemoveSymbolIcon removeSymbolIcon = new RemoveSymbolIcon(this);
 
         editSymbolIcon.setLayoutX(
                 TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
@@ -37,7 +37,7 @@ class SymbolOptionRectangle extends OptionRectangle {
                 - removeSymbolIcon.getBoundsInLocal().getHeight() / 2
         );
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         this.getChildren().addAll(editSymbolIcon, removeSymbolIcon);
     }
@@ -79,27 +79,23 @@ class SymbolOptionRectangle extends OptionRectangle {
 }
 
 class EditSymbolIcon extends ImageView {
-    TuringMachineDrawer drawer;
     SymbolOptionRectangle optionRectangle;
 
-    EditSymbolIcon(TuringMachineDrawer drawer, SymbolOptionRectangle optionRectangle){
+    EditSymbolIcon(SymbolOptionRectangle optionRectangle){
         super("./images/cursor_icon.png");
-        this.drawer = drawer;
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }
 
 class RemoveSymbolIcon extends ImageView {
-    TuringMachineDrawer drawer;
     SymbolOptionRectangle optionRectangle;
 
-    RemoveSymbolIcon(TuringMachineDrawer drawer, SymbolOptionRectangle optionRectangle){
+    RemoveSymbolIcon(SymbolOptionRectangle optionRectangle){
         super("./images/remove_symbol.png");
-        this.drawer = drawer;
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }

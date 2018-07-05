@@ -43,10 +43,10 @@ class TransitionOptionRectangle extends OptionRectangle {
     Tape currentTape;
     int currentHead;
 
-    TransitionOptionRectangle(TuringMachineDrawer drawer, GraphPane graphPane) {
-        super(drawer, drawer.graphPaneMouseHandler);
+    TransitionOptionRectangle(GraphPane graphPane) {
+        super(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
         this.graphPane = graphPane;
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         vbox = new VBox();
 
@@ -55,8 +55,8 @@ class TransitionOptionRectangle extends OptionRectangle {
         iconsHBox.setMaxWidth(getMaximizedWidth());
         iconsHBox.setAlignment(Pos.CENTER);
 
-        readIcon = new ReadIcon(drawer, this);
-        actionsIcon = new ActionsIcon(drawer, this);
+        readIcon = new ReadIcon(this);
+        actionsIcon = new ActionsIcon( this);
         removeTransitionIcon = new RemoveTransitionIcon(this);
 
         iconsHBox.setSpacing((getMaximizedWidth()
@@ -68,9 +68,9 @@ class TransitionOptionRectangle extends OptionRectangle {
 
         headOptionsGroup = new HeadOptionsGroup(this);
         readSymbolMenu = new ReadSymbolMenu(this);
-        transitionOptionRectangleSymbolsDisplay = new TransitionOptionRectangleSymbolsDisplay(this.drawer, this);
+        transitionOptionRectangleSymbolsDisplay = new TransitionOptionRectangleSymbolsDisplay( this);
         actionsMenu = new ActionsMenu(this);
-        actionsDisplay = new ActionDisplay(this.drawer, this);
+        actionsDisplay = new ActionDisplay( this);
 
         vbox.getChildren().addAll(
                 iconsHBox, new Separator(),
@@ -268,8 +268,8 @@ class HeadOptionsGroup extends HBox{
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 
     void addTape(Tape tape){
@@ -373,21 +373,19 @@ class RemoveTransitionIcon extends ImageView{
         super("./images/remove_transition.png");
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 }
 
 class ReadIcon extends Group{
 
-    TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
 
     private Rectangle backgroundColor;
 
-    ReadIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+    ReadIcon(TransitionOptionRectangle optionRectangle) {
 
         ImageView readIcon = new ImageView("./images/read_tape_icon.png");
-        this.drawer = drawer;
         this.optionRectangle = optionRectangle;
 
         readIcon.setLayoutX(-readIcon.getBoundsInLocal().getWidth() / 2);
@@ -400,7 +398,7 @@ class ReadIcon extends Group{
                 readIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.getChildren().addAll(backgroundColor, readIcon);
     }
@@ -474,7 +472,7 @@ class TransitionOptionRectangleChooseHead extends Rectangle{
         super(v, v1, v2, v3);
         this.optionRectangle = optionRectangle;
         this.transitionOptionRectangleTapeHBox = transitionOptionRectangleTapeHBox;
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 
     int getHead() {
@@ -495,8 +493,8 @@ class ReadSymbolMenu extends HBox{
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         ChooseSymbolOptionLabel label =
                 new ChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
@@ -541,7 +539,7 @@ class ReadSymbolMenu extends HBox{
         Set<String> selectedSymbols = new HashSet<>();
 
         if(optionRectangle.currentTransitionGroup != null) {
-            selectedSymbols = optionRectangle.drawer.graphPane.getReadSymbols(
+            selectedSymbols = TuringMachineDrawer.getInstance().graphPane.getReadSymbols(
                     optionRectangle.currentTransitionGroup, tape, head);
         }
 
@@ -600,14 +598,14 @@ class ChooseSymbolOptionLabel extends Label{
         this.setBackground(UNSELECTED_BACKGROUND);
         this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
 
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
         this.setAlignment(Pos.CENTER);
     }
 
@@ -623,14 +621,12 @@ class ChooseSymbolOptionLabel extends Label{
 }
 
 class TransitionOptionRectangleSymbolsDisplay extends HBox {
-    TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
 
     private Map<Tape, TapeSymbolsDisplay> tapes;
     private double offsetX;
 
-    TransitionOptionRectangleSymbolsDisplay(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
-        this.drawer = drawer;
+    TransitionOptionRectangleSymbolsDisplay(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
         this.tapes = new HashMap<>();
 
@@ -642,8 +638,8 @@ class TransitionOptionRectangleSymbolsDisplay extends HBox {
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
 
-        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 
     void addTape(Tape tape){
@@ -748,14 +744,12 @@ class HeadSymbolsLabelDisplay extends Label {
 
 class ActionsIcon extends Group{
 
-    TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
     private Rectangle backgroundColor;
 
-    ActionsIcon(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
+    ActionsIcon(TransitionOptionRectangle optionRectangle) {
 
         ImageView actionsIcon = new ImageView("./images/action_tape_icon.png");
-        this.drawer = drawer;
         this.optionRectangle = optionRectangle;
 
         actionsIcon.setLayoutX(-actionsIcon.getBoundsInLocal().getWidth() / 2);
@@ -768,7 +762,7 @@ class ActionsIcon extends Group{
                 actionsIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.getChildren().addAll(backgroundColor, actionsIcon);
     }
@@ -792,8 +786,8 @@ class ActionsMenu extends HBox {
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         removeActionIcon = new RemoveActionIcon(optionRectangle);
         this.getChildren().add(removeActionIcon);
@@ -871,14 +865,14 @@ class ChooseActionOptionLabel extends Label{
 
         this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
 
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 }
 
@@ -890,18 +884,16 @@ class RemoveActionIcon extends ImageView{
         super("./images/remove_action.png");
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 }
 
 class ActionDisplay extends HBox{
 
-    TuringMachineDrawer drawer;
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
 
-    ActionDisplay(TuringMachineDrawer drawer, TransitionOptionRectangle optionRectangle) {
-        this.drawer = drawer;
+    ActionDisplay(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
         this.offsetX = 0;
 
@@ -911,12 +903,12 @@ class ActionDisplay extends HBox{
         this.setAlignment(Pos.CENTER_LEFT);
         this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
 
-        this.setOnMousePressed(optionRectangle.drawer.graphPaneMouseHandler);
-        this.setOnMouseDragged(optionRectangle.drawer.graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 
     void addAction(Tape tape, int head, String actionSymbol) {
-        addAction(drawer.getColorOfHead(tape, head), actionSymbol);
+        addAction(TuringMachineDrawer.getInstance().getColorOfHead(tape, head), actionSymbol);
     }
 
     private void addAction(Color color, String actionSymbol){
@@ -925,7 +917,7 @@ class ActionDisplay extends HBox{
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         label.setTextFill(color);
 
-        label.setOnMouseClicked(optionRectangle.drawer.graphPaneMouseHandler);
+        label.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
@@ -967,7 +959,7 @@ class ActionDisplay extends HBox{
     }
 
     public void editHeadColor(Tape tape, int head, Color color) {
-        Color previousColor = drawer.getColorOfHead(tape, head);
+        Color previousColor = TuringMachineDrawer.getInstance().getColorOfHead(tape, head);
 
         for(Node child: this.getChildren()){
             Label label = (Label) child;

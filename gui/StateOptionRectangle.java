@@ -19,10 +19,10 @@ class StateOptionRectangle extends OptionRectangle{
     private GraphPane graphPane;
     private ChangeListener<Number> changeListener;
 
-    StateOptionRectangle(TuringMachineDrawer drawer, GraphPane pane) {
-        super(drawer, drawer.graphPaneMouseHandler);
+    StateOptionRectangle(GraphPane pane) {
+        super(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
         this.graphPane = pane;
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         changeListener = (observableValue, oldVal, newVal) ->
                 StateOptionRectangle.this.setLayoutY(
@@ -62,15 +62,15 @@ class StateOptionRectangle extends OptionRectangle{
         hBoxDown.setAlignment(Pos.CENTER);
         hBoxDown.setSpacing(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING);
 
-        FinalStateOption finalStateOption = new FinalStateOption(drawer, this);
-        AcceptingStateOption acceptingStateOption = new AcceptingStateOption(drawer, this);
-        InitialStateOption initialStateOption = new InitialStateOption(drawer, this);
+        FinalStateOption finalStateOption = new FinalStateOption(this);
+        AcceptingStateOption acceptingStateOption = new AcceptingStateOption( this);
+        InitialStateOption initialStateOption = new InitialStateOption( this);
 
-        EditStateNameOptionIcon editStateNameOptionIcon = new EditStateNameOptionIcon(drawer, this);
+        EditStateNameOptionIcon editStateNameOptionIcon = new EditStateNameOptionIcon( this);
         editStateNameOptionIcon.setPreserveRatio(true);
         editStateNameOptionIcon.setFitHeight(TuringMachineDrawer.STATE_RADIUS * 2);
 
-        RemoveStateOptionIcon removeStateOptionIcon = new RemoveStateOptionIcon(drawer, this);
+        RemoveStateOptionIcon removeStateOptionIcon = new RemoveStateOptionIcon( this);
 
         hBoxTop.getChildren().addAll(finalStateOption, acceptingStateOption, initialStateOption);
         hBoxDown.getChildren().addAll(editStateNameOptionIcon, removeStateOptionIcon);
@@ -117,7 +117,7 @@ class FinalStateOption extends Group {
 
     StateOptionRectangle optionRectangle;
 
-    FinalStateOption(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle) {
+    FinalStateOption(StateOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
 
         Circle finalStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
@@ -129,7 +129,7 @@ class FinalStateOption extends Group {
         finalStateOptionInnerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
         finalStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.getChildren().addAll(finalStateOptionOuterCircle, finalStateOptionInnerCircle);
     }
@@ -138,7 +138,7 @@ class FinalStateOption extends Group {
 class AcceptingStateOption extends Group{
     StateOptionRectangle optionRectangle;
 
-    AcceptingStateOption(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+    AcceptingStateOption(StateOptionRectangle optionRectangle){
         this.optionRectangle = optionRectangle;
         Circle acceptingStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         acceptingStateOptionOuterCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
@@ -151,7 +151,7 @@ class AcceptingStateOption extends Group{
 
         ImageView acceptingStateOptionIcon = new ImageView("./images/Accept-icon.png");
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.getChildren().addAll(acceptingStateOptionOuterCircle, acceptingStateOptionInnerCircle,
                 acceptingStateOptionIcon);
@@ -169,7 +169,7 @@ class AcceptingStateOption extends Group{
 class InitialStateOption extends Group{
     StateOptionRectangle optionRectangle;
 
-    InitialStateOption(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+    InitialStateOption(StateOptionRectangle optionRectangle){
         this.optionRectangle = optionRectangle;
 
         Circle initialStateOptionCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
@@ -190,7 +190,7 @@ class InitialStateOption extends Group{
         initialStateOptionLine2.setEndY(Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
         this.getChildren().addAll(initialStateOptionCircle, initialStateOptionLine1, initialStateOptionLine2);
     }
@@ -198,20 +198,20 @@ class InitialStateOption extends Group{
 
 class EditStateNameOptionIcon extends ImageView{
     StateOptionRectangle optionRectangle;
-    EditStateNameOptionIcon(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+    EditStateNameOptionIcon(StateOptionRectangle optionRectangle){
         super("./images/cursor_icon.png");
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 }
 
 class RemoveStateOptionIcon extends ImageView{
     StateOptionRectangle optionRectangle;
-    RemoveStateOptionIcon(TuringMachineDrawer drawer, StateOptionRectangle optionRectangle){
+    RemoveStateOptionIcon(StateOptionRectangle optionRectangle){
         super("./images/remove_state.png");
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(drawer.graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
 }

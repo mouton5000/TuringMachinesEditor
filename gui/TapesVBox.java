@@ -18,20 +18,18 @@ import turingmachines.Tape;
  */
 class TapesVBox extends VBox {
 
-    TuringMachineDrawer drawer;
     TapesHeadMenu tapesHeadMenu;
     SymbolsMenu symbolsMenu;
     TapeBorderPanesHBox tapesPane;
 
-    TapesVBox(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
+    TapesVBox() {
         this.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
         HBox hbox = new HBox();
 
-        tapesHeadMenu = new TapesHeadMenu(this.drawer);
+        tapesHeadMenu = new TapesHeadMenu();
         tapesHeadMenu.setTranslateX(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
-        symbolsMenu = new SymbolsMenu(this.drawer);
+        symbolsMenu = new SymbolsMenu();
 
         Rectangle tapesHeadClip = new Rectangle(0, 0, 0, TuringMachineDrawer.TAPES_MENU_HEIGHT);
         tapesHeadMenu.setClip(tapesHeadClip);
@@ -41,7 +39,7 @@ class TapesVBox extends VBox {
 
         hbox.getChildren().addAll(tapesHeadMenu, new Separator(Orientation.VERTICAL), symbolsMenu);
 
-        tapesPane = new TapeBorderPanesHBox(this.drawer);
+        tapesPane = new TapeBorderPanesHBox();
 
         this.getChildren().addAll(hbox, new Separator(), tapesPane);
 
@@ -148,12 +146,12 @@ class TapesVBox extends VBox {
     void loadJSON(JSONObject jsonTapes) {
         JSONArray jsonSymbols = jsonTapes.getJSONArray("symbolsMenu");
         for(Object object : jsonSymbols)
-            drawer.addSymbol((String)object);
+            TuringMachineDrawer.getInstance().addSymbol((String)object);
 
         JSONArray jsonTapesAr = jsonTapes.getJSONArray("tapes");
         for(int i = 0; i < jsonTapesAr.length(); i++){
-            drawer.addTape();
-            Tape tape = drawer.machine.getTape(i);
+            TuringMachineDrawer.getInstance().addTape();
+            Tape tape = TuringMachineDrawer.getInstance().machine.getTape(i);
 
             JSONObject jsonTape = jsonTapesAr.getJSONObject(i);
 
@@ -187,7 +185,7 @@ class TapesVBox extends VBox {
                 Color color = Color.valueOf(jsonHead.getString("color"));
                 int line = jsonHead.getInt("line");
                 int column = jsonHead.getInt("column");
-                drawer.addHead(tape, line, column, color);
+                TuringMachineDrawer.getInstance().addHead(tape, line, column, color);
             }
 
             JSONArray jsonCells = jsonTape.getJSONArray("cells");

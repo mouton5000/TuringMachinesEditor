@@ -26,7 +26,6 @@ import java.util.Map;
 
 class TapesHeadMenu extends HBox {
 
-    private final TuringMachineDrawer drawer;
     private Map<Tape, TapeHeadMenu> tapeToMenu;
 
     private static final Background CENTERED_BACKGROUND = new Background(
@@ -39,9 +38,8 @@ class TapesHeadMenu extends HBox {
     TapeHeadMenu centered;
     private double offsetX;
 
-    TapesHeadMenu(TuringMachineDrawer drawer) {
+    TapesHeadMenu() {
 
-        this.drawer = drawer;
         this.tapeToMenu = new HashMap<>();
         this.offsetX = 0;
 
@@ -50,17 +48,17 @@ class TapesHeadMenu extends HBox {
         this.setSpacing(TuringMachineDrawer.TAPES_MENU_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
 
-        AddTapeIcon addTapeIcon = new AddTapeIcon(drawer);
+        AddTapeIcon addTapeIcon = new AddTapeIcon();
 
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         this.getChildren().addAll(addTapeIcon, new Separator(Orientation.VERTICAL));
 
     }
 
     void addTape(Tape tape) {
-        TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(this.drawer, tape);
+        TapeHeadMenu tapeHeadMenu = new TapeHeadMenu(tape);
         tapeToMenu.put(tape, tapeHeadMenu);
         this.getChildren().addAll(tapeHeadMenu, new Separator(Orientation.VERTICAL));
 
@@ -135,27 +133,25 @@ class TapesHeadMenu extends HBox {
 }
 
 class TapeHeadMenu extends HBox {
-    TuringMachineDrawer drawer;
     HeadOptionRectangle headOptionRectangle;
     Tape tape;
 
-    TapeHeadMenu(TuringMachineDrawer drawer, Tape tape) {
-        this.drawer = drawer;
+    TapeHeadMenu(Tape tape) {
         this.tape = tape;
 
         this.setAlignment(Pos.CENTER);
         this.setSpacing(TuringMachineDrawer.TAPES_MENU_SPACING);
 
-        this.getChildren().add(new RemoveTapeIcon(drawer, this, tape));
+        this.getChildren().add(new RemoveTapeIcon(this, tape));
 
-        this.headOptionRectangle = new HeadOptionRectangle(drawer, this, tape);
+        this.headOptionRectangle = new HeadOptionRectangle( this, tape);
         headOptionRectangle.managedProperty().bind(headOptionRectangle.visibleProperty());
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 
     void addHead(Color color){
-        HeadMenuSelect headRectangle = new HeadMenuSelect(drawer, this);
+        HeadMenuSelect headRectangle = new HeadMenuSelect( this);
         headRectangle.setStroke(color);
         this.getChildren().add(headRectangle);
     }
@@ -202,14 +198,13 @@ class TapeHeadMenu extends HBox {
 
 class HeadMenuSelect extends Rectangle {
 
-    TuringMachineDrawer drawer;
     TapeHeadMenu tapeHeadMenu;
     private Timeline timeline;
     boolean animating;
 
-    HeadMenuSelect( TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu) {
+    HeadMenuSelect( TapeHeadMenu tapeHeadMenu) {
         super(0, 0, TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE, TuringMachineDrawer.TAPES_HEAD_MENU_HEAD_SIZE);
-        this.drawer = drawer;
+
         this.tapeHeadMenu = tapeHeadMenu;
 
         this.setFill(Color.WHITE);
@@ -219,9 +214,9 @@ class HeadMenuSelect extends Rectangle {
         this.timeline.setOnFinished(actionEvent -> animating = false);
         this.animating = false;
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 
     int getHead(){
@@ -269,27 +264,22 @@ class HeadMenuSelect extends Rectangle {
 
 class AddTapeIcon extends ImageView{
 
-    TuringMachineDrawer drawer;
-
-    AddTapeIcon(TuringMachineDrawer drawer){
+    AddTapeIcon(){
         super("./images/add_tape.png");
-        this.drawer = drawer;
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }
 
 class RemoveTapeIcon extends ImageView{
 
-    TuringMachineDrawer drawer;
     TapeHeadMenu tapeHeadMenu;
     Tape tape;
 
-    RemoveTapeIcon(TuringMachineDrawer drawer, TapeHeadMenu tapeHeadMenu, Tape tape){
+    RemoveTapeIcon( TapeHeadMenu tapeHeadMenu, Tape tape){
         super("./images/remove_tape.png");
-        this.drawer = drawer;
         this.tapeHeadMenu = tapeHeadMenu;
         this.tape = tape;
 
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }

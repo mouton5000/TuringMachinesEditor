@@ -15,21 +15,18 @@ import java.util.Optional;
  */
 public class GraphPaneMouseHandler implements EventHandler<Event> {
 
-    private TuringMachineDrawer drawer;
-
     private Node selected;
 
     private Double dragX;
     private Double dragY;
 
-    public GraphPaneMouseHandler(TuringMachineDrawer drawer) {
-        this.drawer = drawer;
+    public GraphPaneMouseHandler() {
         selected = null;
     }
 
     @Override
     public void handle(Event event) {
-        if(drawer.animating)
+        if(TuringMachineDrawer.getInstance().animating)
             return;
 
 //        System.out.println(event.getEventType()+" "+event.getSource().getClass());
@@ -59,16 +56,16 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             dragY = y;
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateGroup){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof StateGroup){
             StateGroup stateGroup = ((StateGroup) source);
-            if(!stateGroup.drawer.graphPane.stateOptionRectangle.isMaximized()
-                    && !stateGroup.drawer.graphPane.transitionOptionRectangle.isMaximized())
+            if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
+                    && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
                 stateGroup.startTimeline();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowInvisibleLine){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionArrowInvisibleLine){
             TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
-            if(!transitionGroup.drawer.graphPane.stateOptionRectangle.isMaximized()
-                    && !transitionGroup.drawer.graphPane.transitionOptionRectangle.isMaximized())
+            if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
+                    && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
                 transitionGroup.startTimeline();
         }
     }
@@ -83,17 +80,17 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
         double y = mouseEvent.getY();
 
 
-        if(!drawer.buildMode && !drawer.manualMode &&
+        if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode &&
                 !(source instanceof StateOptionRectangle
                 || source instanceof FinalStateOption
                 || source instanceof AcceptingStateOption
                 || source instanceof InitialStateOption
                 || source instanceof EditStateNameOptionIcon
                 || source instanceof RemoveStateOptionIcon)
-                && drawer.graphPane.stateOptionRectangle.isMaximized()) {
-            drawer.graphPane.closeStateOptionRectangle();
+                && TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()) {
+            TuringMachineDrawer.getInstance().graphPane.closeStateOptionRectangle();
         }
-        else if(!drawer.buildMode && !drawer.manualMode &&
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode &&
                 !(source instanceof TransitionOptionRectangle
                 || source instanceof ReadIcon
                 || source instanceof ActionsIcon
@@ -102,22 +99,22 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 || source instanceof ChooseActionOptionLabel
                 || source instanceof ChooseSymbolOptionLabel
                 || source instanceof RemoveActionIcon)
-                && drawer.graphPane.transitionOptionRectangle.isMaximized())
-            drawer.graphPane.closeTransitionOptionRectangle();
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof Pane) {
+                && TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
+            TuringMachineDrawer.getInstance().graphPane.closeTransitionOptionRectangle();
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof Pane) {
 
             if(selected != null)
                 unselect();
             else
-                drawer.graphPane.addState(x, y);
+                TuringMachineDrawer.getInstance().graphPane.addState(x, y);
 
         }
-        else if(!drawer.buildMode && source instanceof StateGroup){
+        else if(!TuringMachineDrawer.getInstance().buildMode && source instanceof StateGroup){
 
             StateGroup stateGroup = ((StateGroup) source);
 
-            if(drawer.manualMode){
-                drawer.manualSelectCurrentState(stateGroup);
+            if(TuringMachineDrawer.getInstance().manualMode){
+                TuringMachineDrawer.getInstance().manualSelectCurrentState(stateGroup);
                 mouseEvent.consume();
             }
             else {
@@ -126,12 +123,12 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
                 if (pressFinished) {
                     unselect();
-                    stateGroup.drawer.graphPane.openStateOptionRectangle(stateGroup);
+                    TuringMachineDrawer.getInstance().graphPane.openStateOptionRectangle(stateGroup);
                 } else {
                     if (selected == null)
                         select(stateGroup);
                     else if (selected instanceof StateGroup) {
-                        drawer.graphPane.addTransition((StateGroup) selected, stateGroup);
+                        TuringMachineDrawer.getInstance().graphPane.addTransition((StateGroup) selected, stateGroup);
                         unselect();
                     } else
                         unselect();
@@ -141,19 +138,19 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
 
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof FinalStateOption){
-            drawer.graphPane.toggleFinal(((FinalStateOption) source).optionRectangle.currentState);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof FinalStateOption){
+            TuringMachineDrawer.getInstance().graphPane.toggleFinal(((FinalStateOption) source).optionRectangle.currentState);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof AcceptingStateOption){
-            drawer.graphPane.toggleAccepting(((AcceptingStateOption) source).optionRectangle.currentState);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof AcceptingStateOption){
+            TuringMachineDrawer.getInstance().graphPane.toggleAccepting(((AcceptingStateOption) source).optionRectangle.currentState);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof InitialStateOption){
-            drawer.graphPane.toggleInitial(((InitialStateOption) source).optionRectangle.currentState);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof InitialStateOption){
+            TuringMachineDrawer.getInstance().graphPane.toggleInitial(((InitialStateOption) source).optionRectangle.currentState);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof EditStateNameOptionIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof EditStateNameOptionIcon){
 
             EditStateNameOptionIcon editStateNameOptionIcon = (EditStateNameOptionIcon) source;
             StateGroup stateGroup = editStateNameOptionIcon.optionRectangle.currentState;
@@ -165,19 +162,19 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             Optional<String> result = virtualKeyboard.showAndWait();
             if(result.isPresent()) {
                 stateGroup.setName(result.get());
-                drawer.setEnableToSave();
+                TuringMachineDrawer.getInstance().setEnableToSave();
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveStateOptionIcon){
-            drawer.graphPane.removeState(((RemoveStateOptionIcon) source).optionRectangle.currentState);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveStateOptionIcon){
+            TuringMachineDrawer.getInstance().graphPane.removeState(((RemoveStateOptionIcon) source).optionRectangle.currentState);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && source instanceof TransitionArrowInvisibleLine){
+        else if(!TuringMachineDrawer.getInstance().buildMode && source instanceof TransitionArrowInvisibleLine){
             TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
 
-            if(drawer.manualMode){
-                drawer.manualFireTransition(transitionGroup);
+            if(TuringMachineDrawer.getInstance().manualMode){
+                TuringMachineDrawer.getInstance().manualFireTransition(transitionGroup);
                 mouseEvent.consume();
             }
             else {
@@ -186,7 +183,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
                 if (pressFinished) {
                     unselect();
-                    transitionGroup.drawer.graphPane.openTransitionOptionRectangle(transitionGroup);
+                    TuringMachineDrawer.getInstance().graphPane.openTransitionOptionRectangle(transitionGroup);
                 } else
                     select(transitionGroup);
 
@@ -194,19 +191,19 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
 
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ReadIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ReadIcon){
             ((ReadIcon) source).optionRectangle.selectReadMenu();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ActionsIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ActionsIcon){
             ((ActionsIcon) source).optionRectangle.selectActionsMenu();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveTransitionIcon){
-            drawer.graphPane.removeTransition(((RemoveTransitionIcon) source).optionRectangle.currentTransitionGroup);
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveTransitionIcon){
+            TuringMachineDrawer.getInstance().graphPane.removeTransition(((RemoveTransitionIcon) source).optionRectangle.currentTransitionGroup);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionOptionRectangleChooseHead){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionOptionRectangleChooseHead){
             TransitionOptionRectangleChooseHead transitionOptionRectangleChooseHead =
                     (TransitionOptionRectangleChooseHead) source;
             Tape tape = transitionOptionRectangleChooseHead.transitionOptionRectangleTapeHBox.tape;
@@ -214,7 +211,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             transitionOptionRectangleChooseHead.optionRectangle.chooseHead(tape, head);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ChooseSymbolOptionLabel){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ChooseSymbolOptionLabel){
             ChooseSymbolOptionLabel chooseSymbolOptionLabel = (ChooseSymbolOptionLabel) source;
             TransitionOptionRectangle optionRectangle = chooseSymbolOptionLabel.optionRectangle;
 
@@ -222,36 +219,36 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
 
             if(optionRectangle.currentTape != null) {
                 if(chooseSymbolOptionLabel.selected)
-                    drawer.graphPane.removeReadSymbol(optionRectangle.currentTransitionGroup,
+                    TuringMachineDrawer.getInstance().graphPane.removeReadSymbol(optionRectangle.currentTransitionGroup,
                             optionRectangle.currentTape, optionRectangle.currentHead, symbol);
                 else
-                    drawer.graphPane.addReadSymbol(optionRectangle.currentTransitionGroup,
+                    TuringMachineDrawer.getInstance().graphPane.addReadSymbol(optionRectangle.currentTransitionGroup,
                             optionRectangle.currentTape, optionRectangle.currentHead, symbol);
             }
 
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ChooseActionOptionLabel){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ChooseActionOptionLabel){
             ChooseActionOptionLabel chooseActionOptionLabel = (ChooseActionOptionLabel) source;
             TransitionOptionRectangle optionRectangle = chooseActionOptionLabel.optionRectangle;
 
             String actionSymbol = chooseActionOptionLabel.getText();
 
             if(optionRectangle.currentTape != null) {
-                drawer.graphPane.addAction(optionRectangle.currentTransitionGroup,
+                TuringMachineDrawer.getInstance().graphPane.addAction(optionRectangle.currentTransitionGroup,
                         optionRectangle.currentTape, optionRectangle.currentHead, actionSymbol);
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof RemoveActionIcon){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof RemoveActionIcon){
             RemoveActionIcon removeActionIcon = (RemoveActionIcon) source;
             TransitionOptionRectangle optionRectangle = removeActionIcon.optionRectangle;
 
             if(optionRectangle.currentTape != null)
-                drawer.graphPane.removeAction(optionRectangle.currentTransitionGroup);
+                TuringMachineDrawer.getInstance().graphPane.removeAction(optionRectangle.currentTransitionGroup);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof OptionRectangle)
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof OptionRectangle)
             mouseEvent.consume();
 
     }
@@ -271,45 +268,45 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 dragY = y;
             }
             else {
-                drawer.graphPane.translate(x - dragX, y - dragY);
+                TuringMachineDrawer.getInstance().graphPane.translate(x - dragX, y - dragY);
                 dragX = x;
                 dragY = y;
             }
             mouseEvent.consume();
         }
-       else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowControl1KeyCircle){
+       else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionArrowControl1KeyCircle){
             if(!(selected instanceof TransitionGroup))
                 return;
             TransitionGroup transitionGroup = ((TransitionArrowControl1KeyCircle) source).transitionGroup;
             transitionGroup.setControl1(x, y);
-            drawer.setEnableToSave();
+            TuringMachineDrawer.getInstance().setEnableToSave();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowControl2KeyCircle){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionArrowControl2KeyCircle){
             if(!(selected instanceof TransitionGroup))
                 return;
             TransitionGroup transitionGroup = ((TransitionArrowControl2KeyCircle) source).transitionGroup;
             transitionGroup.setControl2(x, y);
-            drawer.setEnableToSave();
+            TuringMachineDrawer.getInstance().setEnableToSave();
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateGroup) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof StateGroup) {
             StateGroup stateGroup = ((StateGroup) source);
             stateGroup.stopTimeline();
             select(stateGroup);
-            drawer.graphPane.moveStateGroup(stateGroup, stateGroup.getLayoutX() + x, stateGroup.getLayoutY() + y);
+            TuringMachineDrawer.getInstance().graphPane.moveStateGroup(stateGroup, stateGroup.getLayoutX() + x, stateGroup.getLayoutY() + y);
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionArrowInvisibleLine) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionArrowInvisibleLine) {
             TransitionGroup transitionGroup = ((TransitionArrowInvisibleLine) source).transitionGroup;
             transitionGroup.stopTimeline();
             select(transitionGroup);
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof StateOptionRectangle)
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof StateOptionRectangle)
             mouseEvent.consume();
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionOptionRectangle)
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionOptionRectangle)
             mouseEvent.consume();
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof HeadOptionsGroup){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof HeadOptionsGroup){
             if(dragX == null)
                 dragX = x;
             else {
@@ -319,7 +316,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ReadSymbolMenu){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ReadSymbolMenu){
             if(dragX == null)
                 dragX = x;
             else {
@@ -329,7 +326,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ActionsMenu){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ActionsMenu){
             if(dragX == null)
                 dragX = x;
             else {
@@ -339,7 +336,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof TransitionOptionRectangleSymbolsDisplay){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionOptionRectangleSymbolsDisplay){
             if(dragX == null)
                 dragX = x;
             else {
@@ -349,7 +346,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             }
             mouseEvent.consume();
         }
-        else if(!drawer.buildMode && !drawer.manualMode && source instanceof ActionDisplay){
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof ActionDisplay){
             if(dragX == null)
                 dragX = x;
             else {

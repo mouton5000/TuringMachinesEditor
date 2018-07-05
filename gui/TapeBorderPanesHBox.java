@@ -29,11 +29,9 @@ import java.util.*;
  */
 class TapeBorderPanesHBox extends HBox{
 
-    TuringMachineDrawer drawer;
     private Map<Tape, TapeBorderPane> tapes;
 
-    TapeBorderPanesHBox(TuringMachineDrawer drawer){
-        this.drawer = drawer;
+    TapeBorderPanesHBox(){
         this.tapes = new HashMap<>();
         this.setAlignment(Pos.CENTER_LEFT);
 
@@ -135,7 +133,7 @@ class TapeBorderPanesHBox extends HBox{
     }
 
     void addTape(Tape tape){
-        TapeBorderPane tapeBorderPane = new TapeBorderPane(this.drawer, tape);
+        TapeBorderPane tapeBorderPane = new TapeBorderPane(tape);
 
         tapeBorderPane.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0, 1, 0, 0))));
@@ -148,8 +146,8 @@ class TapeBorderPanesHBox extends HBox{
             for(Node child : this.getChildren())
                 child.setTranslateX(0);
             this.getChildren().addAll(
-                    new RightArrow(this.drawer, this, tapeBorderPane),
-                    new LeftArrow(this.drawer, this, previousTapeBorderPane)
+                    new RightArrow(this, tapeBorderPane),
+                    new LeftArrow(this, previousTapeBorderPane)
             );
         }
 
@@ -191,7 +189,7 @@ class TapeBorderPanesHBox extends HBox{
     private void moveHeadFromMachine(Tape tape, int line, int column, int head){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.moveHead(line, column, head);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void addHead(Tape tape, int line, int column, Color color){
@@ -212,36 +210,36 @@ class TapeBorderPanesHBox extends HBox{
     private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.drawSymbol(line, column, symbol);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     private void setLeftFromMachine(Tape tape, Integer left){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeLeftBound(left);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     private void setRightFromMachine(Tape tape, Integer right){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeRightBound(right);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     private void setBottomFromMachine(Tape tape, Integer bottom){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeBottomBound(bottom);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     private void setTopFromMachine(Tape tape, Integer top){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeTopBound(top);
-        drawer.setEnableToSave();
+        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void centerOn(Tape tape, int head) {
         TapeBorderPane tapeBorderPane = tapes.get(tape);
-        this.drawer.tapesPane.centerOn(tape);
+        TuringMachineDrawer.getInstance().tapesPane.centerOn(tape);
         tapeBorderPane.centerOn(head);
     }
 
@@ -336,7 +334,6 @@ class TapeBorderPanesHBox extends HBox{
 }
 
 class TapeBorderPane extends BorderPane {
-    TuringMachineDrawer drawer;
 
     Integer bottom;
     Integer top;
@@ -355,27 +352,26 @@ class TapeBorderPane extends BorderPane {
 
     Tape tape;
 
-    TapeBorderPane(TuringMachineDrawer drawer, Tape tape) {
-        this.drawer = drawer;
+    TapeBorderPane(Tape tape) {
         this.tape = tape;
 
-        horizontalCoordinates = new HorizontalCoordinates(drawer, this);
+        horizontalCoordinates = new HorizontalCoordinates(this);
         horizontalCoordinates.setMinHeight(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
         horizontalCoordinates.setMaxHeight(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
         horizontalCoordinates.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         horizontalCoordinates.setTranslateX(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
 
-        verticalCoordinates = new VerticalCoordinates(drawer, this);
+        verticalCoordinates = new VerticalCoordinates(this);
         verticalCoordinates.setMinWidth(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
         verticalCoordinates.setMaxWidth(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
         verticalCoordinates.setBorder(new Border(new BorderStroke(Color.BLACK,
                 BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
-        tapePane = new TapePane(drawer, this);
+        tapePane = new TapePane(this);
 
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth()
@@ -519,7 +515,7 @@ class TapeBorderPane extends BorderPane {
                     String symbol = String.valueOf(c);
                     if((bottom == null || line >= bottom) && (top == null || line <= top)
                             && (left == null || column >= left) && (right == null || column <= right)
-                            && (drawer.machine.hasSymbol(symbol)))
+                            && (TuringMachineDrawer.getInstance().machine.hasSymbol(symbol)))
                         tape.writeInput(line, column, symbol);
                     column++;
                 }
@@ -543,7 +539,7 @@ class HorizontalCoordinates extends Pane {
     private List<Label> abscissae;
     private TapeBorderPane tapeBorderPane;
 
-    HorizontalCoordinates(TuringMachineDrawer drawer, TapeBorderPane tapeBorderPane) {
+    HorizontalCoordinates( TapeBorderPane tapeBorderPane) {
         coordinatesGroup = new Group();
         this.tapeBorderPane = tapeBorderPane;
 
@@ -628,7 +624,7 @@ class VerticalCoordinates extends Pane {
     private List<Label> ordinates;
     private TapeBorderPane tapeBorderPane;
 
-    VerticalCoordinates(TuringMachineDrawer drawer, TapeBorderPane tapeBorderPane) {
+    VerticalCoordinates(TapeBorderPane tapeBorderPane) {
         coordinatesGroup = new Group();
         this.tapeBorderPane = tapeBorderPane;
 
@@ -708,7 +704,6 @@ class VerticalCoordinates extends Pane {
 
 class TapePane extends Pane {
 
-    TuringMachineDrawer drawer;
     private Group tapeLinesGroup;
 
     private List<Line> lines;
@@ -728,9 +723,8 @@ class TapePane extends Pane {
     boolean animating;
     private Rectangle animatedRectangle;
 
-    TapePane(TuringMachineDrawer drawer, TapeBorderPane tapeBorderPane) {
+    TapePane(TapeBorderPane tapeBorderPane) {
         this.tapeBorderPane = tapeBorderPane;
-        this.drawer = drawer;
         this.cellLabels = new HashMap<>();
         this.heads = new ArrayList<>();
         this.headsColumns = new HashMap<>();
@@ -742,19 +736,19 @@ class TapePane extends Pane {
 
         lines = new ArrayList<>();
         columns = new ArrayList<>();
-        this.setOnMousePressed(drawer.tapesMouseHandler);
-        this.setOnMouseDragged(drawer.tapesMouseHandler);
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         tapeLinesGroup = new Group();
 
-        cellOptionRectangle = new CellOptionRectangle(drawer, this);
+        cellOptionRectangle = new CellOptionRectangle( this);
         cellOptionRectangle.setVisible(false);
-        cellOptionRectangle.setOnMouseClicked(drawer.tapesMouseHandler);
+        cellOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
-        tapeOptionRectangle = new TapeOptionRectangle(drawer, this.tapeBorderPane);
+        tapeOptionRectangle = new TapeOptionRectangle(this.tapeBorderPane);
         tapeOptionRectangle.setVisible(false);
-        tapeOptionRectangle.setOnMouseClicked(drawer.tapesMouseHandler);
+        tapeOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
         animatedRectangle = new Rectangle(0, 0,
                 TuringMachineDrawer.TAPE_CELL_WIDTH, TuringMachineDrawer.TAPE_CELL_WIDTH);
@@ -1259,18 +1253,18 @@ class TapePane extends Pane {
 abstract class TranslateTapesArrow extends Polygon{
     TapeBorderPanesHBox tapeBorderPanesHBox;
     TapeBorderPane tapeBorderPane;
-    TranslateTapesArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox,
+    TranslateTapesArrow(TapeBorderPanesHBox tapeBorderPanesHBox,
                         TapeBorderPane tapeBorderPane) {
         this.tapeBorderPanesHBox = tapeBorderPanesHBox;
         this.tapeBorderPane = tapeBorderPane;
-        this.setOnMouseClicked(drawer.tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }
 
 class RightArrow extends TranslateTapesArrow{
 
-    RightArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane) {
-        super(drawer, tapeBorderPanesHBox, tapeBorderPane);
+    RightArrow(TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane) {
+        super(tapeBorderPanesHBox, tapeBorderPane);
 
         this.getPoints().addAll(
                 0D, 0D,
@@ -1282,8 +1276,8 @@ class RightArrow extends TranslateTapesArrow{
 
 class LeftArrow extends TranslateTapesArrow{
 
-    LeftArrow(TuringMachineDrawer drawer, TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane){
-        super(drawer, tapeBorderPanesHBox, tapeBorderPane);
+    LeftArrow(TapeBorderPanesHBox tapeBorderPanesHBox, TapeBorderPane tapeBorderPane){
+        super(tapeBorderPanesHBox, tapeBorderPane);
 
         this.getPoints().addAll(
                 TuringMachineDrawer.TAPE_HOBX_ARROW_WIDTH, 0D,

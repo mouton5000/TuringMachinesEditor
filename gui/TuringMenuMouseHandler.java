@@ -8,14 +8,11 @@ import javafx.scene.input.MouseEvent;
  */
 public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
-    TuringMachineDrawer drawer;
-    TuringMenuMouseHandler(TuringMachineDrawer drawer){
-        this.drawer = drawer;
-    }
+    TuringMenuMouseHandler(){ }
 
     @Override
     public void handle(MouseEvent mouseEvent) {
-        if(drawer.animating)
+        if(TuringMachineDrawer.getInstance().animating)
             return;
 
         if(mouseEvent.getEventType() != MouseEvent.MOUSE_CLICKED)
@@ -23,67 +20,67 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
 
         Object source = mouseEvent.getSource();
 
-        if(!drawer.playing && source instanceof BuildIcon){
-            if(drawer.buildMode)
-                drawer.unbuild();
+        if(!TuringMachineDrawer.getInstance().playing && source instanceof BuildIcon){
+            if(TuringMachineDrawer.getInstance().buildMode)
+                TuringMachineDrawer.getInstance().unbuild();
             else
-                drawer.build();
+                TuringMachineDrawer.getInstance().build();
         }
-        else if(!drawer.playing && source instanceof ManualIcon){
-            if(drawer.manualMode)
-                drawer.setNotManual();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof ManualIcon){
+            if(TuringMachineDrawer.getInstance().manualMode)
+                TuringMachineDrawer.getInstance().setNotManual();
             else
-                drawer.setManual();
+                TuringMachineDrawer.getInstance().setManual();
         }
-        else if(!drawer.playing && source instanceof EditGraphIcon){
-            if(drawer.editGraphMode)
-                drawer.setNotEditGraph();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof EditGraphIcon){
+            if(TuringMachineDrawer.getInstance().editGraphMode)
+                TuringMachineDrawer.getInstance().setNotEditGraph();
             else
-                drawer.setEditGraph();
+                TuringMachineDrawer.getInstance().setEditGraph();
         }
-        else if(!drawer.playing && source instanceof ParametersIcon){
-            drawer.openParameters();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof ParametersIcon){
+            TuringMachineDrawer.getInstance().openParameters();
         }
-        else if(!drawer.playing && source instanceof StopIcon){
-            drawer.goToFirstConfiguration();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof StopIcon){
+            TuringMachineDrawer.getInstance().goToFirstConfiguration();
         }
-        if(!drawer.playing && source instanceof PlayIcon){
-            drawer.menu.setPause();
-            drawer.play();
+        if(!TuringMachineDrawer.getInstance().playing && source instanceof PlayIcon){
+            TuringMachineDrawer.getInstance().menu.setPause();
+            TuringMachineDrawer.getInstance().play();
         }
         else if(source instanceof PauseIcon){
-            drawer.menu.setPlay();
-            drawer.pause();
+            TuringMachineDrawer.getInstance().menu.setPlay();
+            TuringMachineDrawer.getInstance().pause();
         }
-        else if(!drawer.playing && source instanceof PreviousFrameIcon){
-            drawer.goToPreviousConfiguration();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof PreviousFrameIcon){
+            TuringMachineDrawer.getInstance().goToPreviousConfiguration();
         }
-        else if(!drawer.playing && source instanceof NextFrameIcon){
-            drawer.tick();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof NextFrameIcon){
+            TuringMachineDrawer.getInstance().tick();
         }
-        else if(!drawer.playing && source instanceof LastFrameIcon){
-            drawer.goToLastConfiguration();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof LastFrameIcon){
+            TuringMachineDrawer.getInstance().goToLastConfiguration();
         }
-        else if(!drawer.playing && source instanceof NewFileIcon){
-            drawer.newMachine();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof NewFileIcon){
+            TuringMachineDrawer.getInstance().newMachine();
         }
-        else if(!drawer.playing && source instanceof SaveFileIcon){
-            drawer.saveMachine();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof SaveFileIcon){
+            TuringMachineDrawer.getInstance().saveMachine();
         }
-        else if(!drawer.playing && source instanceof SaveAsFileIcon){
-            drawer.saveAsMachine();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof SaveAsFileIcon){
+            TuringMachineDrawer.getInstance().saveAsMachine();
         }
-        else if(!drawer.playing && source instanceof OpenFileIcon){
-            drawer.loadMachine();
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof OpenFileIcon){
+            TuringMachineDrawer.getInstance().loadMachine();
         }
-        else if(!drawer.playing && source instanceof HelpIcon){
-            drawer.help.setVisible(true);
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof HelpIcon){
+            TuringMachineDrawer.getInstance().help.setVisible(true);
         }
         else if(source instanceof ShowIcon){
-            drawer.menu.showMenu();
+            TuringMachineDrawer.getInstance().menu.showMenu();
         }
         else if(source instanceof HideIcon){
-            drawer.menu.hideMenu();
+            TuringMachineDrawer.getInstance().menu.hideMenu();
         }
 
 
