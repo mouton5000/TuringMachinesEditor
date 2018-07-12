@@ -598,7 +598,7 @@ public class TuringMachineDrawer extends Application {
         return this.stage.heightProperty();
     }
 
-    static void addSymbol(String symbol){
+    void addSymbol(String symbol){
         instance.machine.addSymbol(symbol);
     }
 
@@ -622,7 +622,7 @@ public class TuringMachineDrawer extends Application {
         this.removeSymbol(index, true);
     }
 
-    private void removeSymbol(int index, boolean doConfirm){
+    void removeSymbol(int index, boolean doConfirm){
         if(doConfirm){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Supprimer le symbole?");
@@ -655,7 +655,7 @@ public class TuringMachineDrawer extends Application {
 
     void removeTape(Tape tape){ removeTape(tape, true);}
 
-    private void removeTape(Tape tape, boolean doConfirm){
+    void removeTape(Tape tape, boolean doConfirm){
         if(doConfirm){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Supprimer la bande?");

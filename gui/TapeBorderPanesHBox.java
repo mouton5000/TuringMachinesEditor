@@ -108,7 +108,7 @@ class TapeBorderPanesHBox extends HBox{
     }
 
     void removeTape(Tape tape){
-        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        TapeBorderPane tapeBorderPane = tapes.remove(tape);
         int index = this.getChildren().indexOf(tapeBorderPane);
         this.getChildren().remove(index);
         int size = this.getChildren().size();
@@ -249,9 +249,11 @@ class TapeBorderPanesHBox extends HBox{
     void eraseTapes(String tapesCellsDescription) {
         String[] tapesCellsDescriptionAr = tapesCellsDescription.split(";");
 
-        if(tapesCellsDescriptionAr.length != tapes.size())
-            return;
+        for(Tape tape : new HashSet<>(tapes.keySet()))
+            TuringMachineDrawer.getInstance().removeTape(tape, false);
 
+        for(int i = 0; i < tapesCellsDescriptionAr.length; i++)
+            TuringMachineDrawer.getInstance().addTape();
 
         int i = 0;
         for(Node child: this.getChildren()) {
@@ -266,7 +268,6 @@ class TapeBorderPanesHBox extends HBox{
 
     String getTapesString() {
         StringBuilder sb = new StringBuilder();
-
         for(Node child: this.getChildren()) {
             if(!(child instanceof TapeBorderPane))
                 continue;
@@ -275,6 +276,7 @@ class TapeBorderPanesHBox extends HBox{
             sb.append(';');
             sb.append('\n');
         }
+        sb.deleteCharAt(sb.length() - 1);
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
@@ -439,19 +441,59 @@ class TapeBorderPane extends BorderPane {
         tapePane.clear();
     }
 
-    void eraseTape(String tapeCellsDescription) {
+    void eraseTape(String tapeDescription) {
         try {
-            tapeCellsDescription = tapeCellsDescription.trim();
-            String[] tapeCellsDescriptionAr = tapeCellsDescription.split("\n");
+            tapeDescription = tapeDescription.trim();
+            String[] tapeCellsDescriptionAr = tapeDescription.split("\n");
 
-            String[] lineColumn = tapeCellsDescriptionAr[0].trim().split(" ");
-            int line = Integer.valueOf(lineColumn[0]) + tapeCellsDescriptionAr.length - 2;
+            String[] bounds = tapeCellsDescriptionAr[0].trim().split(" ");
+            Integer left = bounds[0].equals("I")?null:Integer.valueOf(bounds[0]);
+            Integer right = bounds[1].equals("I")?null:Integer.valueOf(bounds[1]);
+            Integer bottom = bounds[2].equals("I")?null:Integer.valueOf(bounds[2]);
+            Integer top = bounds[3].equals("I")?null:Integer.valueOf(bounds[3]);
+
+            if(left != null && right != null && left > right)
+                right = left;
+            if(bottom != null && top != null && bottom > top)
+                top = bottom;
+
+            if(right != null && right < 0) {
+                TuringMachineDrawer.getInstance().setTapeLeftBound(tape, left);
+                TuringMachineDrawer.getInstance().setTapeRightBound(tape, right);
+            }
+            else{
+                TuringMachineDrawer.getInstance().setTapeRightBound(tape, right);
+                TuringMachineDrawer.getInstance().setTapeLeftBound(tape, left);
+            }
+
+            if(top != null && top < 0) {
+                TuringMachineDrawer.getInstance().setTapeBottomBound(tape, bottom);
+                TuringMachineDrawer.getInstance().setTapeTopBound(tape, top);
+            }
+            else{
+                TuringMachineDrawer.getInstance().setTapeTopBound(tape, top);
+                TuringMachineDrawer.getInstance().setTapeBottomBound(tape, bottom);
+            }
+
+
+            int nbHeads = Integer.valueOf(tapeCellsDescriptionAr[1].trim());
+            for(int i = 2; i < nbHeads + 2; i++){
+                String[] headInfo = tapeCellsDescriptionAr[i].trim().split(" ");
+                int line = Integer.valueOf(headInfo[0]);
+                int column = Integer.valueOf(headInfo[1]);
+                int red = Integer.valueOf(headInfo[2]);
+                int green = Integer.valueOf(headInfo[3]);
+                int blue = Integer.valueOf(headInfo[4]);
+                TuringMachineDrawer.getInstance().addHead(tape, line, column, Color.rgb(red, green, blue));
+            }
+
+            String[] lineColumn = tapeCellsDescriptionAr[nbHeads + 2].trim().split(" ");
+            int line = Integer.valueOf(lineColumn[0]) + tapeCellsDescriptionAr.length - 4 - nbHeads;
             int firstColumn = Integer.valueOf(lineColumn[1]);
 
-            tapePane.clear();
             int column;
 
-            for(int i = 1; i < tapeCellsDescriptionAr.length; i++){
+            for(int i = nbHeads + 3; i < tapeCellsDescriptionAr.length; i++){
                 column = firstColumn;
                 for(int j = 0; j < tapeCellsDescriptionAr[i].length(); j++){
                     char c = tapeCellsDescriptionAr[i].charAt(j);
@@ -460,8 +502,8 @@ class TapeBorderPane extends BorderPane {
                         continue;
                     }
                     String symbol = String.valueOf(c);
-                    if((bottom == null || line >= bottom) && (top == null || line <= top)
-                            && (left == null || column >= left) && (right == null || column <= right)
+                    if((this.bottom == null || line >= this.bottom) && (this.top == null || line <= this.top)
+                            && (this.left == null || column >= this.left) && (this.right == null || column <= this.right)
                             && (TuringMachineDrawer.getInstance().machine.hasSymbol(symbol)))
                         TuringMachineDrawer.getInstance().setInputSymbol(tape, line, column, symbol);
                     column++;
@@ -1155,22 +1197,79 @@ class TapePane extends Pane {
     }
 
     String getTapeString() {
+        StringBuilder sb = new StringBuilder();
+
+        if(this.tapeBorderPane.left==null)
+            sb.append('I');
+        else
+            sb.append(this.tapeBorderPane.left);
+        sb.append(' ');
+
+        if(this.tapeBorderPane.right==null)
+            sb.append('I');
+        else
+            sb.append(this.tapeBorderPane.right);
+        sb.append(' ');
+
+        if(this.tapeBorderPane.bottom==null)
+            sb.append('I');
+        else
+            sb.append(this.tapeBorderPane.bottom);
+        sb.append(' ');
+
+        if(this.tapeBorderPane.top==null)
+            sb.append('I');
+        else
+            sb.append(this.tapeBorderPane.top);
+        sb.append('\n');
+
+        int nbHead = this.heads.size();
+        sb.append(nbHead);
+        sb.append('\n');
+
+        for(int head = 0; head < nbHead; head++){
+            Color color = TuringMachineDrawer.getInstance().getColorOfHead(tapeBorderPane.tape, head);
+            sb.append(this.lineOf(head));
+            sb.append(' ');
+            sb.append(this.columnOf(head));
+            sb.append(' ');
+            sb.append((int)(color.getRed() * 255));
+            sb.append(' ');
+            sb.append((int)(color.getGreen() * 255));
+            sb.append(' ');
+            sb.append((int)(color.getBlue() * 255));
+            sb.append('\n');
+        }
+
         int minLine = Integer.MAX_VALUE;
         int minColumn = Integer.MAX_VALUE;
         int maxLine = Integer.MIN_VALUE;
         int maxColumn = Integer.MIN_VALUE;
 
+        boolean changed = false;
+
         for(Map.Entry<Integer, Map<Integer, Label>> entry : cellLabels.entrySet()) {
             minLine = Math.min(minLine, entry.getKey());
             maxLine = Math.max(maxLine, entry.getKey());
             for (Map.Entry<Integer, Label> entry2 : entry.getValue().entrySet()) {
+                changed = true;
                 minColumn = Math.min(minColumn, entry2.getKey());
                 maxColumn = Math.max(maxColumn, entry2.getKey());
             }
         }
 
+        if(!changed){
+            if(this.tapeBorderPane.left == null)
+                minColumn = 0;
+            else
+                minColumn = this.tapeBorderPane.left;
 
-        StringBuilder sb = new StringBuilder();
+            if(this.tapeBorderPane.bottom == null)
+                minLine = 0;
+            else
+                minLine = this.tapeBorderPane.bottom;
+        }
+
         sb.append(minLine);
         sb.append(' ');
         sb.append(minColumn);

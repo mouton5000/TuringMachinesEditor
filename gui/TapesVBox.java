@@ -12,6 +12,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * Created by dimitri.watel on 19/06/18.
@@ -231,11 +236,38 @@ class TapesVBox extends VBox {
 
     void eraseTapes(String tapesCellsDescription) {
         tapesCellsDescription = tapesCellsDescription.trim();
-        tapesPane.eraseTapes(tapesCellsDescription);
+
+        int index = tapesCellsDescription.indexOf('\n');
+        String symbolsDescripion = tapesCellsDescription.substring(0, index);
+        symbolsDescripion = symbolsDescripion.trim();
+        Set<String> symbolsDescriptionAr = new HashSet<>(Arrays.asList(symbolsDescripion.split(" ")));
+        List<String> currentSymbols = TuringMachineDrawer.getInstance().machine.getSymbols();
+
+        int i = 0;
+        for(String symbol : currentSymbols){
+            if(symbolsDescriptionAr.contains(symbol)) {
+                symbolsDescriptionAr.remove(symbol);
+                i++;
+            }
+            else
+                TuringMachineDrawer.getInstance().removeSymbol(i, false);
+        }
+
+
+        for(String symbol : symbolsDescriptionAr)
+            TuringMachineDrawer.getInstance().addSymbol(symbol);
+
+        tapesPane.eraseTapes(tapesCellsDescription.substring(index + 1));
     }
 
     String getTapesString() {
-        return tapesPane.getTapesString();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(String.join(" ", TuringMachineDrawer.getInstance().machine.getSymbols()));
+        sb.append('\n');
+        sb.append(tapesPane.getTapesString());
+
+        return sb.toString();
     }
 
 }

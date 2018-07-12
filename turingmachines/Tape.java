@@ -81,6 +81,15 @@ public class Tape{
     }
 
     public void addHead(int line, int column){
+        if(tapeLeftBound != null && column < tapeLeftBound)
+            return;
+        if(tapeRightBound != null && column > tapeRightBound)
+            return;
+        if(tapeBottomBound != null && line < tapeBottomBound)
+            return;
+        if(tapeTopBound != null && line > tapeTopBound)
+            return;
+        
         nbHeads++;
         initialHeadsColumn.add(column);
         initialHeadsLine.add(line);

@@ -227,7 +227,7 @@ public class TuringMachine {
     }
 
     public List<String> getSymbols(){
-        return symbols;
+        return new LinkedList<>(symbols);
     }
 
     public String getSymbol(int i){
