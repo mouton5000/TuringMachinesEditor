@@ -19,8 +19,6 @@ import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
-import turingmachines.TuringMachine;
-import util.Subscriber;
 
 import java.util.*;
 
@@ -38,52 +36,6 @@ class TapeBorderPanesHBox extends HBox{
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) ->
             resizeChildren(newVal.getWidth(), newVal.getHeight())
         );
-
-        Subscriber s = new Subscriber() {
-            @Override
-            public void read(String msg, Object... parameters) {
-                Tape tape = (Tape) parameters[1];
-                switch (msg) {
-                    case TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED: {
-                        Integer head = (Integer) parameters[2];
-                        Integer line = (Integer) parameters[3];
-                        Integer column = (Integer) parameters[4];
-                        moveHeadFromMachine(tape, line, column, head);
-                    }
-                        break;
-                    case TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED: {
-                        Integer line = (Integer) parameters[2];
-                        Integer column = (Integer) parameters[3];
-                        String symbol = (String) parameters[4];
-                        setInputSymbolFromMachine(tape, line, column, symbol);
-                    }
-                        break;
-                    case TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED:
-                        Integer left = (Integer) parameters[2];
-                        setLeftFromMachine(tape, left);
-                        break;
-                    case TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED:
-                        Integer right = (Integer) parameters[2];
-                        setRightFromMachine(tape, right);
-                        break;
-                    case TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED:
-                        Integer bottom = (Integer) parameters[2];
-                        setBottomFromMachine(tape, bottom);
-                        break;
-                    case TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED:
-                        Integer top = (Integer) parameters[2];
-                        setTopFromMachine(tape, top);
-                        break;
-                }
-            }
-        };
-
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED);
-        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED);
 
     }
 
@@ -186,11 +138,6 @@ class TapeBorderPanesHBox extends HBox{
         }
     }
 
-    private void moveHeadFromMachine(Tape tape, int line, int column, int head){
-        TapeBorderPane tapeBorderPane = tapes.get(tape);
-        tapeBorderPane.tapePane.moveHead(line, column, head);
-        TuringMachineDrawer.getInstance().setEnableToSave();
-    }
 
     void addHead(Tape tape, int line, int column, Color color){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
@@ -202,39 +149,39 @@ class TapeBorderPanesHBox extends HBox{
         tapeBorderPane.tapePane.editHeadColor(head, color);
     }
 
+    void moveHead(Tape tape, int line, int column, int head) {
+        TapeBorderPane tapeBorderPane = tapes.get(tape);
+        tapeBorderPane.tapePane.moveHead(line, column, head);
+    }
+
     void removeHead(Tape tape, int head){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.removeHead(head);
     }
 
-    private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
+    void setInputSymbol(Tape tape, int line, int column, String symbol){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.tapePane.drawSymbol(line, column, symbol);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setLeftFromMachine(Tape tape, Integer left){
+    void setTapeLeftBound(Tape tape, Integer left){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeLeftBound(left);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setRightFromMachine(Tape tape, Integer right){
+    void setTapeRightBound(Tape tape, Integer right){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeRightBound(right);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setBottomFromMachine(Tape tape, Integer bottom){
+    void setTapeBottomBound(Tape tape, Integer bottom){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeBottomBound(bottom);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
-    private void setTopFromMachine(Tape tape, Integer top){
+    void setTapeTopBound(Tape tape, Integer top){
         TapeBorderPane tapeBorderPane = tapes.get(tape);
         tapeBorderPane.setTapeTopBound(top);
-        TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void centerOn(Tape tape, int head) {
@@ -516,7 +463,7 @@ class TapeBorderPane extends BorderPane {
                     if((bottom == null || line >= bottom) && (top == null || line <= top)
                             && (left == null || column >= left) && (right == null || column <= right)
                             && (TuringMachineDrawer.getInstance().machine.hasSymbol(symbol)))
-                        tape.writeInput(line, column, symbol);
+                        TuringMachineDrawer.getInstance().setInputSymbol(tape, line, column, symbol);
                     column++;
                 }
                 line--;
@@ -1199,7 +1146,8 @@ class TapePane extends Pane {
     void clear() {
         for(Map.Entry<Integer, Map<Integer, Label>> entry : new HashSet<>(cellLabels.entrySet()))
             for(Map.Entry<Integer, Label> entry2 : new HashSet<>(entry.getValue().entrySet()))
-                tapeBorderPane.tape.writeInput(entry.getKey(), entry2.getKey(), null);
+                TuringMachineDrawer.getInstance().setInputSymbol(
+                        tapeBorderPane.tape, entry.getKey(), entry2.getKey(),null);
 
         cellLabels.clear();
         cellOptionRectangle.clear();

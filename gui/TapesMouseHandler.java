@@ -131,7 +131,7 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             String symbol = label.getText();
             symbol = symbol.equals(TuringMachineDrawer.BLANK_SYMBOL)?null:symbol;
-            optionRectangle.tapePane.tapeBorderPane.tape.writeInput(line,column, symbol);
+            TuringMachineDrawer.getInstance().setInputSymbol(optionRectangle.tapePane.tapeBorderPane.tape, line, column, symbol);
 
             mouseEvent.consume();
         }
@@ -247,16 +247,16 @@ public class TapesMouseHandler implements EventHandler<Event> {
 
             switch (tapeOptionIcon.tapeOptionIconDirection) {
                 case LEFT:
-                    tapeBorderPane.tape.setLeftBound(value);
+                    TuringMachineDrawer.getInstance().setTapeLeftBound(tapeBorderPane.tape, value);
                     break;
                 case RIGHT:
-                    tapeBorderPane.tape.setRightBound(value);
+                    TuringMachineDrawer.getInstance().setTapeRightBound(tapeBorderPane.tape, value);
                     break;
                 case BOTTOM:
-                    tapeBorderPane.tape.setBottomBound(value);
+                    TuringMachineDrawer.getInstance().setTapeBottomBound(tapeBorderPane.tape, value);
                     break;
                 case TOP:
-                    tapeBorderPane.tape.setTopBound(value);
+                    TuringMachineDrawer.getInstance().setTapeTopBound(tapeBorderPane.tape, value);
                     break;
             }
         }

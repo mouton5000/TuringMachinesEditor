@@ -90,6 +90,10 @@ class TapesVBox extends VBox {
         tapesPane.addHead(tape, line, column, color);
     }
 
+    public void moveHead(Tape tape, int line, int column, int head) {
+        tapesPane.moveHead(tape, line, column, head);
+    }
+
     void removeHead(Tape tape, int head){
         tapesHeadMenu.removeHead(tape, head);
         tapesPane.removeHead(tape, head);
@@ -98,6 +102,26 @@ class TapesVBox extends VBox {
     void editHeadColor(Tape tape, Integer head, Color color) {
         tapesHeadMenu.editHeadColor(tape, head, color);
         tapesPane.editHeadColor(tape, head, color);
+    }
+
+    void setInputSymbol(Tape tape, int line, int column, String symbol){
+        tapesPane.setInputSymbol(tape, line, column, symbol);
+    }
+
+    void setTapeLeftBound(Tape tape, Integer left){
+        tapesPane.setTapeLeftBound(tape, left);
+    }
+
+    void setTapeRightBound(Tape tape, Integer right){
+        tapesPane.setTapeRightBound(tape, right);
+    }
+
+    void setTapeBottomBound(Tape tape, Integer bottom){
+        tapesPane.setTapeBottomBound(tape, bottom);
+    }
+
+    void setTapeTopBound(Tape tape, Integer top){
+        tapesPane.setTapeTopBound(tape, top);
     }
 
     void centerOn(Tape tape, Integer head) {
@@ -213,4 +237,5 @@ class TapesVBox extends VBox {
     String getTapesString() {
         return tapesPane.getTapesString();
     }
+
 }

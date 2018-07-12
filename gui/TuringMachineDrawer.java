@@ -396,6 +396,46 @@ public class TuringMachineDrawer extends Application {
                         setInitialStateFromMachine(state, false);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer head = (Integer) parameters[2];
+                        Integer line = (Integer) parameters[3];
+                        Integer column = (Integer) parameters[4];
+                        moveHeadFromMachine(tape, line, column, head);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer line = (Integer) parameters[2];
+                        Integer column = (Integer) parameters[3];
+                        String symbol = (String) parameters[4];
+                        setInputSymbolFromMachine(tape, line, column, symbol);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer left = (Integer) parameters[2];
+                        setTapeLeftBoundFromMachine(tape, left);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer right = (Integer) parameters[2];
+                        setTapeRightBoundFromMachine(tape, right);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer bottom = (Integer) parameters[2];
+                        setTapeBottomBoundFromMachine(tape, bottom);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED: {
+                        Tape tape = (Tape) parameters[1];
+                        Integer top = (Integer) parameters[2];
+                        setTapeTopBoundFromMachine(tape, top);
+                    }
+                    break;
                 }
             }
         };
@@ -429,6 +469,13 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
+
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_LEFT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_RIGHT_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_BOTTOM_CHANGED);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_TAPE_TOP_CHANGED);
 
         this.machine = new TuringMachine();
 
@@ -665,6 +712,11 @@ public class TuringMachineDrawer extends Application {
         return !headsColors.containsK(color);
     }
 
+    private void moveHeadFromMachine(Tape tape, int line, int column, int head){
+        tapesPane.moveHead(tape, line, column, head);
+        setEnableToSave();
+    }
+
     void editHeadColor(Tape tape, int head, Color color) {
         if(!isAvailable(color)) {
             notifyMsg("That color was already given to another head.");
@@ -697,7 +749,7 @@ public class TuringMachineDrawer extends Application {
             tape.removeHead(head);
     }
 
-    void removeHeadFromMachine(Tape tape, int head){
+    private void removeHeadFromMachine(Tape tape, int head){
         headsColors.removeV(new Pair<>(tape, head));
         for(Pair<Tape, Integer> pair : new HashSet<>(headsColors.values())) {
             if (pair.first == tape && pair.second > head) {
@@ -709,6 +761,15 @@ public class TuringMachineDrawer extends Application {
 
         graphPane.removeHead(tape, head);
         tapesPane.removeHead(tape, head);
+        setEnableToSave();
+    }
+
+    void setInputSymbol(Tape tape, int line, int column, String symbol){
+        tape.writeInput(line, column, symbol);
+    }
+
+    private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
+        tapesPane.setInputSymbol(tape, line, column, symbol);
         setEnableToSave();
     }
 
@@ -883,6 +944,42 @@ public class TuringMachineDrawer extends Application {
     private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
         graphPane.removeReadSymbol(transition, tape, head, symbol);
         TuringMachineDrawer.getInstance().setEnableToSave();
+    }
+
+    void setTapeLeftBound(Tape tape, Integer left){
+        tape.setLeftBound(left);
+    }
+
+    private void setTapeLeftBoundFromMachine(Tape tape, Integer left){
+        tapesPane.setTapeLeftBound(tape, left);
+        this.setEnableToSave();
+    }
+
+    void setTapeRightBound(Tape tape, Integer right){
+        tape.setRightBound(right);
+    }
+
+    private void setTapeRightBoundFromMachine(Tape tape, Integer right){
+        tapesPane.setTapeRightBound(tape, right);
+        this.setEnableToSave();
+    }
+
+    void setTapeBottomBound(Tape tape, Integer bottom){
+        tape.setBottomBound(bottom);
+    }
+
+    private void setTapeBottomBoundFromMachine(Tape tape, Integer bottom){
+        tapesPane.setTapeBottomBound(tape, bottom);
+        this.setEnableToSave();
+    }
+
+    void setTapeTopBound(Tape tape, Integer top){
+        tape.setTopBound(top);
+    }
+
+    private void setTapeTopBoundFromMachine(Tape tape, Integer top){
+        tapesPane.setTapeTopBound(tape, top);
+        this.setEnableToSave();
     }
 
     void addAction(Transition transition, Tape tape, int head, String actionSymbol) {
