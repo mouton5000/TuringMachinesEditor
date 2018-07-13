@@ -97,6 +97,10 @@ class GraphPane extends Pane {
     }
 
     void clear() {
+        graphGroup.setTranslateX(0);
+        graphGroup.setTranslateY(0);
+        graphScale.setX(1);
+        graphScale.setY(1);
         lastCurrentStateGroup = null;
         stringEnumerator = new StringEnumerator();
 
