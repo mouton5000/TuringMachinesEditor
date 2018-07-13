@@ -44,7 +44,7 @@ public class TuringMenuMouseHandler implements EventHandler<MouseEvent> {
         else if(!TuringMachineDrawer.getInstance().playing && source instanceof StopIcon){
             TuringMachineDrawer.getInstance().goToFirstConfiguration();
         }
-        if(!TuringMachineDrawer.getInstance().playing && source instanceof PlayIcon){
+        else if(!TuringMachineDrawer.getInstance().playing && source instanceof PlayIcon){
             TuringMachineDrawer.getInstance().menu.setPause();
             TuringMachineDrawer.getInstance().play();
         }
