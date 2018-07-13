@@ -723,7 +723,7 @@ public class TuringMachineDrawer extends Application {
         setEnableToSave();
     }
 
-    private boolean isAvailable(Color color) {
+    boolean isAvailable(Color color) {
         return !headsColors.containsK(color);
     }
 

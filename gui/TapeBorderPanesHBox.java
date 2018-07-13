@@ -19,6 +19,7 @@ import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import util.Pair;
 
 import java.util.*;
 
@@ -249,11 +250,20 @@ class TapeBorderPanesHBox extends HBox{
     void eraseTapes(String tapesCellsDescription) {
         String[] tapesCellsDescriptionAr = tapesCellsDescription.split(";");
 
-        for(Tape tape : new HashSet<>(tapes.keySet()))
-            TuringMachineDrawer.getInstance().removeTape(tape, false);
-
-        for(int i = 0; i < tapesCellsDescriptionAr.length; i++)
+        if(tapes.size() > tapesCellsDescriptionAr.length) {
+            int s = tapesCellsDescriptionAr.length;
+            for(Node child: new LinkedList<>(this.getChildren())) {
+                if(!(child instanceof TapeBorderPane)) {
+                    continue;
+                }
+                if(s-- > 0)
+                    continue;
+                TuringMachineDrawer.getInstance().removeTape(((TapeBorderPane) child).tape, false);
+            }
+        }
+        else while(tapes.size() < tapesCellsDescriptionAr.length) {
             TuringMachineDrawer.getInstance().addTape();
+        }
 
         int i = 0;
         for(Node child: this.getChildren()) {
@@ -479,13 +489,28 @@ class TapeBorderPane extends BorderPane {
             int nbHeads = Integer.valueOf(tapeCellsDescriptionAr[1].trim());
             for(int i = 2; i < nbHeads + 2; i++){
                 String[] headInfo = tapeCellsDescriptionAr[i].trim().split(" ");
+                if(headInfo.length != 5){
+                    nbHeads = i - 2;
+                    break;
+                }
                 int line = Integer.valueOf(headInfo[0]);
                 int column = Integer.valueOf(headInfo[1]);
                 int red = Integer.valueOf(headInfo[2]);
                 int green = Integer.valueOf(headInfo[3]);
                 int blue = Integer.valueOf(headInfo[4]);
-                TuringMachineDrawer.getInstance().addHead(tape, line, column, Color.rgb(red, green, blue));
+
+                TuringMachineDrawer drawer = TuringMachineDrawer.getInstance();
+                Color color = Color.rgb(red, green, blue);
+                if(drawer.isAvailable(color))
+                    drawer.addHead(tape, line, column, color);
+                else {
+                    Pair<Tape, Integer> pair = drawer.getHead(color);
+                    if(tape == pair.first)
+                        drawer.moveHead(tape, line, column, pair.second);
+                }
             }
+
+            this.clear();
 
             String[] lineColumn = tapeCellsDescriptionAr[nbHeads + 2].trim().split(" ");
             int line = Integer.valueOf(lineColumn[0]) + tapeCellsDescriptionAr.length - 4 - nbHeads;

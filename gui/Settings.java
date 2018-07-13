@@ -1,5 +1,6 @@
 package gui;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -81,6 +82,28 @@ class Settings {
         dialogPane.setContent(vbox);
 
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        final Button btOk = (Button) dialogPane.lookupButton(ButtonType.OK);
+        btOk.addEventFilter(
+                ActionEvent.ACTION,
+                event -> {
+                    if (!tapeEditCheckBox.isSelected())
+                        return;
+
+                    String tapesDescription = tapeEditTextArea.getText();
+                    String tapeBoundRegex = "((-?\\d+|I) ){3}(-?\\d+|I)\\n";
+                    String tapeNbHeadsRegex = "\\d+\\n";
+                    String tapeHeadDescriptionRegex = "((\\d+ ){4}\\d+\\n)*";
+                    String tapeInputCoordinatesRegex = "\\d+ \\d+\\n";
+                    String tapeInputRegex = "([0-9A-Z ]*\\n?)*";
+                    String taperegex = tapeBoundRegex + tapeNbHeadsRegex + tapeHeadDescriptionRegex +
+                            tapeInputCoordinatesRegex + tapeInputRegex;
+                    String regex =
+                            "([A-Z0-9] )*[A-Z0-9]?\\n("+taperegex+";\\n)*("+taperegex+")?";
+                    System.out.println(regex);
+                    if(!tapesDescription.matches(regex))
+                        event.consume();
+                }
+        );
 
         dialog.setResultConverter(buttonType -> {
             if(buttonType == ButtonType.OK){
