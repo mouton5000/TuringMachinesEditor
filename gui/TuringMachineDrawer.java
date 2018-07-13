@@ -6,10 +6,12 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -165,6 +167,7 @@ public class TuringMachineDrawer extends Application {
     boolean playing;
 
     private Stage stage;
+    SplitPane splitPane;
     GraphPane graphPane;
     TapesVBox tapesPane;
     Notification notification;
@@ -538,8 +541,16 @@ public class TuringMachineDrawer extends Application {
         turingMenuKeyHandler = new TuringMenuKeyHandler();
 
 
+
+
         graphPane = new GraphPane();
         tapesPane = new TapesVBox();
+
+        splitPane = new SplitPane();
+        splitPane.setOrientation(Orientation.VERTICAL);
+        splitPane.getItems().addAll(graphPane, tapesPane);
+        splitPane.setDividerPositions(0.5f);
+
         notification = new Notification();
         menu = new TuringMenu();
         help = new HelpMessages();
@@ -561,10 +572,7 @@ public class TuringMachineDrawer extends Application {
 
         Pane mainPane = new Pane();
 
-        VBox box = new VBox();
-        box.getChildren().addAll(graphPane, separator, tapesPane);
-
-        mainPane.getChildren().addAll(box, menu, notification, help);
+        mainPane.getChildren().addAll(splitPane, menu, notification, help);
         Scene scene = new Scene(mainPane, WIDTH, HEIGHT);
         scene.setOnKeyPressed(turingMenuKeyHandler);
 
@@ -574,15 +582,18 @@ public class TuringMachineDrawer extends Application {
     }
 
     private void resizePanes(){
+        splitPane.setMinHeight(HEIGHT);
+        splitPane.setMaxHeight(HEIGHT);
+
         graphPane.setMinWidth(WIDTH);
         graphPane.setMaxWidth(WIDTH);
-        graphPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
-        graphPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * RATIO_HEIGHT_GRAPH_TAPES);
+        graphPane.setMinHeight(0);
+        graphPane.setMaxHeight(HEIGHT - MARGIN);
 
         tapesPane.setMinWidth(WIDTH);
         tapesPane.setMaxWidth(WIDTH);
-        tapesPane.setMinHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
-        tapesPane.setMaxHeight((HEIGHT - MARGIN - SEPARATOR_WIDTH) * (1 - RATIO_HEIGHT_GRAPH_TAPES));
+        tapesPane.setMinHeight(0);
+        tapesPane.setMaxHeight(HEIGHT - MARGIN);
 
         notification.setLayoutX(WIDTH / 2);
         menu.setLayoutX(WIDTH - menu.getWidth() / 2);
