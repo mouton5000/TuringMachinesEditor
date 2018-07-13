@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import turingmachines.Tape;
+import turingmachines.TuringMachine;
 import util.widget.VirtualKeyboard;
 
 import java.util.Optional;
@@ -101,7 +102,7 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
                 || source instanceof RemoveActionIcon)
                 && TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
             TuringMachineDrawer.getInstance().graphPane.closeTransitionOptionRectangle();
-        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof Pane) {
+        else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof GraphPane) {
 
             if(selected != null)
                 unselect();
@@ -294,7 +295,9 @@ public class GraphPaneMouseHandler implements EventHandler<Event> {
             StateGroup stateGroup = ((StateGroup) source);
             stateGroup.stopTimeline();
             select(stateGroup);
-            TuringMachineDrawer.getInstance().graphPane.moveStateGroup(stateGroup, stateGroup.getLayoutX() + x, stateGroup.getLayoutY() + y);
+            TuringMachineDrawer.getInstance().graphPane.moveStateGroup(stateGroup,
+                    stateGroup.getLayoutX() + x,
+                    stateGroup.getLayoutY() + y);
             mouseEvent.consume();
         }
         else if(!TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode && source instanceof TransitionArrowInvisibleLine) {

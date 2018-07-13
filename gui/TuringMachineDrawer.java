@@ -8,8 +8,13 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -57,14 +62,14 @@ public class TuringMachineDrawer extends Application {
     static final String UP_SYMBOL = "\u21D1";
     static final String NO_ACTION_SYMBOL = "-";
 
-    static final int STATE_RADIUS = 20;
+    static final int STATE_RADIUS = 25;
     static final double FINAL_STATE_RADIUS_RATIO = 0.8;
     static final Color STATE_OUTER_COLOR = Color.BLACK;
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
     static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
     static final Color STATE_PRESS_COLOR = Color.DARKGRAY;
     static final long STATE_PRESS_DURATION = 300;
-    static final int STATE_NAME_FONT_SIZE = 12;
+    static final int STATE_NAME_FONT_SIZE = 20;
     static final String STATE_NAME_FONT_NAME = "Cambria";
 
     static final double TRANSITION_ANGLE = Math.PI/6;
@@ -80,7 +85,7 @@ public class TuringMachineDrawer extends Application {
     static final double TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE = Math.PI / 4;
     static final double TRANSITION_PRESS_OPACITY = 0.8;
     static final long TRANSITION_PRESS_DURATION = 300;
-    static final int TRANSITION_SYMBOL_FONT_SIZE = 15;
+    static final int TRANSITION_SYMBOL_FONT_SIZE = 25;
     static final double TRANSITION_DISPLAY_MAX_HEIGHT = 30;
     static final double TRANSITION_DISPLAY_MAX_WIDTH = 200;
     static final double TRANSITION_DISPLAY_MARGIN = 20;
@@ -540,9 +545,6 @@ public class TuringMachineDrawer extends Application {
         turingMenuMouseHandler = new TuringMenuMouseHandler();
         turingMenuKeyHandler = new TuringMenuKeyHandler();
 
-
-
-
         graphPane = new GraphPane();
         tapesPane = new TapesVBox();
 
@@ -599,6 +601,8 @@ public class TuringMachineDrawer extends Application {
         menu.setLayoutX(WIDTH - menu.getWidth() / 2);
         help.setFitWidth(WIDTH);
         help.setFitHeight(HEIGHT);
+
+
     }
 
     ReadOnlyDoubleProperty screenWidthProperty(){

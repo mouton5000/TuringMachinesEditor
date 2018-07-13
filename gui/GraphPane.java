@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -11,6 +12,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +23,7 @@ import turingmachines.Transition;
 import util.BidirMap;
 import util.Pair;
 import util.StringEnumerator;
+import util.Vector;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,17 +40,19 @@ class GraphPane extends Pane {
 
     StringEnumerator stringEnumerator;
 
-    private double graphOffsetX;
-    private double graphOffsetY;
-
     private BidirMap<StateGroup, Integer> stateGroupToState;
     private BidirMap<TransitionGroup, Transition> transitionGroupToTransition;
 
     private StateGroup lastCurrentStateGroup;
 
+    private Group graphGroup;
+    private Scale graphScale;
+
     GraphPane(){
 
         this.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        this.graphGroup = new Group();
 
         this.stateOptionRectangle = new StateOptionRectangle( this);
         this.stateOptionRectangle.setVisible(false);
@@ -59,14 +64,28 @@ class GraphPane extends Pane {
         this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
+        graphScale = new Scale();
+        this.graphGroup.getTransforms().add(graphScale);
+        this.setOnScroll(scrollEvent -> {
+            int direction = (int)Math.signum(scrollEvent.getDeltaY());
+            if(this.graphGroup.getScaleY() < 0.3 && direction == -1)
+                return;
 
-        this.getChildren().addAll(this.stateOptionRectangle, this.transitionOptionRectangle);
+            graphScale.setX(graphScale.getX() + direction * 0.1);
+            graphScale.setY(graphScale.getY() + direction * 0.1);
+        });
+
+        this.getChildren().addAll(this.graphGroup);
+        graphGroup.getChildren().addAll(this.stateOptionRectangle, this.transitionOptionRectangle);
+
 
         Rectangle graphClip = new Rectangle();
 
         this.setClip(graphClip);
 
         this.layoutBoundsProperty().addListener((ov, oldValue, newValue) -> {
+            graphScale.setPivotX(newValue.getWidth()/2);
+            graphScale.setPivotY(newValue.getHeight()/2);
             graphClip.setWidth(newValue.getWidth());
             graphClip.setHeight(newValue.getHeight());
         });
@@ -78,8 +97,6 @@ class GraphPane extends Pane {
     }
 
     void clear() {
-        graphOffsetX = 0;
-        graphOffsetY = 0;
         lastCurrentStateGroup = null;
         stringEnumerator = new StringEnumerator();
 
@@ -101,10 +118,16 @@ class GraphPane extends Pane {
     void addState(double x, double y, Integer state){
         String name = TuringMachineDrawer.getInstance().machine.getStateName(state);
         StateGroup circle = new StateGroup(name);
+
+        Vector p = new Vector(x - graphGroup.getTranslateX(), y - graphGroup.getTranslateY());
+        Vector c = new Vector(this.getWidth() / 2, this.getHeight() / 2);
+        Vector n = p.diff(c).mult(1 / graphScale.getY()).add(c);
+        x = n.x;
+        y = n.y;
         this.moveStateGroup(circle, x, y);
 
         stateGroupToState.put(circle, state);
-        this.getChildren().add(circle);
+        graphGroup.getChildren().add(circle);
     }
 
     void removeState(StateGroup stateGroup) {
@@ -115,7 +138,7 @@ class GraphPane extends Pane {
         StateGroup stateGroup = stateGroupToState.removeV(state);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
-        this.getChildren().remove(stateGroup);
+        graphGroup.getChildren().remove(stateGroup);
 
         Set<Map.Entry<StateGroup, Integer>> entries = new HashSet<>(stateGroupToState.entrySet());
         for(Map.Entry<StateGroup, Integer> entry : entries){
@@ -125,10 +148,12 @@ class GraphPane extends Pane {
     }
 
     void moveStateGroup(StateGroup stateGroup, double x, double y){
+
+
         int xg = gridClosest(x);
         int yg = gridClosest(y);
-        stateGroup.setLayoutX(xg + graphOffsetX);
-        stateGroup.setLayoutY(yg + graphOffsetY);
+        stateGroup.setLayoutX(xg);
+        stateGroup.setLayoutY(yg);
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
@@ -160,7 +185,7 @@ class GraphPane extends Pane {
             transitionGroup.setControl2(control2X, control2Y);
 
         transitionGroupToTransition.put(transitionGroup, transition);
-        this.getChildren().add(transitionGroup);
+        graphGroup.getChildren().add(transitionGroup);
         transitionGroup.toBack();
 
         Iterator<Tape> it = TuringMachineDrawer.getInstance().machine.getTapes();
@@ -183,7 +208,7 @@ class GraphPane extends Pane {
         TransitionGroup transitionGroup = transitionGroupToTransition.removeV(transition);
         this.closeStateOptionRectangle();
         this.closeTransitionOptionRectangle();
-        this.getChildren().remove(transitionGroup);
+        graphGroup.getChildren().remove(transitionGroup);
     }
 
     Transition getTransition(TransitionGroup transitionGroup) {
@@ -376,15 +401,8 @@ class GraphPane extends Pane {
     }
 
     void translate(double dx, double dy) {
-        for(Node child : getChildren()) {
-            if(child instanceof StateGroup) {
-                child.setLayoutX(child.getLayoutX() + dx);
-                child.setLayoutY(child.getLayoutY() + dy);
-            }
-        }
-
-        graphOffsetX = (graphOffsetX + dx) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
-        graphOffsetY = (graphOffsetY + dy) % TuringMachineDrawer.GRAPH_GRID_WIDTH;
+        graphGroup.setTranslateX(graphGroup.getTranslateX() + dx);
+        graphGroup.setTranslateY(graphGroup.getTranslateY() + dy);
     }
 
 
