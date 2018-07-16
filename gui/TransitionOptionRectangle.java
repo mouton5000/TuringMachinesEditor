@@ -15,7 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
-import util.MouseHandler;
+import util.MouseListener;
 import util.Pair;
 import util.Ressources;
 
@@ -47,9 +47,9 @@ class TransitionOptionRectangle extends OptionRectangle {
     int currentHead;
 
     TransitionOptionRectangle(GraphPane graphPane) {
-        super(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        super();
         this.graphPane = graphPane;
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         vbox = new VBox();
 
@@ -253,7 +253,7 @@ class TransitionOptionRectangle extends OptionRectangle {
     }
 }
 
-class HeadOptionsGroup extends HBox implements MouseHandler {
+class HeadOptionsGroup extends HBox implements MouseListener {
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
     private Map<Tape, TransitionOptionRectangleTapeHBox> tapes;
@@ -273,8 +273,8 @@ class HeadOptionsGroup extends HBox implements MouseHandler {
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     void addTape(Tape tape){
@@ -396,14 +396,14 @@ class HeadOptionsGroup extends HBox implements MouseHandler {
     }
 }
 
-class RemoveTransitionIcon extends ImageView implements MouseHandler{
+class RemoveTransitionIcon extends ImageView implements MouseListener {
     TransitionOptionRectangle optionRectangle;
 
     RemoveTransitionIcon(TransitionOptionRectangle optionRectangle) {
         super(Ressources.getRessource("remove_transition.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     @Override
@@ -426,7 +426,7 @@ class RemoveTransitionIcon extends ImageView implements MouseHandler{
     }
 }
 
-class ReadIcon extends Group implements MouseHandler{
+class ReadIcon extends Group implements MouseListener {
 
     TransitionOptionRectangle optionRectangle;
 
@@ -447,7 +447,7 @@ class ReadIcon extends Group implements MouseHandler{
                 readIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(backgroundColor, readIcon);
     }
@@ -530,7 +530,7 @@ class TransitionOptionRectangleTapeHBox extends HBox{
     }
 }
 
-class TransitionOptionRectangleChooseHead extends Rectangle implements MouseHandler{
+class TransitionOptionRectangleChooseHead extends Rectangle implements MouseListener {
     TransitionOptionRectangle optionRectangle;
     TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox;
 
@@ -540,7 +540,7 @@ class TransitionOptionRectangleChooseHead extends Rectangle implements MouseHand
         super(v, v1, v2, v3);
         this.optionRectangle = optionRectangle;
         this.transitionOptionRectangleTapeHBox = transitionOptionRectangleTapeHBox;
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     int getHead() {
@@ -567,7 +567,7 @@ class TransitionOptionRectangleChooseHead extends Rectangle implements MouseHand
     }
 }
 
-class ReadSymbolMenu extends HBox implements MouseHandler {
+class ReadSymbolMenu extends HBox implements MouseListener {
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
 
@@ -582,8 +582,8 @@ class ReadSymbolMenu extends HBox implements MouseHandler {
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         ChooseSymbolOptionLabel label =
                 new ChooseSymbolOptionLabel(optionRectangle, TuringMachineDrawer.BLANK_SYMBOL);
@@ -691,7 +691,7 @@ class ReadSymbolMenu extends HBox implements MouseHandler {
     }
 }
 
-class ChooseSymbolOptionLabel extends Label implements MouseHandler{
+class ChooseSymbolOptionLabel extends Label implements MouseListener {
 
 
     private static final Background SELECTED_BACKGROUND = new Background(
@@ -712,14 +712,14 @@ class ChooseSymbolOptionLabel extends Label implements MouseHandler{
         this.setBackground(UNSELECTED_BACKGROUND);
         this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
         this.setAlignment(Pos.CENTER);
     }
 
@@ -764,7 +764,7 @@ class ChooseSymbolOptionLabel extends Label implements MouseHandler{
     }
 }
 
-class TransitionOptionRectangleSymbolsDisplay extends HBox implements MouseHandler {
+class TransitionOptionRectangleSymbolsDisplay extends HBox implements MouseListener {
     TransitionOptionRectangle optionRectangle;
 
     private Map<Tape, TapeSymbolsDisplay> tapes;
@@ -783,8 +783,8 @@ class TransitionOptionRectangleSymbolsDisplay extends HBox implements MouseHandl
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     void addTape(Tape tape){
@@ -912,7 +912,7 @@ class HeadSymbolsLabelDisplay extends Label {
     }
 }
 
-class ActionsIcon extends Group implements MouseHandler{
+class ActionsIcon extends Group implements MouseListener {
 
     TransitionOptionRectangle optionRectangle;
     private Rectangle backgroundColor;
@@ -932,7 +932,7 @@ class ActionsIcon extends Group implements MouseHandler{
                 actionsIcon.getBoundsInLocal().getHeight());
         backgroundColor.setFill(Color.GREEN);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(backgroundColor, actionsIcon);
     }
@@ -961,7 +961,7 @@ class ActionsIcon extends Group implements MouseHandler{
     }
 }
 
-class ActionsMenu extends HBox implements MouseHandler{
+class ActionsMenu extends HBox implements MouseListener {
     TransitionOptionRectangle optionRectangle;
     RemoveActionIcon removeActionIcon;
     private double offsetX;
@@ -976,8 +976,8 @@ class ActionsMenu extends HBox implements MouseHandler{
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setTranslateX(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         removeActionIcon = new RemoveActionIcon(optionRectangle);
         this.getChildren().add(removeActionIcon);
@@ -1071,7 +1071,7 @@ class ActionsMenu extends HBox implements MouseHandler{
     }
 }
 
-class ChooseActionOptionLabel extends Label implements MouseHandler{
+class ChooseActionOptionLabel extends Label implements MouseListener {
     TransitionOptionRectangle optionRectangle;
 
     ChooseActionOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
@@ -1080,14 +1080,14 @@ class ChooseActionOptionLabel extends Label implements MouseHandler{
 
         this.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         this.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
         this.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2 - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     @Override
@@ -1116,7 +1116,7 @@ class ChooseActionOptionLabel extends Label implements MouseHandler{
     }
 }
 
-class RemoveActionIcon extends ImageView implements MouseHandler{
+class RemoveActionIcon extends ImageView implements MouseListener {
 
     TransitionOptionRectangle optionRectangle;
 
@@ -1124,7 +1124,7 @@ class RemoveActionIcon extends ImageView implements MouseHandler{
         super(Ressources.getRessource("remove_action.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     @Override
@@ -1151,7 +1151,7 @@ class RemoveActionIcon extends ImageView implements MouseHandler{
     }
 }
 
-class ActionDisplay extends HBox implements MouseHandler{
+class ActionDisplay extends HBox implements MouseListener {
 
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
@@ -1167,8 +1167,8 @@ class ActionDisplay extends HBox implements MouseHandler{
         this.setAlignment(Pos.CENTER_LEFT);
         this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     void addAction(Tape tape, int head, String actionSymbol) {
@@ -1181,7 +1181,7 @@ class ActionDisplay extends HBox implements MouseHandler{
                 TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
         label.setTextFill(color);
 
-        label.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        label.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
         label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);

@@ -2,7 +2,12 @@ package gui;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import util.MouseListener;
 import util.Ressources;
+import util.widget.VirtualKeyboard;
+
+import java.util.Optional;
 
 class SymbolOptionRectangle extends OptionRectangle {
 
@@ -10,7 +15,7 @@ class SymbolOptionRectangle extends OptionRectangle {
     int currentSymbolIndex;
 
     SymbolOptionRectangle(SymbolsMenu symbolsMenu) {
-        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        super();
         this.symbolsMenu = symbolsMenu;
 
         EditSymbolIcon editSymbolIcon = new EditSymbolIcon(this);
@@ -38,7 +43,7 @@ class SymbolOptionRectangle extends OptionRectangle {
                 - removeSymbolIcon.getBoundsInLocal().getHeight() / 2
         );
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(editSymbolIcon, removeSymbolIcon);
     }
@@ -79,24 +84,69 @@ class SymbolOptionRectangle extends OptionRectangle {
     }
 }
 
-class EditSymbolIcon extends ImageView {
+class EditSymbolIcon extends ImageView implements MouseListener {
     SymbolOptionRectangle optionRectangle;
 
     EditSymbolIcon(SymbolOptionRectangle optionRectangle){
         super(Ressources.getRessource("cursor_icon.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
+        virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+        virtualKeyboard.setY(mouseEvent.getScreenY());
+
+        Optional<String> result = virtualKeyboard.showAndWait();
+        if(result.isPresent())
+            TuringMachineDrawer.getInstance().editSymbol(this.optionRectangle.currentSymbolIndex, result.get());
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }
 
-class RemoveSymbolIcon extends ImageView {
+class RemoveSymbolIcon extends ImageView implements MouseListener {
     SymbolOptionRectangle optionRectangle;
 
     RemoveSymbolIcon(SymbolOptionRectangle optionRectangle){
         super(Ressources.getRessource("remove_symbol.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().removeSymbol(this.optionRectangle.currentSymbolIndex);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }

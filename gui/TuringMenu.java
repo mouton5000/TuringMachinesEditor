@@ -4,11 +4,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import util.MouseListener;
 import util.Ressources;
 
 import java.util.Arrays;
@@ -266,7 +268,7 @@ class TuringMenu extends Group {
     }
 }
 
-abstract class PlayerIcon extends Group{
+abstract class PlayerIcon extends Group implements MouseListener {
 
     private Circle circle;
     private boolean wasVisible;
@@ -290,7 +292,7 @@ abstract class PlayerIcon extends Group{
 
     void setClickable(){
         circle.setFill(TuringMachineDrawer.MENU_CLICKABLE_ICON_COLOR);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().turingMenuMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
     void setNonClickable(){
         circle.setFill(TuringMachineDrawer.MENU_NON_CLICKABLE_ICON_COLOR);
@@ -307,6 +309,15 @@ abstract class PlayerIcon extends Group{
         this.setVisible(wasVisible);
     }
 
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
 class EditGraphIcon extends PlayerIcon {
@@ -320,6 +331,18 @@ class EditGraphIcon extends PlayerIcon {
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        if(TuringMachineDrawer.getInstance().editGraphMode)
+            TuringMachineDrawer.getInstance().setNotEditGraph();
+        else
+            TuringMachineDrawer.getInstance().setEditGraph();
+        return true;
     }
 }
 
@@ -335,6 +358,14 @@ class NewFileIcon extends PlayerIcon {
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().newMachine();
+        return true;
+    }
 }
 
 class OpenFileIcon extends PlayerIcon {
@@ -348,6 +379,14 @@ class OpenFileIcon extends PlayerIcon {
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().loadMachine();
+        return true;
     }
 }
 
@@ -363,6 +402,14 @@ class SaveFileIcon extends PlayerIcon {
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().saveMachine();
+        return true;
+    }
 }
 
 class SaveAsFileIcon extends PlayerIcon {
@@ -377,6 +424,14 @@ class SaveAsFileIcon extends PlayerIcon {
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().saveAsMachine();
+        return true;
+    }
 }
 
 class ManualIcon extends PlayerIcon{
@@ -390,6 +445,18 @@ class ManualIcon extends PlayerIcon{
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
         imageView.setLayoutY(-imageView.getBoundsInLocal().getHeight() / 2);
         this.getChildren().add(imageView);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        if(TuringMachineDrawer.getInstance().manualMode)
+            TuringMachineDrawer.getInstance().setNotManual();
+        else
+            TuringMachineDrawer.getInstance().setManual();
+        return true;
     }
 }
 
@@ -410,6 +477,14 @@ class ParametersIcon extends PlayerIcon {
         circle3.setFill(Color.WHITE);
 
         this.getChildren().addAll(circle1, circle2, circle3);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().openParameters();
+        return true;
     }
 }
 
@@ -451,6 +526,19 @@ class BuildIcon extends PlayerIcon{
 
     }
 
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        if(TuringMachineDrawer.getInstance().buildMode)
+            TuringMachineDrawer.getInstance().unbuild();
+        else
+            TuringMachineDrawer.getInstance().build();
+
+        return true;
+    }
+
 }
 
 
@@ -468,6 +556,15 @@ class StopIcon extends PlayerIcon{
         rectangle.setArcHeight(5);
         rectangle.setArcWidth(5);
         this.getChildren().add(rectangle);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        TuringMachineDrawer.getInstance().goToFirstConfiguration();
+        return true;
     }
 }
 
@@ -487,6 +584,16 @@ class PlayIcon extends PlayerIcon{
         triangle.setFill(Color.WHITE);
 
         this.getChildren().add(triangle);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        TuringMachineDrawer.getInstance().menu.setPause();
+        TuringMachineDrawer.getInstance().play();
+        return true;
     }
 }
 
@@ -514,6 +621,13 @@ class PauseIcon extends PlayerIcon{
         rectangle2.setFill(Color.WHITE);
 
         this.getChildren().addAll(rectangle1, rectangle2);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        TuringMachineDrawer.getInstance().menu.setPlay();
+        TuringMachineDrawer.getInstance().pause();
+        return true;
     }
 }
 
@@ -544,6 +658,15 @@ class PreviousFrameIcon extends PlayerIcon{
 
         this.getChildren().addAll(rectangle, triangle);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+
+        TuringMachineDrawer.getInstance().goToPreviousConfiguration();
+        return true;
+    }
 }
 
 class NextFrameIcon extends PlayerIcon{
@@ -572,6 +695,14 @@ class NextFrameIcon extends PlayerIcon{
         triangle.setFill(Color.WHITE);
 
         this.getChildren().addAll(rectangle, triangle);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().tick();
+        return true;
     }
 }
 
@@ -609,6 +740,14 @@ class LastFrameIcon extends PlayerIcon{
 
         this.getChildren().addAll(triangle1, triangle2, rectangle);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().goToLastConfiguration();
+        return true;
+    }
 }
 
 class HideIcon extends PlayerIcon{
@@ -630,6 +769,12 @@ class HideIcon extends PlayerIcon{
         arrow.setFill(Color.WHITE);
 
         this.getChildren().add(arrow);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        TuringMachineDrawer.getInstance().menu.hideMenu();
+        return true;
     }
 }
 
@@ -653,6 +798,12 @@ class ShowIcon extends PlayerIcon{
 
         this.getChildren().add(arrow);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        TuringMachineDrawer.getInstance().menu.showMenu();
+        return true;
+    }
 }
 
 class HelpIcon extends PlayerIcon{
@@ -671,5 +822,13 @@ class HelpIcon extends PlayerIcon{
         label.setAlignment(Pos.CENTER);
 
         this.getChildren().add(label);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().playing)
+            return false;
+        TuringMachineDrawer.getInstance().help.setVisible(true);
+        return true;
     }
 }

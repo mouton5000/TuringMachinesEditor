@@ -15,10 +15,10 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONObject;
-import util.MouseHandler;
+import util.MouseListener;
 import util.Ressources;
 
-class StateGroup extends Group implements MouseHandler {
+class StateGroup extends Group implements MouseListener {
 
     boolean animating;
 
@@ -36,9 +36,9 @@ class StateGroup extends Group implements MouseHandler {
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         outerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         outerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);

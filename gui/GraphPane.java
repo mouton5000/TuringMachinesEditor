@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Created by dimitri.watel on 18/06/18.
  */
-class GraphPane extends Pane implements MouseHandler {
+class GraphPane extends Pane implements MouseListener {
 
     StateOptionRectangle stateOptionRectangle;
     TransitionOptionRectangle transitionOptionRectangle;
@@ -62,9 +62,9 @@ class GraphPane extends Pane implements MouseHandler {
         this.transitionOptionRectangle = new TransitionOptionRectangle(this);
         this.transitionOptionRectangle.setVisible(false);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         graphScale = new Scale();
         this.graphGroup.getTransforms().add(graphScale);

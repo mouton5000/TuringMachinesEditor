@@ -4,19 +4,17 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import util.MouseHandler;
+import util.MouseListener;
 
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-abstract class OptionRectangle extends Group implements MouseHandler {
+abstract class OptionRectangle extends Group implements MouseListener {
 
     private MinimizedOptionRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;
@@ -25,10 +23,10 @@ abstract class OptionRectangle extends Group implements MouseHandler {
 
     private boolean maximized;
 
-    OptionRectangle(EventHandler<Event> mouseHandler){
+    OptionRectangle(){
 
         minimizedRectangle = new MinimizedOptionRectangle(this);
-        minimizedRectangle.setOnMouseClicked(mouseHandler);
+        minimizedRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         Rectangle clipRectangle = new Rectangle();
         this.setClip(clipRectangle);
@@ -152,7 +150,7 @@ abstract class OptionRectangle extends Group implements MouseHandler {
     }
 }
 
-class MinimizedOptionRectangle extends Group{
+class MinimizedOptionRectangle extends Group implements MouseListener{
     OptionRectangle optionRectangle;
     private Rectangle minimizedRectangle;
     private WaitingDots waitingDots;
@@ -171,5 +169,24 @@ class MinimizedOptionRectangle extends Group{
         this.getChildren().addAll(minimizedRectangle, waitingDots);
         minimizedRectangle.setX( - minimizedRectangle.getWidth() / 2);
         minimizedRectangle.setY( - minimizedRectangle.getHeight() / 2);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.optionRectangle.minimize(true);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }

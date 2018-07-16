@@ -10,7 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import util.MouseHandler;
+import util.MouseListener;
 import util.Ressources;
 import util.widget.VirtualKeyboard;
 
@@ -19,16 +19,16 @@ import java.util.Optional;
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-class StateOptionRectangle extends OptionRectangle implements MouseHandler {
+class StateOptionRectangle extends OptionRectangle implements MouseListener {
 
     StateGroup currentState;
     private GraphPane graphPane;
     private ChangeListener<Number> changeListener;
 
     StateOptionRectangle(GraphPane pane) {
-        super(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        super();
         this.graphPane = pane;
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         changeListener = (observableValue, oldVal, newVal) ->
                 StateOptionRectangle.this.setLayoutY(
@@ -120,7 +120,7 @@ class StateOptionRectangle extends OptionRectangle implements MouseHandler {
 
 }
 
-class FinalStateOption extends Group implements MouseHandler{
+class FinalStateOption extends Group implements MouseListener {
 
     StateOptionRectangle optionRectangle;
 
@@ -136,7 +136,7 @@ class FinalStateOption extends Group implements MouseHandler{
         finalStateOptionInnerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
         finalStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(finalStateOptionOuterCircle, finalStateOptionInnerCircle);
     }
@@ -161,7 +161,7 @@ class FinalStateOption extends Group implements MouseHandler{
     }
 }
 
-class AcceptingStateOption extends Group implements MouseHandler{
+class AcceptingStateOption extends Group implements MouseListener {
     StateOptionRectangle optionRectangle;
 
     AcceptingStateOption(StateOptionRectangle optionRectangle){
@@ -177,7 +177,7 @@ class AcceptingStateOption extends Group implements MouseHandler{
 
         ImageView acceptingStateOptionIcon = new ImageView(Ressources.getRessource("Accept-icon.png"));
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(acceptingStateOptionOuterCircle, acceptingStateOptionInnerCircle,
                 acceptingStateOptionIcon);
@@ -211,7 +211,7 @@ class AcceptingStateOption extends Group implements MouseHandler{
     }
 }
 
-class InitialStateOption extends Group implements MouseHandler{
+class InitialStateOption extends Group implements MouseListener {
     StateOptionRectangle optionRectangle;
 
     InitialStateOption(StateOptionRectangle optionRectangle){
@@ -235,7 +235,7 @@ class InitialStateOption extends Group implements MouseHandler{
         initialStateOptionLine2.setEndY(Math.sin(TuringMachineDrawer.TRANSITION_ANGLE) *
                 TuringMachineDrawer.STATE_RADIUS);
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(initialStateOptionCircle, initialStateOptionLine1, initialStateOptionLine2);
     }
@@ -260,13 +260,13 @@ class InitialStateOption extends Group implements MouseHandler{
     }
 }
 
-class EditStateNameOptionIcon extends ImageView implements MouseHandler{
+class EditStateNameOptionIcon extends ImageView implements MouseListener {
     StateOptionRectangle optionRectangle;
     EditStateNameOptionIcon(StateOptionRectangle optionRectangle){
         super(Ressources.getRessource("cursor_icon.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     @Override
@@ -299,13 +299,13 @@ class EditStateNameOptionIcon extends ImageView implements MouseHandler{
     }
 }
 
-class RemoveStateOptionIcon extends ImageView implements MouseHandler{
+class RemoveStateOptionIcon extends ImageView implements MouseListener {
     StateOptionRectangle optionRectangle;
     RemoveStateOptionIcon(StateOptionRectangle optionRectangle){
         super(Ressources.getRessource("remove_state.png"));
         this.optionRectangle = optionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     @Override

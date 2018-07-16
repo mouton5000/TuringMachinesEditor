@@ -3,7 +3,9 @@ package gui;
 import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import turingmachines.Tape;
+import util.MouseListener;
 import util.Ressources;
 
 /**
@@ -16,7 +18,7 @@ class HeadOptionRectangle extends OptionRectangle{
     int currentHead;
 
     HeadOptionRectangle(TapeHeadMenu tapeHeadMenu, Tape tape) {
-        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        super();
         this.tapeHeadMenu = tapeHeadMenu;
         this.tape = tape;
 
@@ -105,7 +107,7 @@ class HeadOptionRectangle extends OptionRectangle{
     }
 }
 
-class RemoveHeadIcon extends ImageView{
+class RemoveHeadIcon extends ImageView implements MouseListener {
 
     HeadOptionRectangle optionRectangle;
 
@@ -113,6 +115,27 @@ class RemoveHeadIcon extends ImageView{
         super(s);
         this.optionRectangle = headOptionRectangle;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode|| TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        Tape tape = this.optionRectangle.tape;
+        int head = this.optionRectangle.currentHead;
+        TuringMachineDrawer.getInstance().removeHead(tape, head, true);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }

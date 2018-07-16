@@ -9,18 +9,24 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONArray;
+import util.MouseListener;
 import util.Ressources;
+import util.widget.VirtualKeyboard;
 
-class SymbolsMenu extends HBox {
+import java.util.Optional;
+
+class SymbolsMenu extends HBox implements MouseListener {
 
     SymbolOptionRectangle symbolOptionRectangle;
     AddSymbolIcon addSymbolIcon;
     private double offsetX;
+    private Double dragX;
 
     SymbolsMenu(){
         this.symbolOptionRectangle = new SymbolOptionRectangle(this);
@@ -33,9 +39,9 @@ class SymbolsMenu extends HBox {
         this.setAlignment(Pos.CENTER_LEFT);
 
         symbolOptionRectangle.managedProperty().bind(symbolOptionRectangle.visibleProperty());
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(addSymbolIcon);
     }
@@ -124,17 +130,70 @@ class SymbolsMenu extends HBox {
         closeSymbolOptionRectangle();
         symbolOptionRectangle.clear();
     }
-}
 
-class AddSymbolIcon extends ImageView {
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
 
-    AddSymbolIcon() {
-        super(Ressources.getRessource("add_symbol.png"));
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        if(this.symbolOptionRectangle.isMaximized())
+            this.closeSymbolOptionRectangle();
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        double x = mouseEvent.getX();
+        if(dragX == null)
+            dragX = x;
+        else {
+            this.translate(x - dragX);
+            dragX = x;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }
 
-class SymbolLabel extends Group {
+class AddSymbolIcon extends ImageView implements MouseListener{
+
+    AddSymbolIcon() {
+        super(Ressources.getRessource("add_symbol.png"));
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        VirtualKeyboard virtualKeyboard = new VirtualKeyboard();
+        virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+        virtualKeyboard.setY(mouseEvent.getScreenY());
+
+        Optional<String> result = virtualKeyboard.showAndWait();
+        if(result.isPresent()){
+            TuringMachineDrawer.getInstance().addSymbol(result.get());
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
+}
+
+class SymbolLabel extends Group implements MouseListener {
 
     SymbolsMenu symbolsMenu;
     boolean animating;
@@ -171,9 +230,9 @@ class SymbolLabel extends Group {
 
         this.getChildren().addAll(backgroundRectangle, symbolLabel);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     String getText(){ return symbolLabel.getText(); }
@@ -199,5 +258,42 @@ class SymbolLabel extends Group {
         timeline.stop();
         backgroundRectangle.setFill(TuringMachineDrawer.TAPE_MENU_DEFAULT_FILL_COLOR);
         animating = false;
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(this.symbolsMenu.symbolOptionRectangle.isMaximized())
+            this.symbolsMenu.closeSymbolOptionRectangle();
+        else {
+            boolean pressFinished = !this.animating;
+            this.stopTimeline();
+
+            if (pressFinished)
+                this.symbolsMenu.openSymbolOptionRectantle(this.symbolsMenu.getIndex(this));
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.stopTimeline();
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!this.symbolsMenu.symbolOptionRectangle.isMaximized())
+            this.startTimeline();
+
+        return false;
     }
 }

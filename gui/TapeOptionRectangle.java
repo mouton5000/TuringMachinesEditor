@@ -2,8 +2,10 @@ package gui;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Line;
 import turingmachines.Tape;
+import util.MouseListener;
 import util.Ressources;
 
 /**
@@ -37,7 +39,7 @@ class TapeOptionRectangle extends OptionRectangle{
     int currentColumn;
 
     TapeOptionRectangle(TapeBorderPane tapeBorderPane) {
-        super(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        super();
         this.tapeBorderPane = tapeBorderPane;
 
         this.currentTape = tapeBorderPane.tape;
@@ -296,7 +298,7 @@ enum TapeOptionIconDirection{
     TOP
 }
 
-class TapeOptionIcon extends ImageView{
+class TapeOptionIcon extends ImageView implements MouseListener {
 
     TapeOptionIconAction tapeOptionIconAction;
     TapeOptionIconDirection tapeOptionIconDirection;
@@ -308,9 +310,84 @@ class TapeOptionIcon extends ImageView{
         this.optionRectangle = optionRectangle;
         this.tapeOptionIconAction = tapeOptionIconAction;
         this.tapeOptionIconDirection = tapeOptionIconDirection;
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
 
     }
 
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode|| TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TapeBorderPane tapeBorderPane = this.optionRectangle.tapeBorderPane;
+        int line = this.optionRectangle.currentLine;
+        int column = this.optionRectangle.currentColumn;
+
+        Integer coord = -1;
+        Integer delta = 0;
+        switch (this.tapeOptionIconDirection){
+
+            case LEFT:
+                delta = -1;
+                coord = column;
+                break;
+            case RIGHT:
+                delta = 1;
+                coord = column;
+                break;
+            case BOTTOM:
+                delta = -1;
+                coord = line;
+                break;
+            case TOP:
+                delta = 1;
+                coord = line;
+                break;
+        }
+
+        Integer value = -1;
+
+        switch (this.tapeOptionIconAction){
+
+            case INFINITE:
+                value = null;
+                break;
+
+            case REMOVE:
+                value = coord;
+                break;
+
+            case ADD:
+                value = coord + delta;
+                break;
+        }
+
+        switch (this.tapeOptionIconDirection) {
+            case LEFT:
+                TuringMachineDrawer.getInstance().setTapeLeftBound(tapeBorderPane.tape, value);
+                break;
+            case RIGHT:
+                TuringMachineDrawer.getInstance().setTapeRightBound(tapeBorderPane.tape, value);
+                break;
+            case BOTTOM:
+                TuringMachineDrawer.getInstance().setTapeBottomBound(tapeBorderPane.tape, value);
+                break;
+            case TOP:
+                TuringMachineDrawer.getInstance().setTapeTopBound(tapeBorderPane.tape, value);
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }

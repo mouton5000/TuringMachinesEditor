@@ -8,16 +8,9 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
@@ -30,7 +23,10 @@ import util.Pair;
 import util.Subscriber;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 public class TuringMachineDrawer extends Application {
 
@@ -194,9 +190,7 @@ public class TuringMachineDrawer extends Application {
     private Double nextControl2X;
     private Double nextControl2Y;
 
-    GraphPaneMouseHandler graphPaneMouseHandler;
-    TapesMouseHandler tapesMouseHandler;
-    TuringMenuMouseHandler turingMenuMouseHandler;
+    MouseHandler mouseHandler;
     TuringMenuKeyHandler turingMenuKeyHandler;
 
     SequentialTransition machineTimeLine;
@@ -540,9 +534,7 @@ public class TuringMachineDrawer extends Application {
 
     private void initDraw(){
 
-        graphPaneMouseHandler = new GraphPaneMouseHandler();
-        tapesMouseHandler = new TapesMouseHandler();
-        turingMenuMouseHandler = new TuringMenuMouseHandler();
+        mouseHandler = new MouseHandler();
         turingMenuKeyHandler = new TuringMenuKeyHandler();
 
         graphPane = new GraphPane();
@@ -1055,7 +1047,7 @@ public class TuringMachineDrawer extends Application {
         manualMode = true;
         this.playing = false;
         closeAllOptionRectangle();
-        graphPaneMouseHandler.unselect();
+        graphPane.unselect();
 
         this.machine.buildManual();
         this.goToFirstConfiguration();
@@ -1106,7 +1098,7 @@ public class TuringMachineDrawer extends Application {
         buildMode = true;
         this.playing = false;
         closeAllOptionRectangle();
-        graphPaneMouseHandler.unselect();
+        graphPane.unselect();
 
         this.machine.build();
         this.goToFirstConfiguration();

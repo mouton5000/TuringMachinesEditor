@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -19,6 +20,7 @@ import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import util.MouseListener;
 import util.Pair;
 
 import java.util.*;
@@ -292,7 +294,7 @@ class TapeBorderPanesHBox extends HBox{
     }
 }
 
-class TapeBorderPane extends BorderPane {
+class TapeBorderPane extends BorderPane implements MouseListener {
 
     Integer bottom;
     Integer top;
@@ -301,6 +303,9 @@ class TapeBorderPane extends BorderPane {
 
     double offsetX;
     double offsetY;
+
+    Double dragX;
+    Double dragY;
 
     TapePane tapePane;
     private HorizontalCoordinates horizontalCoordinates;
@@ -329,8 +334,8 @@ class TapeBorderPane extends BorderPane {
 
         tapePane = new TapePane(this);
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth()
@@ -544,6 +549,34 @@ class TapeBorderPane extends BorderPane {
     String getTapeString() {
         return tapePane.getTapeString();
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        double x = mouseEvent.getX();
+        double y = mouseEvent.getY();
+        if(dragX == null){
+            dragX = x;
+            dragY = y;
+        }
+        else {
+            this.translate(x - dragX, y - dragY);
+            dragX = x;
+            dragY = y;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        dragY = mouseEvent.getY();
+        return true;
+    }
 }
 
 class HorizontalCoordinates extends Pane {
@@ -716,7 +749,7 @@ class VerticalCoordinates extends Pane {
     }
 }
 
-class TapePane extends Pane {
+class TapePane extends Pane implements MouseListener{
 
     private Group tapeLinesGroup;
 
@@ -750,19 +783,19 @@ class TapePane extends Pane {
 
         lines = new ArrayList<>();
         columns = new ArrayList<>();
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         tapeLinesGroup = new Group();
 
         cellOptionRectangle = new CellOptionRectangle( this);
         cellOptionRectangle.setVisible(false);
-        cellOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        cellOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         tapeOptionRectangle = new TapeOptionRectangle(this.tapeBorderPane);
         tapeOptionRectangle.setVisible(false);
-        tapeOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        tapeOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         animatedRectangle = new Rectangle(0, 0,
                 TuringMachineDrawer.TAPE_CELL_WIDTH, TuringMachineDrawer.TAPE_CELL_WIDTH);
@@ -1320,17 +1353,80 @@ class TapePane extends Pane {
         return sb.toString();
 
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(this.cellOptionRectangle.isMaximized())
+            this.closeCellOptionRectangle();
+        else if(this.tapeOptionRectangle.isMaximized())
+            this.closeTapeOptionRectangle();
+        else {
+            boolean pressFinished = !this.animating;
+            this.stopTimeline();
+            Integer line = this.getLine(mouseEvent.getY());
+            Integer column = this.getColumn(mouseEvent.getX());
+
+            if(!pressFinished)
+                this.openCellOptionRectangle(line, column);
+            else
+                this.openTapeOptionRectangle(line, column);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode )
+            return false;
+
+        this.stopTimeline();
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!this.cellOptionRectangle.isMaximized() && !this.tapeOptionRectangle.isMaximized()) {
+            Integer line = this.getLine(mouseEvent.getY());
+            Integer column = this.getColumn(mouseEvent.getX());
+            this.startTimeline(line, column);
+        }
+        return false;
+    }
 }
 
-abstract class TranslateTapesArrow extends Polygon{
+abstract class TranslateTapesArrow extends Polygon implements MouseListener {
     TapeBorderPanesHBox tapeBorderPanesHBox;
     TapeBorderPane tapeBorderPane;
     TranslateTapesArrow(TapeBorderPanesHBox tapeBorderPanesHBox,
                         TapeBorderPane tapeBorderPane) {
         this.tapeBorderPanesHBox = tapeBorderPanesHBox;
         this.tapeBorderPane = tapeBorderPane;
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        TuringMachineDrawer.getInstance().tapesPane.centerOn(this.tapeBorderPane.tape);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
+
 }
 
 class RightArrow extends TranslateTapesArrow{

@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Separator;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -20,12 +21,13 @@ import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import util.MouseListener;
 import util.Ressources;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class TapesHeadMenu extends HBox {
+class TapesHeadMenu extends HBox implements MouseListener {
 
     private Map<Tape, TapeHeadMenu> tapeToMenu;
 
@@ -38,6 +40,7 @@ class TapesHeadMenu extends HBox {
 
     TapeHeadMenu centered;
     private double offsetX;
+    private Double dragX;
 
     TapesHeadMenu() {
 
@@ -51,8 +54,8 @@ class TapesHeadMenu extends HBox {
 
         AddTapeIcon addTapeIcon = new AddTapeIcon();
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         this.getChildren().addAll(addTapeIcon, new Separator(Orientation.VERTICAL));
 
@@ -131,9 +134,32 @@ class TapesHeadMenu extends HBox {
         for(TapeHeadMenu tapeHeadMenu: tapeToMenu.values())
             tapeHeadMenu.clear();
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        double x = mouseEvent.getX();
+        if(dragX == null)
+            dragX = x;
+        else {
+            this.translate(x - dragX);
+            dragX = x;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
+    }
 }
 
-class TapeHeadMenu extends HBox {
+class TapeHeadMenu extends HBox implements MouseListener {
     HeadOptionRectangle headOptionRectangle;
     Tape tape;
 
@@ -148,7 +174,7 @@ class TapeHeadMenu extends HBox {
         this.headOptionRectangle = new HeadOptionRectangle( this, tape);
         headOptionRectangle.managedProperty().bind(headOptionRectangle.visibleProperty());
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     void addHead(Color color){
@@ -162,6 +188,7 @@ class TapeHeadMenu extends HBox {
     }
 
     void removeHead(int head) {
+        this.closeHeadOptionRectangle(true);
         this.getChildren().remove(head + 1);
     }
 
@@ -195,9 +222,29 @@ class TapeHeadMenu extends HBox {
         closeHeadOptionRectangle();
         headOptionRectangle.clear();
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(this.headOptionRectangle.isMaximized())
+            this.closeHeadOptionRectangle();
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class HeadMenuSelect extends Rectangle {
+class HeadMenuSelect extends Rectangle implements MouseListener{
 
     TapeHeadMenu tapeHeadMenu;
     private Timeline timeline;
@@ -215,9 +262,9 @@ class HeadMenuSelect extends Rectangle {
         this.timeline.setOnFinished(actionEvent -> animating = false);
         this.animating = false;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
     int getHead(){
@@ -261,17 +308,78 @@ class HeadMenuSelect extends Rectangle {
         return new JSONObject()
                 .put("color", this.getStroke());
     }
-}
 
-class AddTapeIcon extends ImageView{
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode){
+            TuringMachineDrawer.getInstance().centerOn(this.tapeHeadMenu.tape, this.getHead());
+            return false;
+        }
+        else {
+            if (this.tapeHeadMenu.headOptionRectangle.isMaximized())
+                this.tapeHeadMenu.closeHeadOptionRectangle();
+            else {
+                boolean pressFinished = !this.animating;
+                this.stopTimeline();
 
-    AddTapeIcon(){
-        super(Ressources.getRessource("add_tape.png"));
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+                if (!pressFinished)
+                    TuringMachineDrawer.getInstance().centerOn(this.tapeHeadMenu.tape, this.getHead());
+                else
+                    this.tapeHeadMenu.openHeadOptionRectangle(this.getHead());
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.stopTimeline();
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!this.tapeHeadMenu.headOptionRectangle.isMaximized())
+            this.startTimeline();
+
+        return false;
     }
 }
 
-class RemoveTapeIcon extends ImageView{
+class AddTapeIcon extends ImageView implements MouseListener{
+
+    AddTapeIcon(){
+        super(Ressources.getRessource("add_tape.png"));
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().addTape();
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
+}
+
+class RemoveTapeIcon extends ImageView implements MouseListener{
 
     TapeHeadMenu tapeHeadMenu;
     Tape tape;
@@ -281,6 +389,28 @@ class RemoveTapeIcon extends ImageView{
         this.tapeHeadMenu = tapeHeadMenu;
         this.tape = tape;
 
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(this.tapeHeadMenu.headOptionRectangle.isMaximized())
+            this.tapeHeadMenu.closeHeadOptionRectangle();
+        else
+            TuringMachineDrawer.getInstance().removeTape(this.tape);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }

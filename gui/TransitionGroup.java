@@ -15,7 +15,7 @@ import javafx.scene.shape.*;
 import javafx.util.Duration;
 import org.json.JSONObject;
 import turingmachines.Tape;
-import util.MouseHandler;
+import util.MouseListener;
 import util.Pair;
 import util.Vector;
 
@@ -72,8 +72,8 @@ public class TransitionGroup extends Group {
         control1Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
         control2Line.setStrokeWidth(TuringMachineDrawer.TRANSITION_KEY_LINE_STROKE_WIDTH);
 
-        control1Key.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        control2Key.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        control1Key.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
+        control2Key.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         centerLine = new CubicCurve();
         centerLine.setFill(Color.TRANSPARENT);
@@ -510,7 +510,7 @@ public class TransitionGroup extends Group {
     }
 }
 
-class TransitionArrowInvisibleLine extends Path implements MouseHandler {
+class TransitionArrowInvisibleLine extends Path implements MouseListener {
     TransitionGroup transitionGroup;
 
     MoveTo moveTo;
@@ -530,9 +530,9 @@ class TransitionArrowInvisibleLine extends Path implements MouseHandler {
         this.getElements().addAll(moveTo, cubicCurveTo1);
 
 
-        this.setOnMousePressed(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseDragged(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
-        this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+        this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
+        this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
     }
 
@@ -623,7 +623,7 @@ class TransitionArrowInvisibleLine extends Path implements MouseHandler {
     }
 }
 
-class TransitionArrowControl1KeyCircle extends Circle implements MouseHandler{
+class TransitionArrowControl1KeyCircle extends Circle implements MouseListener {
 
     TransitionGroup transitionGroup;
 
@@ -655,7 +655,7 @@ class TransitionArrowControl1KeyCircle extends Circle implements MouseHandler{
         return false;
     }
 }
-class TransitionArrowControl2KeyCircle extends Circle implements MouseHandler{
+class TransitionArrowControl2KeyCircle extends Circle implements MouseListener {
 
     TransitionGroup transitionGroup;
 
