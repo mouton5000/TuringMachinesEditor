@@ -9,6 +9,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import util.Ressources;
 
 import java.util.Arrays;
 import java.util.List;
@@ -327,7 +328,7 @@ class NewFileIcon extends PlayerIcon {
     NewFileIcon() {
         
 
-        ImageView imageView = new ImageView("./images/new_file.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("new_file.png"));
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
@@ -341,7 +342,7 @@ class OpenFileIcon extends PlayerIcon {
     OpenFileIcon() {
         
 
-        ImageView imageView = new ImageView("./images/open_file.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("open_file.png"));
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
@@ -355,7 +356,7 @@ class SaveFileIcon extends PlayerIcon {
     SaveFileIcon() {
         
 
-        ImageView imageView = new ImageView("./images/save_file.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("save_file.png"));
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
@@ -369,7 +370,7 @@ class SaveAsFileIcon extends PlayerIcon {
     SaveAsFileIcon() {
         
 
-        ImageView imageView = new ImageView("./images/saveas_file.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("saveas_file.png"));
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
@@ -383,7 +384,7 @@ class ManualIcon extends PlayerIcon{
     ManualIcon() {
         
 
-        ImageView imageView = new ImageView("./images/manual_icon.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("manual_icon.png"));
         imageView.setFitHeight(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.7 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);

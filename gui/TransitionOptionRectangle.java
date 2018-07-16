@@ -15,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
 import util.Pair;
+import util.Ressources;
 
 import java.util.*;
 
@@ -370,7 +371,7 @@ class RemoveTransitionIcon extends ImageView{
     TransitionOptionRectangle optionRectangle;
 
     RemoveTransitionIcon(TransitionOptionRectangle optionRectangle) {
-        super("./images/remove_transition.png");
+        super(Ressources.getRessource("remove_transition.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
@@ -385,7 +386,7 @@ class ReadIcon extends Group{
 
     ReadIcon(TransitionOptionRectangle optionRectangle) {
 
-        ImageView readIcon = new ImageView("./images/read_tape_icon.png");
+        ImageView readIcon = new ImageView(Ressources.getRessource("read_tape_icon.png"));
         this.optionRectangle = optionRectangle;
 
         readIcon.setLayoutX(-readIcon.getBoundsInLocal().getWidth() / 2);
@@ -749,7 +750,7 @@ class ActionsIcon extends Group{
 
     ActionsIcon(TransitionOptionRectangle optionRectangle) {
 
-        ImageView actionsIcon = new ImageView("./images/action_tape_icon.png");
+        ImageView actionsIcon = new ImageView(Ressources.getRessource("action_tape_icon.png"));
         this.optionRectangle = optionRectangle;
 
         actionsIcon.setLayoutX(-actionsIcon.getBoundsInLocal().getWidth() / 2);
@@ -881,7 +882,7 @@ class RemoveActionIcon extends ImageView{
     TransitionOptionRectangle optionRectangle;
 
     RemoveActionIcon(TransitionOptionRectangle optionRectangle) {
-        super("./images/remove_action.png");
+        super(Ressources.getRessource("remove_action.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);

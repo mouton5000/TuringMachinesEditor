@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import util.Ressources;
 
 /**
  * Created by dimitri.watel on 06/06/18.
@@ -149,7 +150,7 @@ class AcceptingStateOption extends Group{
         acceptingStateOptionInnerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
         acceptingStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
 
-        ImageView acceptingStateOptionIcon = new ImageView("./images/Accept-icon.png");
+        ImageView acceptingStateOptionIcon = new ImageView(Ressources.getRessource("Accept-icon.png"));
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
 
@@ -199,7 +200,7 @@ class InitialStateOption extends Group{
 class EditStateNameOptionIcon extends ImageView{
     StateOptionRectangle optionRectangle;
     EditStateNameOptionIcon(StateOptionRectangle optionRectangle){
-        super("./images/cursor_icon.png");
+        super(Ressources.getRessource("cursor_icon.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
@@ -209,7 +210,7 @@ class EditStateNameOptionIcon extends ImageView{
 class RemoveStateOptionIcon extends ImageView{
     StateOptionRectangle optionRectangle;
     RemoveStateOptionIcon(StateOptionRectangle optionRectangle){
-        super("./images/remove_state.png");
+        super(Ressources.getRessource("remove_state.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);

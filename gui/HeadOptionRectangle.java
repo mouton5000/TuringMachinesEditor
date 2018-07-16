@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.image.ImageView;
 import turingmachines.Tape;
+import util.Ressources;
 
 /**
  * Created by dimitri.watel on 19/06/18.
@@ -20,11 +21,11 @@ class HeadOptionRectangle extends OptionRectangle{
         this.tape = tape;
 
 
-        ImageView changeColorIcon = new ImageView("./images/edit_head_color.png");
+        ImageView changeColorIcon = new ImageView(Ressources.getRessource("edit_head_color.png"));
         ColorPicker changeColorPicker = new ColorPicker();
         changeColorPicker.setOpacity(0);
 
-        RemoveHeadIcon removeHeadIcon = new RemoveHeadIcon( this, "./images/remove_head.png");
+        RemoveHeadIcon removeHeadIcon = new RemoveHeadIcon( this, Ressources.getRessource("remove_head.png"));
 
 
         changeColorPicker.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);

@@ -2,6 +2,7 @@ package gui;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import util.Ressources;
 
 class SymbolOptionRectangle extends OptionRectangle {
 
@@ -82,7 +83,7 @@ class EditSymbolIcon extends ImageView {
     SymbolOptionRectangle optionRectangle;
 
     EditSymbolIcon(SymbolOptionRectangle optionRectangle){
-        super("./images/cursor_icon.png");
+        super(Ressources.getRessource("cursor_icon.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
@@ -93,7 +94,7 @@ class RemoveSymbolIcon extends ImageView {
     SymbolOptionRectangle optionRectangle;
 
     RemoveSymbolIcon(SymbolOptionRectangle optionRectangle){
-        super("./images/remove_symbol.png");
+        super(Ressources.getRessource("remove_symbol.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);

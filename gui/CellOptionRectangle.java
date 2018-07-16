@@ -16,6 +16,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
+import util.Ressources;
 
 /**
  * Created by dimitri.watel on 11/06/18.
@@ -116,7 +117,7 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox {
         this.setOnMousePressed(TuringMachineDrawer.getInstance().tapesMouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().tapesMouseHandler);
 
-        symbolsIcon = new ImageView("./images/edit-icon.png");
+        symbolsIcon = new ImageView(Ressources.getRessource("edit-icon.png"));
         this.getChildren().add(symbolsIcon);
         symbolsIcon.setTranslateY(- symbolsIcon.getBoundsInLocal().getHeight() / 2
         + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2);
@@ -257,7 +258,7 @@ class AddHeadOptionIcon extends Group {
         super();
 
         this.optionRectangle = optionRectangle;
-        ImageView addHeadIcon = new ImageView("./images/add_head.png");
+        ImageView addHeadIcon = new ImageView(Ressources.getRessource("add_head.png"));
 
         ColorPicker changeColorPicker = new ColorPicker();
 

@@ -3,6 +3,7 @@ package gui;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import util.Ressources;
 
 import java.io.File;
 import java.util.Collections;
@@ -12,16 +13,15 @@ import java.util.ListIterator;
 
 class HelpMessages extends ImageView {
     private ListIterator<String> iter;
+    private static final int nbHelp = 83;
 
     HelpMessages(){
         super();
 
-        File dir = new File(getClass().getClassLoader().getResource("helpCaptures").getPath());
         List<String> list = new LinkedList<>();
-        for(File file : dir.listFiles()){
-            list.add(getClass().getClassLoader().getResource(file.getName()).toExternalForm());
+        for(int i = 1; i <= nbHelp; i++){
+            list.add("help"+((i < 10)?"0"+i:String.valueOf(i))+".png");
         }
-        Collections.sort(list);
         iter = list.listIterator();
 
         this.setOnMouseClicked(mouseEvent -> {
@@ -45,12 +45,12 @@ class HelpMessages extends ImageView {
 
     private void next(){
         if(iter.hasNext())
-            this.setImage(new Image(iter.next()));
+            this.setImage(new Image(Ressources.getRessource(iter.next())));
     }
 
     private void previous(){
             if(iter.hasPrevious())
-                this.setImage(new Image(iter.previous()));
+                this.setImage(new Image(Ressources.getRessource(iter.previous())));
     }
 
 }

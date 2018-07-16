@@ -14,6 +14,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONArray;
+import util.Ressources;
 
 class SymbolsMenu extends HBox {
 
@@ -128,7 +129,7 @@ class SymbolsMenu extends HBox {
 class AddSymbolIcon extends ImageView {
 
     AddSymbolIcon() {
-        super("./images/add_symbol.png");
+        super(Ressources.getRessource("add_symbol.png"));
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }

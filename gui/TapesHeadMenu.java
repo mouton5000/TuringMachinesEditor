@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import util.Ressources;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -265,7 +266,7 @@ class HeadMenuSelect extends Rectangle {
 class AddTapeIcon extends ImageView{
 
     AddTapeIcon(){
-        super("./images/add_tape.png");
+        super(Ressources.getRessource("add_tape.png"));
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().tapesMouseHandler);
     }
 }
@@ -276,7 +277,7 @@ class RemoveTapeIcon extends ImageView{
     Tape tape;
 
     RemoveTapeIcon( TapeHeadMenu tapeHeadMenu, Tape tape){
-        super("./images/remove_tape.png");
+        super(Ressources.getRessource("remove_tape.png"));
         this.tapeHeadMenu = tapeHeadMenu;
         this.tape = tape;
 

@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Line;
 import turingmachines.Tape;
+import util.Ressources;
 
 /**
  * Created by dimitri.watel on 14/06/18.
@@ -41,37 +42,37 @@ class TapeOptionRectangle extends OptionRectangle{
 
         this.currentTape = tapeBorderPane.tape;
 
-        add_column_left_icon = new TapeOptionIcon(this, "./images/add_column_left.png",
+        add_column_left_icon = new TapeOptionIcon(this, Ressources.getRessource("add_column_left.png"),
                 TapeOptionIconAction.ADD, TapeOptionIconDirection.LEFT);
-        add_column_right_icon = new TapeOptionIcon(this, "./images/add_column_right.png",
+        add_column_right_icon = new TapeOptionIcon(this, Ressources.getRessource("add_column_right.png"),
                 TapeOptionIconAction.ADD, TapeOptionIconDirection.RIGHT);
-        add_line_bottom_icon = new TapeOptionIcon(this, "./images/add_line_bottom.png",
+        add_line_bottom_icon = new TapeOptionIcon(this, Ressources.getRessource("add_line_bottom.png"),
                 TapeOptionIconAction.ADD, TapeOptionIconDirection.BOTTOM);
-        add_line_top_icon = new TapeOptionIcon(this, "./images/add_line_top.png",
+        add_line_top_icon = new TapeOptionIcon(this, Ressources.getRessource("add_line_top.png"),
                 TapeOptionIconAction.ADD, TapeOptionIconDirection.TOP);
 
-        remove_columns_left_icon = new TapeOptionIcon(this, "./images/remove_columns_left.png",
+        remove_columns_left_icon = new TapeOptionIcon(this, Ressources.getRessource("remove_columns_left.png"),
                 TapeOptionIconAction.REMOVE, TapeOptionIconDirection.LEFT);
-        remove_columns_right_icon = new TapeOptionIcon(this, "./images/remove_columns_right.png",
+        remove_columns_right_icon = new TapeOptionIcon(this, Ressources.getRessource("remove_columns_right.png"),
                 TapeOptionIconAction.REMOVE, TapeOptionIconDirection.RIGHT);
-        remove_lines_bottom_icon = new TapeOptionIcon(this, "./images/remove_lines_bottom.png",
+        remove_lines_bottom_icon = new TapeOptionIcon(this, Ressources.getRessource("remove_lines_bottom.png"),
                 TapeOptionIconAction.REMOVE, TapeOptionIconDirection.BOTTOM);
-        remove_lines_top_icon = new TapeOptionIcon(this, "./images/remove_lines_top.png",
+        remove_lines_top_icon = new TapeOptionIcon(this, Ressources.getRessource("remove_lines_top.png"),
                 TapeOptionIconAction.REMOVE, TapeOptionIconDirection.TOP);
 
-        inf_column_left_icon = new TapeOptionIcon(this, "./images/inf_column_left.png",
+        inf_column_left_icon = new TapeOptionIcon(this, Ressources.getRessource("inf_column_left.png"),
                 TapeOptionIconAction.INFINITE, TapeOptionIconDirection.LEFT);
-        inf_column_right_icon = new TapeOptionIcon(this, "./images/inf_column_right.png",
+        inf_column_right_icon = new TapeOptionIcon(this, Ressources.getRessource("inf_column_right.png"),
                 TapeOptionIconAction.INFINITE, TapeOptionIconDirection.RIGHT);
-        inf_line_bottom_icon = new TapeOptionIcon(this, "./images/inf_line_bottom.png",
+        inf_line_bottom_icon = new TapeOptionIcon(this, Ressources.getRessource("inf_line_bottom.png"),
                 TapeOptionIconAction.INFINITE, TapeOptionIconDirection.BOTTOM);
-        inf_line_top_icon = new TapeOptionIcon(this, "./images/inf_line_top.png",
+        inf_line_top_icon = new TapeOptionIcon(this, Ressources.getRessource("inf_line_top.png"),
                 TapeOptionIconAction.INFINITE, TapeOptionIconDirection.TOP);
 
-        inf_column_left_icon_gray = new ImageView("./images/inf_column_left_gray.png");
-        inf_column_right_icon_gray = new ImageView("./images/inf_column_right_gray.png");
-        inf_line_bottom_icon_gray = new ImageView("./images/inf_line_bottom_gray.png");
-        inf_line_top_icon_gray = new ImageView("./images/inf_line_top_gray.png");
+        inf_column_left_icon_gray = new ImageView(Ressources.getRessource("inf_column_left_gray.png"));
+        inf_column_right_icon_gray = new ImageView(Ressources.getRessource("inf_column_right_gray.png"));
+        inf_line_bottom_icon_gray = new ImageView(Ressources.getRessource("inf_line_bottom_gray.png"));
+        inf_line_top_icon_gray = new ImageView(Ressources.getRessource("inf_line_top_gray.png"));
 
         add_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
         add_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);

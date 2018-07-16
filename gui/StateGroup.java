@@ -13,6 +13,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONObject;
+import util.Ressources;
 
 class StateGroup extends Group{
 
@@ -45,8 +46,8 @@ class StateGroup extends Group{
         innerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
         innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         innerCircle.setVisible(false);
-
-        acceptIcon = new ImageView("./images/Accept-icon.png");
+        
+        acceptIcon = new ImageView(Ressources.getRessource("Accept-icon.png"));
         acceptIcon.setLayoutX(
                 TuringMachineDrawer.STATE_RADIUS * Math.sqrt(2) / 2
                         - acceptIcon.getBoundsInLocal().getWidth() / 2);
