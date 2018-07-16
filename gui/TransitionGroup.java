@@ -9,11 +9,13 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import util.MouseHandler;
 import util.Pair;
 import util.Vector;
 
@@ -508,7 +510,7 @@ public class TransitionGroup extends Group {
     }
 }
 
-class TransitionArrowInvisibleLine extends Path {
+class TransitionArrowInvisibleLine extends Path implements MouseHandler {
     TransitionGroup transitionGroup;
 
     MoveTo moveTo;
@@ -565,9 +567,63 @@ class TransitionArrowInvisibleLine extends Path {
     void setControlY2(double controlY2){
         cubicCurveTo1.setControlY2(controlY2);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode)
+            return false;
+
+        GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
+
+        if(graphPane.stateOptionRectangle.isMaximized()){
+            graphPane.closeStateOptionRectangle();
+            return true;
+        }
+        else if(graphPane.transitionOptionRectangle.isMaximized()){
+            graphPane.closeTransitionOptionRectangle();
+            return true;
+        }
+
+        if(TuringMachineDrawer.getInstance().manualMode)
+            TuringMachineDrawer.getInstance().manualFireTransition(transitionGroup);
+        else {
+            boolean pressFinished = !transitionGroup.animating;
+            transitionGroup.stopTimeline();
+
+            if (pressFinished) {
+                graphPane.unselect();
+                graphPane.openTransitionOptionRectangle(transitionGroup);
+            } else
+                graphPane.select(transitionGroup);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        transitionGroup.stopTimeline();
+        TuringMachineDrawer.getInstance().graphPane.select(transitionGroup);
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
+                && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
+            transitionGroup.startTimeline();
+
+        return false;
+    }
 }
 
-class TransitionArrowControl1KeyCircle extends Circle{
+class TransitionArrowControl1KeyCircle extends Circle implements MouseHandler{
 
     TransitionGroup transitionGroup;
 
@@ -575,13 +631,59 @@ class TransitionArrowControl1KeyCircle extends Circle{
         super(v);
         this.transitionGroup = transitionGroup;
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!(TuringMachineDrawer.getInstance().graphPane.getSelected() instanceof TransitionGroup))
+            return false;
+
+        transitionGroup.setControl1(mouseEvent.getX(), mouseEvent.getY());
+        TuringMachineDrawer.getInstance().setEnableToSave();
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
-class TransitionArrowControl2KeyCircle extends Circle{
+class TransitionArrowControl2KeyCircle extends Circle implements MouseHandler{
 
     TransitionGroup transitionGroup;
 
     TransitionArrowControl2KeyCircle(TransitionGroup transitionGroup, double v) {
         super(v);
         this.transitionGroup = transitionGroup;
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!(TuringMachineDrawer.getInstance().graphPane.getSelected() instanceof TransitionGroup))
+            return false;
+
+        transitionGroup.setControl2(mouseEvent.getX(), mouseEvent.getY());
+        TuringMachineDrawer.getInstance().setEnableToSave();
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }

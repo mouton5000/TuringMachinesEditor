@@ -6,6 +6,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -20,10 +21,7 @@ import turingmachines.ActionType;
 import turingmachines.Direction;
 import turingmachines.Tape;
 import turingmachines.Transition;
-import util.BidirMap;
-import util.Pair;
-import util.StringEnumerator;
-import util.Vector;
+import util.*;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,7 +31,7 @@ import java.util.Set;
 /**
  * Created by dimitri.watel on 18/06/18.
  */
-class GraphPane extends Pane {
+class GraphPane extends Pane implements MouseHandler {
 
     StateOptionRectangle stateOptionRectangle;
     TransitionOptionRectangle transitionOptionRectangle;
@@ -47,6 +45,10 @@ class GraphPane extends Pane {
 
     private Group graphGroup;
     private Scale graphScale;
+
+    private Double dragX;
+    private Double dragY;
+    private Node selected;
 
     GraphPane(){
 
@@ -581,5 +583,82 @@ class GraphPane extends Pane {
 
         }
 
+    }
+
+    void select(Node node) {
+        unselect();
+        selected = node;
+
+        if(node instanceof TransitionGroup)
+            ((TransitionGroup) node).setSelected(true);
+        else if(node instanceof StateGroup)
+            ((StateGroup) node).setSelected();
+    }
+
+    void unselect() {
+        if(selected == null)
+            return;
+
+        if(selected instanceof TransitionGroup) {
+            TransitionGroup transitionGroup = (TransitionGroup) selected;
+            transitionGroup.setSelected(false);
+            selected = null;
+        }
+        else if(selected instanceof StateGroup){
+            StateGroup stateGroup = (StateGroup) selected;
+            stateGroup.setUnselected();
+            selected = null;
+        }
+        else
+            selected = null;
+    }
+
+    Node getSelected(){
+        return selected;
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(this.stateOptionRectangle.isMaximized()){
+            this.closeStateOptionRectangle();
+            return true;
+        }
+        else if(this.transitionOptionRectangle.isMaximized()){
+            this.closeTransitionOptionRectangle();
+            return true;
+        }
+
+        if(selected != null)
+            unselect();
+        else {
+            TuringMachineDrawer.getInstance().addState(mouseEvent.getX(), mouseEvent.getY());
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        double x = mouseEvent.getX();
+        double y = mouseEvent.getY();
+        if(dragX == null){
+            dragX = x;
+            dragY = y;
+        }
+        else {
+            this.translate(x - dragX, y - dragY);
+            dragX = x;
+            dragY = y;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        dragY = mouseEvent.getY();
+        return true;
     }
 }

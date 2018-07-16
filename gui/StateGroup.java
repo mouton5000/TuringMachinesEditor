@@ -6,16 +6,19 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONObject;
+import util.MouseHandler;
 import util.Ressources;
 
-class StateGroup extends Group{
+class StateGroup extends Group implements MouseHandler {
 
     boolean animating;
 
@@ -177,5 +180,70 @@ class StateGroup extends Group{
                 .put("isFinal", this.isFinal())
                 .put("isAccepting", this.isAccepting())
                 .put("isInitial", this.isInitial());
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode)
+            return false;
+
+        GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
+
+        if(graphPane.stateOptionRectangle.isMaximized()){
+            graphPane.closeStateOptionRectangle();
+            return true;
+        }
+        else if(graphPane.transitionOptionRectangle.isMaximized()){
+            graphPane.closeTransitionOptionRectangle();
+            return true;
+        }
+
+        if(TuringMachineDrawer.getInstance().manualMode)
+            TuringMachineDrawer.getInstance().manualSelectCurrentState(this);
+        else {
+            boolean pressFinished = !this.animating;
+            this.stopTimeline();
+
+            if (pressFinished) {
+                graphPane.unselect();
+                graphPane.openStateOptionRectangle(this);
+            } else {
+                Node selected = graphPane.getSelected();
+                if (selected == null)
+                    graphPane.select(this);
+                else if (selected instanceof StateGroup) {
+                    graphPane.addTransition((StateGroup) selected, this);
+                    graphPane.unselect();
+                } else
+                    graphPane.unselect();
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.stopTimeline();
+        GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
+        graphPane.select(this);
+        graphPane.moveStateGroup(this,this.getLayoutX() + mouseEvent.getX(),
+                this.getLayoutY() + mouseEvent.getY());
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
+                && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
+            this.startTimeline();
+
+        return false;
     }
 }

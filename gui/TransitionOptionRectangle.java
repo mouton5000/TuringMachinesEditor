@@ -9,11 +9,13 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import turingmachines.Tape;
+import util.MouseHandler;
 import util.Pair;
 import util.Ressources;
 
@@ -251,12 +253,14 @@ class TransitionOptionRectangle extends OptionRectangle {
     }
 }
 
-class HeadOptionsGroup extends HBox{
+class HeadOptionsGroup extends HBox implements MouseHandler {
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
     private Map<Tape, TransitionOptionRectangleTapeHBox> tapes;
 
     private TransitionOptionRectangleTapeHBox selected;
+
+    private Double dragX;
 
     HeadOptionsGroup(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
@@ -365,9 +369,34 @@ class HeadOptionsGroup extends HBox{
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(dragX == null)
+            dragX = mouseEvent.getX();
+        else {
+            this.translate(mouseEvent.getX() - dragX);
+            dragX = mouseEvent.getX();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
+    }
 }
 
-class RemoveTransitionIcon extends ImageView{
+class RemoveTransitionIcon extends ImageView implements MouseHandler{
     TransitionOptionRectangle optionRectangle;
 
     RemoveTransitionIcon(TransitionOptionRectangle optionRectangle) {
@@ -376,9 +405,28 @@ class RemoveTransitionIcon extends ImageView{
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().graphPane.removeTransition(this.optionRectangle.currentTransitionGroup);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class ReadIcon extends Group{
+class ReadIcon extends Group implements MouseHandler{
 
     TransitionOptionRectangle optionRectangle;
 
@@ -406,6 +454,25 @@ class ReadIcon extends Group{
 
     void setSelected(boolean selected){
         this.backgroundColor.setOpacity(selected?1:0);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.optionRectangle.selectReadMenu();
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }
 
@@ -463,7 +530,7 @@ class TransitionOptionRectangleTapeHBox extends HBox{
     }
 }
 
-class TransitionOptionRectangleChooseHead extends Rectangle{
+class TransitionOptionRectangleChooseHead extends Rectangle implements MouseHandler{
     TransitionOptionRectangle optionRectangle;
     TransitionOptionRectangleTapeHBox transitionOptionRectangleTapeHBox;
 
@@ -479,11 +546,32 @@ class TransitionOptionRectangleChooseHead extends Rectangle{
     int getHead() {
         return this.getParent().getChildrenUnmodifiable().indexOf(this);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.optionRectangle.chooseHead(this.transitionOptionRectangleTapeHBox.tape, this.getHead());
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class ReadSymbolMenu extends HBox{
+class ReadSymbolMenu extends HBox implements MouseHandler {
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
+
+    private Double dragX;
 
     ReadSymbolMenu(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
@@ -576,9 +664,34 @@ class ReadSymbolMenu extends HBox{
             }
         }
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(dragX == null)
+            dragX = mouseEvent.getX();
+        else {
+            this.translate(mouseEvent.getX() - dragX);
+            dragX = mouseEvent.getX();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
+    }
 }
 
-class ChooseSymbolOptionLabel extends Label{
+class ChooseSymbolOptionLabel extends Label implements MouseHandler{
 
 
     private static final Background SELECTED_BACKGROUND = new Background(
@@ -619,13 +732,44 @@ class ChooseSymbolOptionLabel extends Label{
         selected = false;
         this.setBackground(UNSELECTED_BACKGROUND);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TransitionOptionRectangle optionRectangle = this.optionRectangle;
+        String symbol = this.getText();
+
+        if(optionRectangle.currentTape != null) {
+            if(this.selected)
+                TuringMachineDrawer.getInstance().graphPane.removeReadSymbol(optionRectangle.currentTransitionGroup,
+                        optionRectangle.currentTape, optionRectangle.currentHead, symbol);
+            else
+                TuringMachineDrawer.getInstance().graphPane.addReadSymbol(optionRectangle.currentTransitionGroup,
+                        optionRectangle.currentTape, optionRectangle.currentHead, symbol);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class TransitionOptionRectangleSymbolsDisplay extends HBox {
+class TransitionOptionRectangleSymbolsDisplay extends HBox implements MouseHandler {
     TransitionOptionRectangle optionRectangle;
 
     private Map<Tape, TapeSymbolsDisplay> tapes;
     private double offsetX;
+    private Double dragX;
 
     TransitionOptionRectangleSymbolsDisplay(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
@@ -690,6 +834,31 @@ class TransitionOptionRectangleSymbolsDisplay extends HBox {
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(dragX == null)
+            dragX = mouseEvent.getX();
+        else {
+            this.translate(mouseEvent.getX() - dragX);
+            dragX = mouseEvent.getX();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
+    }
 }
 
 class TapeSymbolsDisplay extends HBox {
@@ -743,7 +912,7 @@ class HeadSymbolsLabelDisplay extends Label {
     }
 }
 
-class ActionsIcon extends Group{
+class ActionsIcon extends Group implements MouseHandler{
 
     TransitionOptionRectangle optionRectangle;
     private Rectangle backgroundColor;
@@ -771,12 +940,32 @@ class ActionsIcon extends Group{
     void setSelected(boolean selected){
         this.backgroundColor.setOpacity(selected?1:0);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        this.optionRectangle.selectActionsMenu();
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class ActionsMenu extends HBox {
+class ActionsMenu extends HBox implements MouseHandler{
     TransitionOptionRectangle optionRectangle;
     RemoveActionIcon removeActionIcon;
     private double offsetX;
+    private Double dragX;
 
     ActionsMenu(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
@@ -855,9 +1044,34 @@ class ActionsMenu extends HBox {
             label.setTextFill(color);
         }
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(dragX == null)
+            dragX = mouseEvent.getX();
+        else {
+            this.translate(mouseEvent.getX() - dragX);
+            dragX = mouseEvent.getX();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
+    }
 }
 
-class ChooseActionOptionLabel extends Label{
+class ChooseActionOptionLabel extends Label implements MouseHandler{
     TransitionOptionRectangle optionRectangle;
 
     ChooseActionOptionLabel(TransitionOptionRectangle optionRectangle, String s) {
@@ -875,9 +1089,34 @@ class ChooseActionOptionLabel extends Label{
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TransitionOptionRectangle optionRectangle = this.optionRectangle;
+
+        String actionSymbol = this.getText();
+
+        if(optionRectangle.currentTape != null)
+            TuringMachineDrawer.getInstance().graphPane.addAction(optionRectangle.currentTransitionGroup,
+                    optionRectangle.currentTape, optionRectangle.currentHead, actionSymbol);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class RemoveActionIcon extends ImageView{
+class RemoveActionIcon extends ImageView implements MouseHandler{
 
     TransitionOptionRectangle optionRectangle;
 
@@ -887,12 +1126,36 @@ class RemoveActionIcon extends ImageView{
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TransitionOptionRectangle optionRectangle = this.optionRectangle;
+
+        if(optionRectangle.currentTape != null)
+            TuringMachineDrawer.getInstance().graphPane.removeAction(optionRectangle.currentTransitionGroup);
+
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class ActionDisplay extends HBox{
+class ActionDisplay extends HBox implements MouseHandler{
 
     TransitionOptionRectangle optionRectangle;
     private double offsetX;
+    private Double dragX;
 
     ActionDisplay(TransitionOptionRectangle optionRectangle) {
         this.optionRectangle = optionRectangle;
@@ -986,5 +1249,30 @@ class ActionDisplay extends HBox{
         offsetX -= dx;
         for(Node child: this.getChildren())
             child.setTranslateX(child.getTranslateX() + dx);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        if(dragX == null)
+            dragX = mouseEvent.getX();
+        else {
+            this.translate(mouseEvent.getX() - dragX);
+            dragX = mouseEvent.getX();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        dragX = mouseEvent.getX();
+        return true;
     }
 }

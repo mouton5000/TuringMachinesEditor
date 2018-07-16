@@ -8,13 +8,15 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import util.MouseHandler;
 
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-abstract class OptionRectangle extends Group{
+abstract class OptionRectangle extends Group implements MouseHandler {
 
     private MinimizedOptionRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;
@@ -133,6 +135,21 @@ abstract class OptionRectangle extends Group{
     protected abstract Node associatedNode();
 
     public abstract void clear();
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        return !TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return !TuringMachineDrawer.getInstance().buildMode && !TuringMachineDrawer.getInstance().manualMode;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
 class MinimizedOptionRectangle extends Group{

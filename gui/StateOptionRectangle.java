@@ -5,16 +5,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import util.MouseHandler;
 import util.Ressources;
+import util.widget.VirtualKeyboard;
+
+import java.util.Optional;
 
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-class StateOptionRectangle extends OptionRectangle{
+class StateOptionRectangle extends OptionRectangle implements MouseHandler {
 
     StateGroup currentState;
     private GraphPane graphPane;
@@ -112,9 +117,10 @@ class StateOptionRectangle extends OptionRectangle{
     public void clear() {
         currentState = null;
     }
+
 }
 
-class FinalStateOption extends Group {
+class FinalStateOption extends Group implements MouseHandler{
 
     StateOptionRectangle optionRectangle;
 
@@ -134,9 +140,28 @@ class FinalStateOption extends Group {
 
         this.getChildren().addAll(finalStateOptionOuterCircle, finalStateOptionInnerCircle);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().graphPane.toggleFinal(this.optionRectangle.currentState);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class AcceptingStateOption extends Group{
+class AcceptingStateOption extends Group implements MouseHandler{
     StateOptionRectangle optionRectangle;
 
     AcceptingStateOption(StateOptionRectangle optionRectangle){
@@ -165,9 +190,28 @@ class AcceptingStateOption extends Group{
                 TuringMachineDrawer.STATE_RADIUS * Math.sqrt(2) / 2
                         - acceptingStateOptionIcon.getBoundsInLocal().getHeight() / 2);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().graphPane.toggleAccepting(this.optionRectangle.currentState);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class InitialStateOption extends Group{
+class InitialStateOption extends Group implements MouseHandler{
     StateOptionRectangle optionRectangle;
 
     InitialStateOption(StateOptionRectangle optionRectangle){
@@ -195,9 +239,28 @@ class InitialStateOption extends Group{
 
         this.getChildren().addAll(initialStateOptionCircle, initialStateOptionLine1, initialStateOptionLine2);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().graphPane.toggleInitial(this.optionRectangle.currentState);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class EditStateNameOptionIcon extends ImageView{
+class EditStateNameOptionIcon extends ImageView implements MouseHandler{
     StateOptionRectangle optionRectangle;
     EditStateNameOptionIcon(StateOptionRectangle optionRectangle){
         super(Ressources.getRessource("cursor_icon.png"));
@@ -205,14 +268,62 @@ class EditStateNameOptionIcon extends ImageView{
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
     }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        StateGroup stateGroup = this.optionRectangle.currentState;
+
+        VirtualKeyboard virtualKeyboard = new VirtualKeyboard(stateGroup.getName());
+        virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
+        virtualKeyboard.setY(mouseEvent.getScreenY());
+
+        Optional<String> result = virtualKeyboard.showAndWait();
+        if(result.isPresent()) {
+            stateGroup.setName(result.get());
+            TuringMachineDrawer.getInstance().setEnableToSave();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
+    }
 }
 
-class RemoveStateOptionIcon extends ImageView{
+class RemoveStateOptionIcon extends ImageView implements MouseHandler{
     StateOptionRectangle optionRectangle;
     RemoveStateOptionIcon(StateOptionRectangle optionRectangle){
         super(Ressources.getRessource("remove_state.png"));
         this.optionRectangle = optionRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().graphPaneMouseHandler);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
+            return false;
+
+        TuringMachineDrawer.getInstance().graphPane.removeState(this.optionRectangle.currentState);
+        return true;
+    }
+
+    @Override
+    public boolean onMouseDragged(MouseEvent mouseEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onMousePressed(MouseEvent mouseEvent) {
+        return false;
     }
 }
