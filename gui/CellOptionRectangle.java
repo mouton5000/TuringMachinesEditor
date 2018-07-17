@@ -21,6 +21,8 @@ import util.MouseListener;
 import util.Pair;
 import util.Ressources;
 
+import java.util.Iterator;
+
 /**
  * Created by dimitri.watel on 11/06/18.
  */
@@ -127,8 +129,9 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox implements MouseListen
         + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2);
 
         this.addSymbol(TuringMachineDrawer.BLANK_SYMBOL);
-        for(String symbol : TuringMachineDrawer.getInstance().machine.getSymbols())
-            this.addSymbol(symbol);
+        Iterator<String> it = TuringMachineDrawer.getInstance().machine.getSymbols();
+        while(it.hasNext())
+            this.addSymbol(it.next());
     }
 
     void translate(double dx){

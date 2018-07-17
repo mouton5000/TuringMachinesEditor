@@ -1,5 +1,10 @@
 package util;
 
+/**
+ * Simple pair of objects of class T and U
+ * @param <T>
+ * @param <U>
+ */
 public class Pair<T, U> {
     public T first;
     public U second;

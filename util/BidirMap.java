@@ -6,7 +6,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by dimitri.watel on 18/06/18.
+ * Bidirectional Map
+ *
+ * Contain the classical methods of a java Map: {@link #put(Object, Object)}, {@link #getV(Object)} {@link #size()}
+ * {@link #keySet()} {@link #values()}, {@link #entrySet()} and {@link #removeK(Object)}. getV and removeK
+ * corresponds to the classical get and remove methods. It also contains two other methods {@link #getK(Object)} and
+ * {@link #removeV(Object)} to access directly the key and the values.
+ *
+ * This map is bidirectional: every key is uniquely associated to a value and conversely. Thus, for instance adding a
+ * pair (k, v) and then a pair(k2, v) remove the first pair as v should be associated to a unique key. This is done
+ * using two java Map.
+ *
+ * @see java.util.Map
  */
 public class BidirMap<K, V> {
 

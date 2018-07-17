@@ -1,5 +1,8 @@
 package util;
 
+/**
+ * Enumerates all the strings "[A-Z]+" starting with "A" in alphabetical order.
+ */
 public class StringEnumerator {
 
     private String current;

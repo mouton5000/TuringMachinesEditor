@@ -1,5 +1,10 @@
 package util;
 
+/**
+ * Simple 2D vector class in order to simplify drawing.s
+ *
+ * Every IP method means "in place" meaning that no new object is build, the vector "this" is modified.
+ */
 public class Vector {
     public double x;
     public double y;
