@@ -282,8 +282,8 @@ class EditStateNameOptionIcon extends ImageView implements MouseListener {
 
         Optional<String> result = virtualKeyboard.showAndWait();
         if(result.isPresent()) {
-            stateGroup.setName(result.get());
-            TuringMachineDrawer.getInstance().setEnableToSave();
+            Integer state = TuringMachineDrawer.getInstance().graphPane.getState(stateGroup);
+            TuringMachineDrawer.getInstance().editStateName(state, result.get());
         }
         return true;
     }

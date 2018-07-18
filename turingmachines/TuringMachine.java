@@ -90,6 +90,13 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_ADD_STATE = "TMAddState";
 
     /**
+     * Message sent when the name of a state is changed. The parameters are the machine, the identifier of the state
+     * and the new name.
+     * @see util.Subscriber
+     */
+    public static final String SUBSCRIBER_MSG_EDIT_STATE_NAME = "TMEditStateName";
+
+    /**
      * Message sent when a state is removed from the machine. The parameters are the machine and the identifier of the
      * state.
      * @see util.Subscriber
@@ -477,12 +484,26 @@ public class TuringMachine {
 
     /**
      * @param state index of a state
-     * @return the name of the state identified by the given index. or null of the state is not in the machine.
+     * @return the name of the state identified by the given index or null of the state is not in the machine.
      */
     public String getStateName(int state){
         if(state < 0 || state >= getNbStates())
             return null;
         return statesNames.get(state);
+    }
+
+    /**
+     * Edit the name of the state identified by the given index. If the state is not in the machine, do nothing.
+     * A {@link #SUBSCRIBER_MSG_EDIT_STATE_NAME} message is broadcast to the class {@link util.Subscriber}.
+     * @param state index of a state
+     * @param name the new name of the state
+     * @see util.Subscriber
+     */
+    public void editStateName(int state, String name){
+        if(state < 0 || state >= getNbStates())
+            return;
+        statesNames.set(state, name);
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_EDIT_STATE_NAME, this, state, name);
     }
 
     /**

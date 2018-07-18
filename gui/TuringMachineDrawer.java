@@ -677,6 +677,12 @@ public class TuringMachineDrawer extends Application {
                         addStateFromMachine(state);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_EDIT_STATE_NAME:{
+                        Integer state = (Integer) parameters[1];
+                        String name = (String) parameters[2];
+                        editStateNameFromMachine(state, name);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE:{
                         Integer state = (Integer) parameters[1];
                         removeStateFromMachine(state);
@@ -813,6 +819,7 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SYMBOL_WRITTEN);
 
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_EDIT_STATE_NAME);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION);
@@ -1363,6 +1370,15 @@ public class TuringMachineDrawer extends Application {
 
     private void addStateFromMachine(Integer state){
         graphPane.addState(nextX, nextY, state);
+        setEnableToSave();
+    }
+
+    void editStateName(Integer state, String name){
+        this.machine.editStateName(state, name);
+    }
+
+    private void editStateNameFromMachine(Integer state, String name){
+        this.graphPane.editStateName(state, name);
         setEnableToSave();
     }
 

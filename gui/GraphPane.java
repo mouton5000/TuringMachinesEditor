@@ -17,10 +17,7 @@ import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import turingmachines.ActionType;
-import turingmachines.Direction;
-import turingmachines.Tape;
-import turingmachines.Transition;
+import turingmachines.*;
 import util.*;
 
 import java.util.HashSet;
@@ -118,7 +115,15 @@ class GraphPane extends Pane implements MouseListener {
     }
 
     String nextStateName(){
-        return stringEnumerator.next();
+        Set<String> names = new HashSet<>();
+        for(int i = 0; i < this.stateGroupToState.size(); i++){
+            names.add(TuringMachineDrawer.getInstance().machine.getStateName(i));
+        }
+        String s =  stringEnumerator.next();
+        while(names.contains(s)){
+            s = stringEnumerator.next();
+        }
+        return s;
     }
 
     void addState(double x, double y, Integer state){
@@ -134,6 +139,11 @@ class GraphPane extends Pane implements MouseListener {
 
         stateGroupToState.put(circle, state);
         graphGroup.getChildren().add(circle);
+    }
+
+    void editStateName(Integer state, String name){
+        StateGroup stateGroup = stateGroupToState.getK(state);
+        stateGroup.setName(name);
     }
 
     void removeState(StateGroup stateGroup) {
@@ -154,8 +164,6 @@ class GraphPane extends Pane implements MouseListener {
     }
 
     void moveStateGroup(StateGroup stateGroup, double x, double y){
-
-
         int xg = gridClosest(x);
         int yg = gridClosest(y);
         stateGroup.setLayoutX(xg);
