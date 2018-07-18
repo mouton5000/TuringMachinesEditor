@@ -1329,28 +1329,70 @@ public class TuringMachineDrawer extends Application {
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to write the given symbol at the given line and column of the input word of the given tape.
+     * @param tape
+     * @param line
+     * @param column
+     * @param symbol
+     * @see #setInputSymbolFromMachine(Tape, int, int, String)
+     */
     void setInputSymbol(Tape tape, int line, int column, String symbol){
         tape.writeInput(line, column, symbol);
     }
 
+    /**
+     * Response from the machine. The given symbol was written at the given line and column of the input word of the
+     * given tape and the GUI must be updated.
+     * @param tape
+     * @param line
+     * @param column
+     * @param symbol
+     * @see #setInputSymbol(Tape, int, int, String)
+     */
     private void setInputSymbolFromMachine(Tape tape, int line, int column, String symbol){
         tapesPane.setInputSymbol(tape, line, column, symbol);
         setEnableToSave();
     }
 
+    /**
+     * Center the tapes pane on the given head (identified by the index of the head in the list of heads of the given
+     * tape).
+     * @param tape
+     * @param head
+     */
     void centerOn(Tape tape, int head) {
         tapesPane.centerOn(tape, head);
     }
 
+    /**
+     * Close all the settings rectangle of all the widgets.
+     */
     void closeAllSettingsRectangle(){
         graphPane.closeAllSettingsRectangle();
         tapesPane.closeAllSettingsRectangle();
     }
 
+    /**
+     * Display a notification on the top part of the application.
+     * @param msg message of the notification.
+     */
     void notifyMsg(String msg){
         notification.notifyMsg(msg);
     }
 
+    /**
+     * Request the machine to add a new state. Once this is done, the position of the head on the GUI is at the given
+     * coordinates (x, y). The name of the state is the first name not previously given to a state.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param x
+     * @param y
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #addState(double, double, String)
+     * @see #addStateFromMachine(Integer)
+     */
     void addState(double x, double y){
         if(!editGraphMode)
             return;
@@ -1358,6 +1400,20 @@ public class TuringMachineDrawer extends Application {
         this.addState(x, y, name);
     }
 
+    /**
+     * Request the machine to add a new state. Once this is done, the position of the head on the GUI is at the given
+     * coordinates (x, y) with the given name
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param x
+     * @param y
+     * @param name
+     * @return the state built by the machine
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #addState(double, double)
+     * @see #addStateFromMachine(Integer)
+     */
     int addState(double x, double y, String name){
         if(!editGraphMode)
             return -1;
@@ -1368,24 +1424,62 @@ public class TuringMachineDrawer extends Application {
         return machine.addState(name);
     }
 
+    /**
+     * Response from the machine. The given state was added to the machine and the GUI must be updated. The position
+     * of the state is the one previously choosed by the user with the method {@link #addState(double, double, String)}.
+     * @param state
+     * @see #addState(double, double, String)
+     */
     private void addStateFromMachine(Integer state){
         graphPane.addState(nextX, nextY, state);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to update the name of the given state with the given name.
+     * @param state
+     * @param name
+     * @see #editStateNameFromMachine(Integer, String)
+     */
     void editStateName(Integer state, String name){
         this.machine.editStateName(state, name);
     }
 
+    /**
+     * Response from the machine. The name of the given state was updated with the given name and the GUI must be
+     * updated.
+     * @param state
+     * @param name
+     * @see #editStateName(Integer, String)
+     */
     private void editStateNameFromMachine(Integer state, String name){
         this.graphPane.editStateName(state, name);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to remove the given name. Ask for a confirmation before.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param state
+     * @see #removeState(Integer, boolean)
+     * @see #removeStateFromMachine(Integer)
+     */
     void removeState(Integer state) {
         removeState(state, true);
     }
 
+    /**
+     * Request the machine to remove the given name. If doConfirm is true, ask for a confirmation before.
+     * @param state
+     * @param doConfirm
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #removeState(Integer)
+     * @see #removeStateFromMachine(Integer)
+     */
     void removeState(Integer state, boolean doConfirm){
         if(!editGraphMode)
             return;
@@ -1404,16 +1498,52 @@ public class TuringMachineDrawer extends Application {
             TuringMachineDrawer.getInstance().machine.removeState(state);
     }
 
+    /**
+     * Response from the machine. The given state was removed and the GUI must be updated.
+     * @param state
+     * @see #removeState(Integer)
+     * @see #removeState(Integer, boolean)
+     */
     private void removeStateFromMachine(Integer state){
         graphPane.removeState(state);
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to add a new transition from the given input state to the given output state. The
+     * transition is drawn with a straight line.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param input
+     * @param output
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #addTransition(Integer, Integer, Double, Double, Double, Double)
+     * @see #addTransitionFromMachine(Transition)
+     */
     void addTransition(Integer input, Integer output){
         addTransition(input, output, null, null, null, null);
     }
 
 
+    /**
+     * Request the machine to add a new transition from the given input state to the given output state. Once this is
+     * done, the transition is drawn as a Bezier curve between the two states using the given control coordinates as
+     * control keys.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param input
+     * @param output
+     * @param control1X
+     * @param control1Y
+     * @param control2X
+     * @param control2Y
+     * @return the transition added by the machine
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #addTransition(Integer, Integer)
+     * @see #addTransitionFromMachine(Transition)
+     */
     Transition addTransition(Integer input, Integer output,
                              Double control1X, Double control1Y,
                              Double control2X, Double control2Y
@@ -1430,16 +1560,45 @@ public class TuringMachineDrawer extends Application {
         return TuringMachineDrawer.getInstance().machine.addTransition(input, output);
     }
 
+    /**
+     * Response from the machine. The given transition was added to the machine and the GUI must be updated.
+     * The transition is drawn as a Bezier curve. The positions of the control keys are the one previously choosed by
+     * the user with the method {@link #addTransition(Integer, Integer, Double, Double, Double, Double)}.
+     * @param transition
+     * @see #addTransition(Integer, Integer)
+     * @see #addTransition(Integer, Integer, Double, Double, Double, Double)
+     */
     private void addTransitionFromMachine(Transition transition){
         graphPane.addTransition(transition, nextControl1X, nextControl1Y, nextControl2X, nextControl2Y);
 
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to remove the given transition. Ask for a confirmation before.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param transition
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #removeTransition(Transition, boolean)
+     * @see #removeTransitionFromMachine(Transition)
+     */
     void removeTransition(Transition transition){
         removeTransition(transition, true);
     }
 
+    /**
+     * Request the machine to remove the given transition. If doConfirm is true, ask for a confirmation before.
+     *
+     * If the GUI is not in "Edit Graph mode", do nothing.
+     * @param transition
+     * @param doConfirm
+     * @see #setEditGraph()
+     * @see #setNotEditGraph()
+     * @see #removeTransition(Transition)
+     * @see #removeTransitionFromMachine(Transition)
+     */
     void removeTransition(Transition transition, boolean doConfirm){
         if(!editGraphMode)
             return;
@@ -1458,11 +1617,23 @@ public class TuringMachineDrawer extends Application {
             machine.removeTransition(transition);
     }
 
+    /**
+     * Response from the machine. The given transition was removed from the machine and the GUI must be updated.
+     * @param transition
+     * @see #removeTransition(Transition)
+     * @see #removeTransition(Transition, boolean)
+     */
     private void removeTransitionFromMachine(Transition transition){
         graphPane.removeTransition(transition);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to declare the given state as final if isFinal is true and not final otherwise.
+     * @param state
+     * @param isFinal
+     * @see #setFinalStateFromMachine(Integer, boolean)
+     */
     void setFinalState(Integer state, boolean isFinal){
         if(isFinal)
             machine.setFinalState(state);
@@ -1470,11 +1641,24 @@ public class TuringMachineDrawer extends Application {
             machine.unsetFinalState(state);
     }
 
+    /**
+     * Response from the machine. The given state was declared as final if isFinal is true and not final otherwise
+     * and the GUI must be updated.
+     * @param state
+     * @param isFinal
+     * @see #setFinalState(Integer, boolean)
+     */
     private void setFinalStateFromMachine(Integer state, boolean isFinal){
         graphPane.setFinalState(state, isFinal);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to declare the given state as accepting if isAccepting is true and not accepting otherwise.
+     * @param state
+     * @param isAccepting
+     * @see #setAcceptingStateFromMachine(Integer, boolean)
+     */
     void setAcceptingState(Integer state, boolean isAccepting){
         if(isAccepting)
             machine.setAcceptingState(state);
@@ -1482,11 +1666,24 @@ public class TuringMachineDrawer extends Application {
             machine.unsetAcceptingState(state);
     }
 
+    /**
+     * Response from the machine. The given state was declared as accepting if isAccepting is true and not accepting
+     * otherwise and the GUI must be updated.
+     * @param state
+     * @param isAccepting
+     * @see #setAcceptingState(Integer, boolean)
+     */
     private void setAcceptingStateFromMachine(Integer state, boolean isAccepting){
         graphPane.setAcceptingState(state, isAccepting);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to declare the given state as initial if isInitial is true and not initial otherwise.
+     * @param state
+     * @param isInitial
+     * @see #setInitialStateFromMachine(Integer, boolean)
+     */
     void setInitialState(Integer state, boolean isInitial){
         if(isInitial)
             machine.setInitialState(state);
@@ -1494,69 +1691,190 @@ public class TuringMachineDrawer extends Application {
             machine.unsetInitialState(state);
     }
 
+    /**
+     * Response from the machine. The given state was declared as initial if isInitial is true and not initial
+     * otherwise and the GUI must be updated.
+     * @param state
+     * @param isInitial
+     * @see #setInitialState(Integer, boolean)
+     */
     private void setInitialStateFromMachine(Integer state, boolean isInitial){
         graphPane.setInitialState(state, isInitial);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to add a read symbol to the given transition. The read symbol consists in the triplet
+     * containing the given tape, the given head (identified with the index of the head in the list of heads of the
+     * tape) and the given symbol.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param symbol
+     * @see #addReadSymbolFromMachine(Transition, Tape, int, String)
+     */
     void addReadSymbol(Transition transition, Tape tape, int head, String symbol){
         symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
                 null:symbol;
         transition.addReadSymbols(tape, head, symbol);
     }
 
+    /**
+     * Response from the machine. A read symbol consisting in the triplet
+     * containing the given tape, the given head (identified with the index of the head in the list of heads of the
+     * tape) and the given symbol (null if the symbol is the BLANK symbol) was added to the given transition and the GUI
+     * must be updated.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param symbol
+     * @see #addReadSymbol(Transition, Tape, int, String)
+     */
     private void addReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
         graphPane.addReadSymbol(transition, tape, head, symbol);
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
+    /**
+     * Request the machine to remove a read symbol from the given transition. The read symbol consists in the triplet
+     * containing the given tape, the given head (identified with the index of the head in the list of heads of the
+     * tape) and the given symbol.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param symbol
+     * @see #removeReadSymbolFromMachine(Transition, Tape, int, String)
+     */
     void removeReadSymbol(Transition transition, Tape tape, int head, String symbol){
         symbol = (symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))?
                 null:symbol;
         transition.removeReadSymbols(tape, head, symbol);
     }
 
+    /**
+     * Response from the machine. A read symbol consisting in the triplet
+     * containing the given tape, the given head (identified with the index of the head in the list of heads of the
+     * tape) and the given symbol (null if the symbol is the BLANK symbol) was removed from the given transition and the
+     * GUI must be updated.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param symbol
+     * @see #removeReadSymbol(Transition, Tape, int, String)
+     */
     private void removeReadSymbolFromMachine(Transition transition, Tape tape, int head, String symbol){
         graphPane.removeReadSymbol(transition, tape, head, symbol);
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
+    /**
+     * Request the machine to move the left bound of the given tape to the given value (null if the new bound is
+     * infinite).
+     * @param tape
+     * @param left
+     * @see #setTapeLeftBoundFromMachine(Tape, Integer)
+     */
     void setTapeLeftBound(Tape tape, Integer left){
         tape.setLeftBound(left);
     }
 
+    /**
+     * Response from the machine. The left bound of the given tape was changed to the given value and the
+     * GUI must be updated.
+     * @param tape
+     * @param left
+     * @see #setTapeLeftBound(Tape, Integer)
+     */
     private void setTapeLeftBoundFromMachine(Tape tape, Integer left){
         tapesPane.setTapeLeftBound(tape, left);
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to move the right bound of the given tape to the given value (null if the new bound is
+     * infinite).
+     * @param tape
+     * @param right
+     * @see #setTapeRightBoundFromMachine(Tape, Integer)
+     */
     void setTapeRightBound(Tape tape, Integer right){
         tape.setRightBound(right);
     }
 
+    /**
+     * Response from the machine. The right bound of the given tape was changed to the given value and the
+     * GUI must be updated.
+     * @param tape
+     * @param right
+     * @see #setTapeRightBound(Tape, Integer)
+     */
     private void setTapeRightBoundFromMachine(Tape tape, Integer right){
         tapesPane.setTapeRightBound(tape, right);
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to move the bottom bound of the given tape to the given value (null if the new bound is
+     * infinite).
+     * @param tape
+     * @param bottom
+     * @see #setTapeBottomBoundFromMachine(Tape, Integer)
+     */
     void setTapeBottomBound(Tape tape, Integer bottom){
         tape.setBottomBound(bottom);
     }
 
+    /**
+     * Response from the machine. The bottom bound of the given tape was changed to the given value and the
+     * GUI must be updated.
+     * @param tape
+     * @param bottom
+     * @see #setTapeBottomBound(Tape, Integer)
+     */
     private void setTapeBottomBoundFromMachine(Tape tape, Integer bottom){
         tapesPane.setTapeBottomBound(tape, bottom);
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to move the top bound of the given tape to the given value (null if the new bound is
+     * infinite).
+     * @param tape
+     * @param top
+     * @see #setTapeTopBoundFromMachine(Tape, Integer)
+     */
     void setTapeTopBound(Tape tape, Integer top){
         tape.setTopBound(top);
     }
 
+    /**
+     * Response from the machine. The top bound of the given tape was changed to the given value and the
+     * GUI must be updated.
+     * @param tape
+     * @param top
+     * @see #setTapeTopBound(Tape, Integer)
+     */
     private void setTapeTopBoundFromMachine(Tape tape, Integer top){
         tapesPane.setTapeTopBound(tape, top);
         this.setEnableToSave();
     }
 
+    /**
+     * Request the machine to add an action to the given transition. The action deals with the given tape and the
+     * given head (identified with the index of the head in the list of heads of the tape). The type of action
+     * depends on the given action symbol. If the symbol is an arrow, the action consists in moving the head in the
+     * given direction. Otherwise it consists in writing the symbol on the head position in the tape.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param actionSymbol
+     * @see #addActionFromMachine(Transition, Tape, int, ActionType, Object)
+     */
     void addAction(Transition transition, Tape tape, int head, String actionSymbol) {
 
         Action action;
@@ -1583,32 +1901,71 @@ public class TuringMachineDrawer extends Application {
         transition.addAction(action);
     }
 
+    /**
+     * Response from the machine. An action was added to the given transition. The action deals with the given tape and
+     * the given head (identified with the index of the head in the list of heads of the tape). The type of action
+     * (moving a head or writing on the tape) is the given type. The value is either the direction of the moving or
+     * the symbol that should be written.
+     * The GUI must be updated.
+     *
+     * @param transition
+     * @param tape
+     * @param head
+     * @param type
+     * @param value
+     * @see #addAction(Transition, Tape, int, String)
+     */
     private void addActionFromMachine(Transition transition, Tape tape, int head, ActionType type, Object value){
         graphPane.addAction(transition, tape, head, type, value);
         setEnableToSave();
     }
 
+    /**
+     * Request the machine to remove the last action of the list of actions of the given transition.
+     * @param transition
+     * @see #removeActionFromMachine(Transition, int)
+     */
     void removeAction(Transition transition){
         transition.removeAction(transition.getNbActions() - 1);
     }
 
+    /**
+     * Response from the machine. The action at the given index in the list of actions of the given transition was
+     * removed and the GUI must be updated.
+     * @param transition
+     * @param index
+     * @see #removeAction(Transition)
+     */
     private void removeActionFromMachine(Transition transition, int index){
         graphPane.removeAction(transition, index);
         setEnableToSave();
     }
 
+    /**
+     * Set the GUI in "Edit graph mode" meaning that nodes and transitions can be added/removed.
+     * @see #setNotEditGraph()
+     */
     void setEditGraph(){
         notification.notifyMsg("Enter \"Add/remove node/transitions\" mode");
         this.editGraphMode = true;
         menu.setEditGraph();
     }
 
+    /**
+     * Set the GUI in "Not Edit graph mode" meaning that nodes and transitions cannot be added/removed.
+     * @see #setEditGraph()
+     */
     void setNotEditGraph(){
         notification.notifyMsg("Quit \"Add/remove node/transitions\" mode");
         this.editGraphMode = false;
         menu.setNotEditGraph();
     }
 
+    /**
+     * Request the machine and the GUI to enter the "Manual firing mode" meaning that the user can select the current
+     * node and fire transitions manually. Then, animate the GUI to display an arbitrary initial configuration.
+     * @see #setNotManual()
+     */
     void setManual() {
         notification.notifyMsg("Enter \"Manual firing \" mode");
         menu.setManual();
@@ -1621,6 +1978,11 @@ public class TuringMachineDrawer extends Application {
         this.goToFirstConfiguration();
     }
 
+
+    /**
+     * Request the machine and the GUI to quit the "Manual firing mode".
+     * @see #setManual()
+     */
     void setNotManual() {
         notification.notifyMsg("Quit \"Manual firing \" mode");
         menu.setNotManual();
@@ -1637,14 +1999,32 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    /**
+     * Request the machine to manually select another current state and animate the change. If the machine and the GUI
+     * are not in the "Manual firing mode" or if an animation is currently playing, do nothing.
+     * @param stateGroup
+     * @see #setManual()
+     * @see #setNotManual()
+     */
     void manualSelectCurrentState(StateGroup stateGroup) {
+        if(!manualMode)
+            return;
         if(this.playing)
             return;
         machine.manualSetCurrentState(graphPane.getState(stateGroup));
         this.goToFirstConfiguration();
     }
 
+    /**
+     * Request the machine to manually fire a transition and animate the change. If the machine and the GUI are not in
+     * the "Manual firing mode" or if an animation is currently playing, do nothing.
+     * @param transitionGroup
+     * @see #setManual()
+     * @see #setNotManual()
+     */
     void manualFireTransition(TransitionGroup transitionGroup) {
+        if(!manualMode)
+            return;
         if(this.playing)
             return;
         machine.manualFireTransition(graphPane.getTransition(transitionGroup));
@@ -1656,6 +2036,12 @@ public class TuringMachineDrawer extends Application {
         flushTimeline();
     }
 
+    /**
+     * Request the machine and the GUI to enter the "Automatic firing mode" meaning that the machine will search for
+     * an accepting path (or refusing path if no accepting path is found). Then, animate the GUI to display the
+     * initial configuration of that path.
+     * @see #unbuild()
+     */
     void build() {
         notification.notifyMsg("Enter \"Automatic firing \" mode");
         menu.setBuild();
@@ -1668,6 +2054,10 @@ public class TuringMachineDrawer extends Application {
         this.goToFirstConfiguration();
     }
 
+    /**
+     * Request the machine and the GUI to quit the "Automatic firing mode".
+     * @see #build()
+     */
     void unbuild(){
         notification.notifyMsg("Quit \"Automatic firing \" mode");
         if(this.playing)
@@ -1686,6 +2076,10 @@ public class TuringMachineDrawer extends Application {
         this.flushDirect();
     }
 
+    /**
+     * Animate the GUI to display the previous configuration of the current (manual or automatic) execution of the
+     * machine.
+     */
     void goToPreviousConfiguration(){
         if(this.playing)
             return;
@@ -1701,6 +2095,10 @@ public class TuringMachineDrawer extends Application {
         }
     }
 
+    /**
+     * Animate the GUI to display the first configuration of the current (manual or automatic) execution of the
+     * machine.
+     */
     void goToFirstConfiguration() {
         if(this.playing)
             return;
@@ -1711,6 +2109,10 @@ public class TuringMachineDrawer extends Application {
         this.menu.setFirstFrame();
     }
 
+    /**
+     * Animate the GUI to display the last configuration of the current (manual or automatic) execution of the
+     * machine.
+     */
     void goToLastConfiguration() {
         if(this.playing)
             return;
@@ -1721,7 +2123,11 @@ public class TuringMachineDrawer extends Application {
         this.menu.setLastFrame();
     }
 
-
+    /**
+     * Animate the GUI to display the next configuration of the current (manual or automatic) execution of the
+     * machine. The fired transition is animated too. If the current configuration has no successor, the GUI is
+     * adequately updated.
+     */
     void tick(){
         if(this.playing)
             return;
@@ -1737,6 +2143,10 @@ public class TuringMachineDrawer extends Application {
         }
     }
 
+    /**
+     * Animate the GUI to display all the configurations from the current configuration to the last configuration of
+     * the current (manual or automatic) execution of the machine.
+     */
     void play(){
         this.menu.setPlay();
         this.machineTimeLine.setOnFinished(actionEvent -> {
@@ -1754,6 +2164,9 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    /**
+     * Pause the current animation started with the {@link #play()} method.
+     */
     void pause(){
         if(!this.playing)
             return;
@@ -1761,6 +2174,9 @@ public class TuringMachineDrawer extends Application {
         this.playing = false;
     }
 
+    /**
+     * Sequentially animate all the current stored animations.
+     */
     private void flushTimeline(){
         this.machineTimeLine.getChildren().clear();
         this.machineTimeLine.getChildren().addAll(this.toPlay);
@@ -1769,6 +2185,9 @@ public class TuringMachineDrawer extends Application {
         this.machineTimeLine.play();
     }
 
+    /**
+     * Parallely animate all the current stored animations.
+     */
     private void flushDirect(){
         this.directTimeline.getChildren().clear();
         this.directTimeline.getChildren().addAll(this.toPlay);
@@ -1777,6 +2196,10 @@ public class TuringMachineDrawer extends Application {
         this.directTimeline.play();
     }
 
+    /**
+     * Clear all the machine, remove all states and transitions of the graph, all the tapes, all the heads and all
+     * the symbols.
+     */
     private void clearMachine(){
         if(buildMode)
             this.unbuild();
@@ -1785,6 +2208,9 @@ public class TuringMachineDrawer extends Application {
         this.tapesPane.clear();
     }
 
+    /**
+     * Init a new machine with no state, one 1D tape and one head.
+     */
     void newMachine(){
         clearMachine();
 
@@ -1798,6 +2224,11 @@ public class TuringMachineDrawer extends Application {
         this.setNotEnableToSave();
     }
 
+    /**
+     * Set the flag enableToSave to True, display a star in the title bar of the application and set the save button
+     * active.
+     * @see #setNotEnableToSave()
+     */
     void setEnableToSave(){
         if(enableToSave)
             return;
@@ -1806,6 +2237,11 @@ public class TuringMachineDrawer extends Application {
         menu.setSave(true);
     }
 
+    /**
+     * Set the flag enableToSave to False, remove the star in the title bar of the application (if such a star exists)
+     * and set the save button inactive.
+     * @see #setEnableToSave()
+     */
     private void setNotEnableToSave(){
         if(!enableToSave)
             return;
@@ -1816,6 +2252,11 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    /**
+     * If the machine was previously updated since the last save, save the machine in the last given saved file name.
+     * If no such file is given, ask the user to choose a file. Do not save if the user cancel during the choosing.
+     * @return true if the machine was effectively saved by the user
+     */
     boolean saveMachine(){
         if(lastSaveFilename != null)
             return saveAsMachine(lastSaveFilename);
@@ -1823,6 +2264,11 @@ public class TuringMachineDrawer extends Application {
             return saveAsMachine();
     }
 
+    /**
+     * If the machine was previously updated since the last save, ask the user to choose a file and save the machine
+     * in this file. Do not save if the user cancel during the choosing.
+     * @return true if the machine was effectively saved by the user
+     */
     boolean saveAsMachine() {
         if(!enableToSave)
             return false;
@@ -1850,6 +2296,11 @@ public class TuringMachineDrawer extends Application {
         return false;
     }
 
+    /**
+     * If the machine was previously updated since the last save, save the machine in the given file name.
+     * @param filename
+     * @return true if the machine was effectively saved
+     */
     private boolean saveAsMachine(String filename){
         if(!enableToSave)
             return false;
@@ -1871,6 +2322,9 @@ public class TuringMachineDrawer extends Application {
         }
     }
 
+    /**
+     * Ask the user to choose a *.tm file and load the machine described in that file.
+     */
     void loadMachine(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose loadMachine file");
@@ -1883,6 +2337,10 @@ public class TuringMachineDrawer extends Application {
             loadMachine(file.getAbsolutePath());
     }
 
+
+    /**
+     * Load the machine described in that file.
+     */
     private void loadMachine(String filename){
         StringBuilder sb = new StringBuilder();
         try {
@@ -1908,6 +2366,9 @@ public class TuringMachineDrawer extends Application {
 
     }
 
+    /**
+     * Open the parameters dialog box.
+     */
     void openParameters() {
         Dialog<Settings> dialog = Settings.getDialog(
                 TuringMachineDrawer.ANIMATION_DURATION,
@@ -1927,6 +2388,11 @@ public class TuringMachineDrawer extends Application {
         }
     }
 
+    /**
+     * @return a JSON description of the machine. The description also contains graphical information such as the
+     * color of the heads or the positions of the states.
+     * @see #loadJSON(JSONObject)
+     */
     private JSONObject getJSON(){
         JSONObject jsonOptions = new JSONObject();
         jsonOptions.put("animationDuration", ANIMATION_DURATION);
@@ -1941,6 +2407,11 @@ public class TuringMachineDrawer extends Application {
                 .put("tapes", jsonTape);
     }
 
+    /**
+     * Build a new machine using a JSON object as a description.
+     * @param jsonObject
+     * @see #getJSON()
+     */
     private void loadJSON(JSONObject jsonObject){
         setEditGraph();
 

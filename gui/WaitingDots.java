@@ -19,6 +19,5 @@ class WaitingDots extends Group {
 
         left.setCenterX(- MARGIN);
         right.setCenterX(MARGIN);
-
     }
 }
