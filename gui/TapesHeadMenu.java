@@ -111,9 +111,9 @@ class TapesHeadMenu extends HBox implements MouseListener {
             child.setTranslateX(child.getTranslateX() + dx);
     }
 
-    void closeAllOptionRectangle() {
+    void closeAllSettingsRectangle() {
         for(TapeHeadMenu tapeHeadMenu: tapeToMenu.values())
-            tapeHeadMenu.closeHeadOptionRectangle(false);
+            tapeHeadMenu.closeHeadSettingsRectangle(false);
     }
 
     KeyFrame getHeadWriteKeyFrame(Tape tape, Integer head) {
@@ -160,7 +160,7 @@ class TapesHeadMenu extends HBox implements MouseListener {
 }
 
 class TapeHeadMenu extends HBox implements MouseListener {
-    HeadOptionRectangle headOptionRectangle;
+    HeadSettingsRectangle headSettingsRectangle;
     Tape tape;
 
     TapeHeadMenu(Tape tape) {
@@ -171,8 +171,8 @@ class TapeHeadMenu extends HBox implements MouseListener {
 
         this.getChildren().add(new RemoveTapeIcon(this, tape));
 
-        this.headOptionRectangle = new HeadOptionRectangle( this, tape);
-        headOptionRectangle.managedProperty().bind(headOptionRectangle.visibleProperty());
+        this.headSettingsRectangle = new HeadSettingsRectangle( this, tape);
+        headSettingsRectangle.managedProperty().bind(headSettingsRectangle.visibleProperty());
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -188,20 +188,20 @@ class TapeHeadMenu extends HBox implements MouseListener {
     }
 
     void removeHead(int head) {
-        this.closeHeadOptionRectangle(true);
+        this.closeHeadSettingsRectangle(true);
         this.getChildren().remove(head + 1);
     }
 
-    void openHeadOptionRectangle(int head) {
-        headOptionRectangle.setHead(head);
-        headOptionRectangle.setVisible(true);
-        this.getChildren().remove(headOptionRectangle);
-        this.getChildren().add(head + 2, headOptionRectangle);
-        headOptionRectangle.maximize();
+    void openHeadSettingsRectangle(int head) {
+        headSettingsRectangle.setHead(head);
+        headSettingsRectangle.setVisible(true);
+        this.getChildren().remove(headSettingsRectangle);
+        this.getChildren().add(head + 2, headSettingsRectangle);
+        headSettingsRectangle.maximize();
     }
 
-    void closeHeadOptionRectangle() { closeHeadOptionRectangle(true); }
-    void closeHeadOptionRectangle(boolean animate) { headOptionRectangle.minimize(animate); }
+    void closeHeadSettingsRectangle() { closeHeadSettingsRectangle(true); }
+    void closeHeadSettingsRectangle(boolean animate) { headSettingsRectangle.minimize(animate); }
 
     KeyFrame getHeadWriteKeyFrame(Integer head) {
         HeadMenuSelect headRectangle = (HeadMenuSelect) this.getChildren().get(head + 1);
@@ -219,8 +219,8 @@ class TapeHeadMenu extends HBox implements MouseListener {
     }
 
     void clear() {
-        closeHeadOptionRectangle();
-        headOptionRectangle.clear();
+        closeHeadSettingsRectangle();
+        headSettingsRectangle.clear();
     }
 
     @Override
@@ -228,8 +228,8 @@ class TapeHeadMenu extends HBox implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.headOptionRectangle.isMaximized())
-            this.closeHeadOptionRectangle();
+        if(this.headSettingsRectangle.isMaximized())
+            this.closeHeadSettingsRectangle();
         return true;
     }
 
@@ -285,7 +285,7 @@ class HeadMenuSelect extends Rectangle implements MouseListener{
                 TuringMachineDrawer.EDIT_PRESS_COLOR,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.EDIT_PRESS_DURATION), kfill)
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_PRESS_DURATION), kfill)
         );
         timeline.play();
     }
@@ -316,8 +316,8 @@ class HeadMenuSelect extends Rectangle implements MouseListener{
             return false;
         }
         else {
-            if (this.tapeHeadMenu.headOptionRectangle.isMaximized())
-                this.tapeHeadMenu.closeHeadOptionRectangle();
+            if (this.tapeHeadMenu.headSettingsRectangle.isMaximized())
+                this.tapeHeadMenu.closeHeadSettingsRectangle();
             else {
                 boolean pressFinished = !this.animating;
                 this.stopTimeline();
@@ -325,7 +325,7 @@ class HeadMenuSelect extends Rectangle implements MouseListener{
                 if (!pressFinished)
                     TuringMachineDrawer.getInstance().centerOn(this.tapeHeadMenu.tape, this.getHead());
                 else
-                    this.tapeHeadMenu.openHeadOptionRectangle(this.getHead());
+                    this.tapeHeadMenu.openHeadSettingsRectangle(this.getHead());
             }
             return true;
         }
@@ -345,7 +345,7 @@ class HeadMenuSelect extends Rectangle implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(!this.tapeHeadMenu.headOptionRectangle.isMaximized())
+        if(!this.tapeHeadMenu.headSettingsRectangle.isMaximized())
             this.startTimeline();
 
         return false;
@@ -397,8 +397,8 @@ class RemoveTapeIcon extends ImageView implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.tapeHeadMenu.headOptionRectangle.isMaximized())
-            this.tapeHeadMenu.closeHeadOptionRectangle();
+        if(this.tapeHeadMenu.headSettingsRectangle.isMaximized())
+            this.tapeHeadMenu.closeHeadSettingsRectangle();
         else
             TuringMachineDrawer.getInstance().removeTape(this.tape);
         return true;

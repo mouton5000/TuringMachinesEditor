@@ -129,7 +129,7 @@ class StateGroup extends Group implements MouseListener {
         return label.getText();
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.label.setText(name);
     }
 
@@ -144,7 +144,7 @@ class StateGroup extends Group implements MouseListener {
                 TuringMachineDrawer.STATE_PRESS_COLOR,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.STATE_PRESS_DURATION),
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_PRESS_DURATION),
                         kOuterFill, kInnerfill)
         );
 
@@ -189,12 +189,12 @@ class StateGroup extends Group implements MouseListener {
 
         GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
 
-        if(graphPane.stateOptionRectangle.isMaximized()){
-            graphPane.closeStateOptionRectangle();
+        if(graphPane.stateSettingsRectangle.isMaximized()){
+            graphPane.closeStateSettingsRectangle();
             return true;
         }
-        else if(graphPane.transitionOptionRectangle.isMaximized()){
-            graphPane.closeTransitionOptionRectangle();
+        else if(graphPane.transitionSettingsRectangle.isMaximized()){
+            graphPane.closeTransitionSettingsRectangle();
             return true;
         }
 
@@ -206,7 +206,7 @@ class StateGroup extends Group implements MouseListener {
 
             if (pressFinished) {
                 graphPane.unselect();
-                graphPane.openStateOptionRectangle(this);
+                graphPane.openStateSettingsRectangle(this);
             } else {
                 Node selected = graphPane.getSelected();
                 if (selected == null)
@@ -240,8 +240,8 @@ class StateGroup extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
-                && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
+        if(!TuringMachineDrawer.getInstance().graphPane.stateSettingsRectangle.isMaximized()
+                && !TuringMachineDrawer.getInstance().graphPane.transitionSettingsRectangle.isMaximized())
             this.startTimeline();
 
         return false;

@@ -21,7 +21,7 @@ import util.Vector;
 
 import java.util.List;
 
-public class TransitionGroup extends Group {
+class TransitionGroup extends Group {
     private final StateGroup input;
     private final StateGroup output;
 
@@ -180,11 +180,11 @@ public class TransitionGroup extends Group {
         setSelected(false);
     }
 
-    public DoubleProperty centerXProperty() {
+    DoubleProperty centerXProperty() {
         return centerX;
     }
 
-    public DoubleProperty centerYProperty() {
+    DoubleProperty centerYProperty() {
         return centerY;
     }
 
@@ -448,7 +448,7 @@ public class TransitionGroup extends Group {
                 TuringMachineDrawer.TRANSITION_PRESS_OPACITY,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.TRANSITION_PRESS_DURATION),
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_PRESS_DURATION),
                         kOpacity)
         );
 
@@ -575,12 +575,12 @@ class TransitionArrowInvisibleLine extends Path implements MouseListener {
 
         GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
 
-        if(graphPane.stateOptionRectangle.isMaximized()){
-            graphPane.closeStateOptionRectangle();
+        if(graphPane.stateSettingsRectangle.isMaximized()){
+            graphPane.closeStateSettingsRectangle();
             return true;
         }
-        else if(graphPane.transitionOptionRectangle.isMaximized()){
-            graphPane.closeTransitionOptionRectangle();
+        else if(graphPane.transitionSettingsRectangle.isMaximized()){
+            graphPane.closeTransitionSettingsRectangle();
             return true;
         }
 
@@ -592,7 +592,7 @@ class TransitionArrowInvisibleLine extends Path implements MouseListener {
 
             if (pressFinished) {
                 graphPane.unselect();
-                graphPane.openTransitionOptionRectangle(transitionGroup);
+                graphPane.openTransitionSettingsRectangle(transitionGroup);
             } else
                 graphPane.select(transitionGroup);
         }
@@ -615,8 +615,8 @@ class TransitionArrowInvisibleLine extends Path implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(!TuringMachineDrawer.getInstance().graphPane.stateOptionRectangle.isMaximized()
-                && !TuringMachineDrawer.getInstance().graphPane.transitionOptionRectangle.isMaximized())
+        if(!TuringMachineDrawer.getInstance().graphPane.stateSettingsRectangle.isMaximized()
+                && !TuringMachineDrawer.getInstance().graphPane.transitionSettingsRectangle.isMaximized())
             transitionGroup.startTimeline();
 
         return false;

@@ -23,13 +23,13 @@ import java.util.Optional;
 
 class SymbolsMenu extends HBox implements MouseListener {
 
-    SymbolOptionRectangle symbolOptionRectangle;
+    SymbolSettingsRectangle symbolSettingsRectangle;
     AddSymbolIcon addSymbolIcon;
     private double offsetX;
     private Double dragX;
 
     SymbolsMenu(){
-        this.symbolOptionRectangle = new SymbolOptionRectangle(this);
+        this.symbolSettingsRectangle = new SymbolSettingsRectangle(this);
         this.addSymbolIcon = new AddSymbolIcon();
         this.offsetX = 0;
 
@@ -38,7 +38,7 @@ class SymbolsMenu extends HBox implements MouseListener {
         this.setSpacing(TuringMachineDrawer.TAPES_MENU_SPACING);
         this.setAlignment(Pos.CENTER_LEFT);
 
-        symbolOptionRectangle.managedProperty().bind(symbolOptionRectangle.visibleProperty());
+        symbolSettingsRectangle.managedProperty().bind(symbolSettingsRectangle.visibleProperty());
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
@@ -56,7 +56,7 @@ class SymbolsMenu extends HBox implements MouseListener {
     }
 
     void removeSymbol(int index){
-        closeSymbolOptionRectangle();
+        closeSymbolSettingsRectangle();
         this.getChildren().remove(getSymbolLabel(index));
     }
 
@@ -75,18 +75,18 @@ class SymbolsMenu extends HBox implements MouseListener {
     }
 
     void openSymbolOptionRectantle(int index){
-        symbolOptionRectangle.setSymbolIndex(index);
-        symbolOptionRectangle.setVisible(true);
-        this.getChildren().remove(symbolOptionRectangle);
-        this.getChildren().add(index + 2, symbolOptionRectangle);
-        symbolOptionRectangle.maximize();
+        symbolSettingsRectangle.setSymbolIndex(index);
+        symbolSettingsRectangle.setVisible(true);
+        this.getChildren().remove(symbolSettingsRectangle);
+        this.getChildren().add(index + 2, symbolSettingsRectangle);
+        symbolSettingsRectangle.maximize();
     }
 
-    void closeSymbolOptionRectangle(){
-        closeSymbolOptionRectangle(true);
+    void closeSymbolSettingsRectangle(){
+        closeSymbolSettingsRectangle(true);
     }
-    void closeSymbolOptionRectangle(boolean animate){
-        symbolOptionRectangle.minimize(animate);
+    void closeSymbolSettingsRectangle(boolean animate){
+        symbolSettingsRectangle.minimize(animate);
     }
 
     int getIndex(SymbolLabel symbolLabel){
@@ -114,7 +114,7 @@ class SymbolsMenu extends HBox implements MouseListener {
             child.setTranslateX(child.getTranslateX() + dx);
     }
 
-    void closeAllOptionRectangle() { closeSymbolOptionRectangle(false); }
+    void closeAllSettingsRectangle() { closeSymbolSettingsRectangle(false); }
 
     JSONArray getJSON() {
         JSONArray jsonArray = new JSONArray();
@@ -127,8 +127,8 @@ class SymbolsMenu extends HBox implements MouseListener {
     }
 
     void clear() {
-        closeSymbolOptionRectangle();
-        symbolOptionRectangle.clear();
+        closeSymbolSettingsRectangle();
+        symbolSettingsRectangle.clear();
     }
 
     @Override
@@ -136,8 +136,8 @@ class SymbolsMenu extends HBox implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.symbolOptionRectangle.isMaximized())
-            this.closeSymbolOptionRectangle();
+        if(this.symbolSettingsRectangle.isMaximized())
+            this.closeSymbolSettingsRectangle();
         return true;
     }
 
@@ -249,7 +249,7 @@ class SymbolLabel extends Group implements MouseListener {
                 TuringMachineDrawer.EDIT_PRESS_COLOR,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.EDIT_PRESS_DURATION), kbg)
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_PRESS_DURATION), kbg)
         );
         timeline.play();
     }
@@ -265,8 +265,8 @@ class SymbolLabel extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.symbolsMenu.symbolOptionRectangle.isMaximized())
-            this.symbolsMenu.closeSymbolOptionRectangle();
+        if(this.symbolsMenu.symbolSettingsRectangle.isMaximized())
+            this.symbolsMenu.closeSymbolSettingsRectangle();
         else {
             boolean pressFinished = !this.animating;
             this.stopTimeline();
@@ -291,7 +291,7 @@ class SymbolLabel extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(!this.symbolsMenu.symbolOptionRectangle.isMaximized())
+        if(!this.symbolsMenu.symbolSettingsRectangle.isMaximized())
             this.startTimeline();
 
         return false;

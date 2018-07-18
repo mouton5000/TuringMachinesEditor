@@ -11,7 +11,7 @@ import util.Ressources;
 /**
  * Created by dimitri.watel on 14/06/18.
  */
-class TapeOptionRectangle extends OptionRectangle{
+class TapeSettingsRectangle extends SettingsRectangle {
 
     private final TapeOptionIcon add_column_left_icon;
     private final TapeOptionIcon add_column_right_icon;
@@ -38,7 +38,7 @@ class TapeOptionRectangle extends OptionRectangle{
     int currentLine;
     int currentColumn;
 
-    TapeOptionRectangle(TapeBorderPane tapeBorderPane) {
+    TapeSettingsRectangle(TapeBorderPane tapeBorderPane) {
         super();
         this.tapeBorderPane = tapeBorderPane;
 
@@ -76,40 +76,40 @@ class TapeOptionRectangle extends OptionRectangle{
         inf_line_bottom_icon_gray = new ImageView(Ressources.getRessource("inf_line_bottom_gray.png"));
         inf_line_top_icon_gray = new ImageView(Ressources.getRessource("inf_line_top_gray.png"));
 
-        add_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        add_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        add_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        add_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        add_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        add_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
 
-        remove_columns_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_columns_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_lines_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        remove_lines_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        remove_columns_left_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        remove_columns_right_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        remove_lines_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        remove_lines_top_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
 
-        inf_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
-        inf_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH);
+        inf_column_left_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        inf_column_right_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        inf_line_bottom_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
+        inf_line_top_icon.setFitWidth(TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH);
 
-        double left2X = - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double leftX = - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double right2X = TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING * 3 / 2
-                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH * 3 / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double rightX = TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING / 2
-                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double left2X = - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING * 3 / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH * 3 / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
+        double leftX = - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
+        double right2X = TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING * 3 / 2
+                + TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH * 3 / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
+        double rightX = TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING / 2
+                + TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
 
-        double topY = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
-        double bottomY = TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH / 2;
+        double topY = TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
+        double bottomY = TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 4
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH / 2;
 
         add_column_left_icon.setLayoutX(left2X);
         add_column_left_icon.setLayoutY(bottomY);
@@ -160,34 +160,34 @@ class TapeOptionRectangle extends OptionRectangle{
         inf_line_top_icon_gray.setLayoutY(topY);
 
         Line leftLine = new Line(
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                        - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2,
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                        - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT
         );
 
         Line rightLine = new Line(
-                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                        + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+                TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                + TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2,
+                TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                        + TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT
         );
 
         Line centerLine = new Line(
-                - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                        - TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.TAPE_OPTION_RECTANGLE_SPACING
-                        + TuringMachineDrawer.TAPE_OPTION_RECTANGLE_ICON_WIDTH,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                        - TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2,
+                TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_SPACING
+                        + TuringMachineDrawer.TAPE_SETTINGS_RECTANGLE_ICON_WIDTH,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2
         );
 
         this.getChildren().addAll(
@@ -274,12 +274,12 @@ class TapeOptionRectangle extends OptionRectangle{
     }
 
     @Override
-    protected Node associatedNode() {
+    Node associatedNode() {
         return tapeBorderPane.tapePane;
     }
 
     @Override
-    public void clear() {
+    void clear() {
         currentLine = 0;
         currentColumn = 0;
     }
@@ -302,12 +302,12 @@ class TapeOptionIcon extends ImageView implements MouseListener {
 
     TapeOptionIconAction tapeOptionIconAction;
     TapeOptionIconDirection tapeOptionIconDirection;
-    TapeOptionRectangle optionRectangle;
+    TapeSettingsRectangle settingsRectangle;
 
-    public TapeOptionIcon(TapeOptionRectangle optionRectangle, String url,
-                          TapeOptionIconAction tapeOptionIconAction, TapeOptionIconDirection tapeOptionIconDirection) {
+    TapeOptionIcon(TapeSettingsRectangle settingsRectangle, String url,
+                   TapeOptionIconAction tapeOptionIconAction, TapeOptionIconDirection tapeOptionIconDirection) {
         super(url);
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
         this.tapeOptionIconAction = tapeOptionIconAction;
         this.tapeOptionIconDirection = tapeOptionIconDirection;
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
@@ -320,9 +320,9 @@ class TapeOptionIcon extends ImageView implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode|| TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TapeBorderPane tapeBorderPane = this.optionRectangle.tapeBorderPane;
-        int line = this.optionRectangle.currentLine;
-        int column = this.optionRectangle.currentColumn;
+        TapeBorderPane tapeBorderPane = this.settingsRectangle.tapeBorderPane;
+        int line = this.settingsRectangle.currentLine;
+        int column = this.settingsRectangle.currentColumn;
 
         Integer coord = -1;
         Integer delta = 0;

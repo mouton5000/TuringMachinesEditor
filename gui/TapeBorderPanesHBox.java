@@ -215,9 +215,9 @@ class TapeBorderPanesHBox extends HBox{
             child.setTranslateX(child.getTranslateX() + dx);
     }
 
-    void closeAllOptionRectangle() {
+    void closeAllSettingsRectangle() {
         for(TapeBorderPane tapeBorderPane : tapes.values())
-            tapeBorderPane.closeAllOptionRectangle();
+            tapeBorderPane.closeAllSettingsRectangle();
     }
 
     KeyFrame getHeadWriteKeyFrame(Tape tape, Integer head) {
@@ -243,7 +243,7 @@ class TapeBorderPanesHBox extends HBox{
     }
 
     void clear() {
-        closeAllOptionRectangle();
+        closeAllSettingsRectangle();
         for(TapeBorderPane tapeBorderPane : tapes.values())
             tapeBorderPane.clear();
         tapes.clear();
@@ -369,25 +369,25 @@ class TapeBorderPane extends BorderPane implements MouseListener {
     void setTapeLeftBound(Integer left) {
         this.left = left;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
-        tapePane.tapeOptionRectangle.reset();
+        tapePane.tapeSettingsRectangle.reset();
     }
 
     void setTapeRightBound(Integer right) {
         this.right = right;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
-        tapePane.tapeOptionRectangle.reset();
+        tapePane.tapeSettingsRectangle.reset();
     }
 
     void setTapeBottomBound(Integer bottom) {
         this.bottom = bottom;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
-        tapePane.tapeOptionRectangle.reset();
+        tapePane.tapeSettingsRectangle.reset();
     }
 
     void setTapeTopBound(Integer top) {
         this.top = top;
         tapePane.checkLinesAndColumns(maxWidth, maxHeight, true);
-        tapePane.tapeOptionRectangle.reset();
+        tapePane.tapeSettingsRectangle.reset();
     }
 
     void translate(double dx, double dy) {
@@ -428,8 +428,8 @@ class TapeBorderPane extends BorderPane implements MouseListener {
         return -line * TuringMachineDrawer.TAPE_CELL_WIDTH;
     }
 
-    void closeAllOptionRectangle() {
-        tapePane.closeAllOptionRectangle();
+    void closeAllSettingsRectangle() {
+        tapePane.closeAllSettingsRectangle();
     }
 
     KeyFrame getHeadWriteKeyFrame(Integer head) {
@@ -756,8 +756,8 @@ class TapePane extends Pane implements MouseListener{
     private List<Line> lines;
     private List<Line> columns;
 
-    CellOptionRectangle cellOptionRectangle;
-    TapeOptionRectangle tapeOptionRectangle;
+    CellSettingsRectangle cellSettingsRectangle;
+    TapeSettingsRectangle tapeSettingsRectangle;
 
     TapeBorderPane tapeBorderPane;
 
@@ -789,13 +789,13 @@ class TapePane extends Pane implements MouseListener{
 
         tapeLinesGroup = new Group();
 
-        cellOptionRectangle = new CellOptionRectangle( this);
-        cellOptionRectangle.setVisible(false);
-        cellOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        cellSettingsRectangle = new CellSettingsRectangle( this);
+        cellSettingsRectangle.setVisible(false);
+        cellSettingsRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
-        tapeOptionRectangle = new TapeOptionRectangle(this.tapeBorderPane);
-        tapeOptionRectangle.setVisible(false);
-        tapeOptionRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
+        tapeSettingsRectangle = new TapeSettingsRectangle(this.tapeBorderPane);
+        tapeSettingsRectangle.setVisible(false);
+        tapeSettingsRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         animatedRectangle = new Rectangle(0, 0,
                 TuringMachineDrawer.TAPE_CELL_WIDTH, TuringMachineDrawer.TAPE_CELL_WIDTH);
@@ -803,7 +803,7 @@ class TapePane extends Pane implements MouseListener{
         animatedRectangle.setStroke(Color.BLACK);
         animatedRectangle.setVisible(false);
 
-        tapeLinesGroup.getChildren().addAll(cellOptionRectangle, tapeOptionRectangle, animatedRectangle);
+        tapeLinesGroup.getChildren().addAll(cellSettingsRectangle, tapeSettingsRectangle, animatedRectangle);
 
         this.getChildren().addAll(tapeLinesGroup);
 
@@ -826,48 +826,48 @@ class TapePane extends Pane implements MouseListener{
         tapeLinesGroup.setTranslateY(tapeLinesGroup.getTranslateY() + dy);
     }
 
-    void openCellOptionRectangle(Integer line, Integer column) {
+    void openCellSettingsRectangle(Integer line, Integer column) {
         if (line == null || column == null)
             return;
-        cellOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
-        cellOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        cellOptionRectangle.setLineAndColumn(line, column);
-        cellOptionRectangle.toFront();
-        cellOptionRectangle.setVisible(true);
-        cellOptionRectangle.maximize();
+        cellSettingsRectangle.setLayoutX(tapeBorderPane.getXOf(column));
+        cellSettingsRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2);
+        cellSettingsRectangle.setLineAndColumn(line, column);
+        cellSettingsRectangle.toFront();
+        cellSettingsRectangle.setVisible(true);
+        cellSettingsRectangle.maximize();
     }
 
-    void closeCellOptionRectangle(){
-        closeCellOptionRectangle(true);
+    void closeCellSettingsRectangle(){
+        closeCellSettingsRectangle(true);
     }
-    void closeCellOptionRectangle(boolean animate){
-        cellOptionRectangle.minimize(animate);
+    void closeCellSettingsRectangle(boolean animate){
+        cellSettingsRectangle.minimize(animate);
     }
 
-    void openTapeOptionRectangle(Integer line, Integer column) {
+    void openTapeSettingsRectangle(Integer line, Integer column) {
         if (line == null || column == null)
             return;
-        tapeOptionRectangle.setLayoutX(tapeBorderPane.getXOf(column));
-        tapeOptionRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-        tapeOptionRectangle.setLineAndColumn(line, column);
-        tapeOptionRectangle.toFront();
-        tapeOptionRectangle.setVisible(true);
-        tapeOptionRectangle.maximize();
+        tapeSettingsRectangle.setLayoutX(tapeBorderPane.getXOf(column));
+        tapeSettingsRectangle.setLayoutY(tapeBorderPane.getYOf(line) - TuringMachineDrawer.TAPE_CELL_WIDTH / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2);
+        tapeSettingsRectangle.setLineAndColumn(line, column);
+        tapeSettingsRectangle.toFront();
+        tapeSettingsRectangle.setVisible(true);
+        tapeSettingsRectangle.maximize();
     }
 
-    void closeTapeOptionRectangle(){
-        closeTapeOptionRectangle(true);
+    void closeTapeSettingsRectangle(){
+        closeTapeSettingsRectangle(true);
     }
-    void closeTapeOptionRectangle(boolean animate){
-        tapeOptionRectangle.minimize(animate);
+    void closeTapeSettingsRectangle(boolean animate){
+        tapeSettingsRectangle.minimize(animate);
     }
 
 
-    void closeAllOptionRectangle() {
-        closeTapeOptionRectangle(false);
-        closeCellOptionRectangle(false);
+    void closeAllSettingsRectangle() {
+        closeTapeSettingsRectangle(false);
+        closeCellSettingsRectangle(false);
     }
 
     void checkLinesAndColumns(double width, double height, boolean forceChange) {
@@ -1036,7 +1036,7 @@ class TapePane extends Pane implements MouseListener{
         headRectangle.setStrokeWidth(TuringMachineDrawer.TAPE_CELL_HEAD_STROKE_WIDTH);
         heads.add(headRectangle);
 
-        cellOptionRectangle.addHead(color);
+        cellSettingsRectangle.addHead(color);
 
         headRectangle.setVisible(true);
         tapeLinesGroup.getChildren().add(headRectangle);
@@ -1050,7 +1050,7 @@ class TapePane extends Pane implements MouseListener{
         Rectangle headRectangle = heads.get(head);
         headRectangle.setStroke(color);
 
-        cellOptionRectangle.editHeadColor(head, color);
+        cellSettingsRectangle.editHeadColor(head, color);
     }
 
     void removeHead(int head) {
@@ -1059,15 +1059,15 @@ class TapePane extends Pane implements MouseListener{
         headsLines.remove(headRectangle);
         headsColumns.remove(headRectangle);
 
-        cellOptionRectangle.removeHead(head);
+        cellSettingsRectangle.removeHead(head);
     }
 
     void addSymbol(String symbol){
-        cellOptionRectangle.addSymbol(symbol);
+        cellSettingsRectangle.addSymbol(symbol);
     }
 
     void editSymbol(int index, String previousSymbol, String symbol){
-        cellOptionRectangle.editSymbol(index, symbol);
+        cellSettingsRectangle.editSymbol(index, symbol);
 
         for(Map<Integer, Label> column : cellLabels.values()){
             for(Label label : column.values()){
@@ -1078,7 +1078,7 @@ class TapePane extends Pane implements MouseListener{
     }
 
     void removeSymbol(int index, String symbol) {
-        cellOptionRectangle.removeSymbol(index);
+        cellSettingsRectangle.removeSymbol(index);
 
         Iterator<Map.Entry<Integer, Map<Integer, Label>>> itColumns = cellLabels.entrySet().iterator();
 
@@ -1122,7 +1122,7 @@ class TapePane extends Pane implements MouseListener{
                 TuringMachineDrawer.EDIT_PRESS_COLOR,
                 Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.EDIT_PRESS_DURATION), kfill)
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_PRESS_DURATION), kfill)
         );
         timeline.play();
     }
@@ -1250,8 +1250,8 @@ class TapePane extends Pane implements MouseListener{
                         tapeBorderPane.tape, entry.getKey(), entry2.getKey(),null);
 
         cellLabels.clear();
-        cellOptionRectangle.clear();
-        tapeOptionRectangle.clear();
+        cellSettingsRectangle.clear();
+        tapeSettingsRectangle.clear();
     }
 
     String getTapeString() {
@@ -1359,10 +1359,10 @@ class TapePane extends Pane implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.cellOptionRectangle.isMaximized())
-            this.closeCellOptionRectangle();
-        else if(this.tapeOptionRectangle.isMaximized())
-            this.closeTapeOptionRectangle();
+        if(this.cellSettingsRectangle.isMaximized())
+            this.closeCellSettingsRectangle();
+        else if(this.tapeSettingsRectangle.isMaximized())
+            this.closeTapeSettingsRectangle();
         else {
             boolean pressFinished = !this.animating;
             this.stopTimeline();
@@ -1370,9 +1370,9 @@ class TapePane extends Pane implements MouseListener{
             Integer column = this.getColumn(mouseEvent.getX());
 
             if(!pressFinished)
-                this.openCellOptionRectangle(line, column);
+                this.openCellSettingsRectangle(line, column);
             else
-                this.openTapeOptionRectangle(line, column);
+                this.openTapeSettingsRectangle(line, column);
         }
 
         return true;
@@ -1392,7 +1392,7 @@ class TapePane extends Pane implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(!this.cellOptionRectangle.isMaximized() && !this.tapeOptionRectangle.isMaximized()) {
+        if(!this.cellSettingsRectangle.isMaximized() && !this.tapeSettingsRectangle.isMaximized()) {
             Integer line = this.getLine(mouseEvent.getY());
             Integer column = this.getColumn(mouseEvent.getX());
             this.startTimeline(line, column);

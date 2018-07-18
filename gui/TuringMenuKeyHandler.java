@@ -4,7 +4,7 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public class TuringMenuKeyHandler implements EventHandler<KeyEvent> {
+class TuringMenuKeyHandler implements EventHandler<KeyEvent> {
 
     TuringMenuKeyHandler(){
         super();

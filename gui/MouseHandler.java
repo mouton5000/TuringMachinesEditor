@@ -8,7 +8,7 @@ import util.MouseListener;
 /**
  * Created by dimitri.watel on 04/06/18.
  */
-public class MouseHandler implements EventHandler<Event> {
+class MouseHandler implements EventHandler<Event> {
 
     @Override
     public void handle(Event event) {

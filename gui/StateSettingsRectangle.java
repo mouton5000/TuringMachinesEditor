@@ -19,54 +19,54 @@ import java.util.Optional;
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-class StateOptionRectangle extends OptionRectangle implements MouseListener {
+class StateSettingsRectangle extends SettingsRectangle implements MouseListener {
 
     StateGroup currentState;
     private GraphPane graphPane;
     private ChangeListener<Number> changeListener;
 
-    StateOptionRectangle(GraphPane pane) {
+    StateSettingsRectangle(GraphPane pane) {
         super();
         this.graphPane = pane;
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         changeListener = (observableValue, oldVal, newVal) ->
-                StateOptionRectangle.this.setLayoutY(
+                StateSettingsRectangle.this.setLayoutY(
                         currentState.getLayoutY()
                 - TuringMachineDrawer.STATE_RADIUS
-                * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
+                * TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_DISTANCE_RATIO);
 
         VBox vbox = new VBox();
         vbox.setSpacing(0);
-        vbox.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        vbox.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        vbox.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
-        vbox.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT);
+        vbox.setMinWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        vbox.setMaxWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        vbox.setMinHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT);
+        vbox.setMaxHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT);
         vbox.setLayoutX(
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2
         );
         vbox.setLayoutY(
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT
         );
 
         HBox hBoxTop = new HBox();
-        hBoxTop.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        hBoxTop.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        hBoxTop.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
-        hBoxTop.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxTop.setMinWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxTop.setMaxWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxTop.setMinHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxTop.setMaxHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         hBoxTop.setAlignment(Pos.TOP_CENTER);
-        hBoxTop.setTranslateY(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING / 2);
-        hBoxTop.setSpacing(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING);
+        hBoxTop.setTranslateY(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_SPACING / 2);
+        hBoxTop.setSpacing(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_SPACING);
 
 
         HBox hBoxDown = new HBox();
-        hBoxDown.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        hBoxDown.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH);
-        hBoxDown.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
-        hBoxDown.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxDown.setMinWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxDown.setMaxWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH);
+        hBoxDown.setMinHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        hBoxDown.setMaxHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         hBoxDown.setAlignment(Pos.CENTER);
-        hBoxDown.setSpacing(TuringMachineDrawer.STATE_OPTION_RECTANGLE_SPACING);
+        hBoxDown.setSpacing(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_SPACING);
 
         FinalStateOption finalStateOption = new FinalStateOption(this);
         AcceptingStateOption acceptingStateOption = new AcceptingStateOption( this);
@@ -109,7 +109,7 @@ class StateOptionRectangle extends OptionRectangle implements MouseListener {
     }
 
     @Override
-    protected Node associatedNode() {
+    Node associatedNode() {
         return graphPane;
     }
 
@@ -122,10 +122,10 @@ class StateOptionRectangle extends OptionRectangle implements MouseListener {
 
 class FinalStateOption extends Group implements MouseListener {
 
-    StateOptionRectangle optionRectangle;
+    StateSettingsRectangle settingsRectangle;
 
-    FinalStateOption(StateOptionRectangle optionRectangle) {
-        this.optionRectangle = optionRectangle;
+    FinalStateOption(StateSettingsRectangle settingsRectangle) {
+        this.settingsRectangle = settingsRectangle;
 
         Circle finalStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         finalStateOptionOuterCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
@@ -146,7 +146,7 @@ class FinalStateOption extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TuringMachineDrawer.getInstance().graphPane.toggleFinal(this.optionRectangle.currentState);
+        TuringMachineDrawer.getInstance().graphPane.toggleFinal(this.settingsRectangle.currentState);
         return true;
     }
 
@@ -162,10 +162,10 @@ class FinalStateOption extends Group implements MouseListener {
 }
 
 class AcceptingStateOption extends Group implements MouseListener {
-    StateOptionRectangle optionRectangle;
+    StateSettingsRectangle settingsRectangle;
 
-    AcceptingStateOption(StateOptionRectangle optionRectangle){
-        this.optionRectangle = optionRectangle;
+    AcceptingStateOption(StateSettingsRectangle settingsRectangle){
+        this.settingsRectangle = settingsRectangle;
         Circle acceptingStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         acceptingStateOptionOuterCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
         acceptingStateOptionOuterCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
@@ -196,7 +196,7 @@ class AcceptingStateOption extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TuringMachineDrawer.getInstance().graphPane.toggleAccepting(this.optionRectangle.currentState);
+        TuringMachineDrawer.getInstance().graphPane.toggleAccepting(this.settingsRectangle.currentState);
         return true;
     }
 
@@ -212,10 +212,10 @@ class AcceptingStateOption extends Group implements MouseListener {
 }
 
 class InitialStateOption extends Group implements MouseListener {
-    StateOptionRectangle optionRectangle;
+    StateSettingsRectangle settingsRectangle;
 
-    InitialStateOption(StateOptionRectangle optionRectangle){
-        this.optionRectangle = optionRectangle;
+    InitialStateOption(StateSettingsRectangle settingsRectangle){
+        this.settingsRectangle = settingsRectangle;
 
         Circle initialStateOptionCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         initialStateOptionCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
@@ -245,7 +245,7 @@ class InitialStateOption extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TuringMachineDrawer.getInstance().graphPane.toggleInitial(this.optionRectangle.currentState);
+        TuringMachineDrawer.getInstance().graphPane.toggleInitial(this.settingsRectangle.currentState);
         return true;
     }
 
@@ -261,10 +261,10 @@ class InitialStateOption extends Group implements MouseListener {
 }
 
 class EditStateNameOptionIcon extends ImageView implements MouseListener {
-    StateOptionRectangle optionRectangle;
-    EditStateNameOptionIcon(StateOptionRectangle optionRectangle){
+    StateSettingsRectangle settingsRectangle;
+    EditStateNameOptionIcon(StateSettingsRectangle settingsRectangle){
         super(Ressources.getRessource("cursor_icon.png"));
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -274,7 +274,7 @@ class EditStateNameOptionIcon extends ImageView implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        StateGroup stateGroup = this.optionRectangle.currentState;
+        StateGroup stateGroup = this.settingsRectangle.currentState;
 
         VirtualKeyboard virtualKeyboard = new VirtualKeyboard(stateGroup.getName());
         virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
@@ -300,10 +300,10 @@ class EditStateNameOptionIcon extends ImageView implements MouseListener {
 }
 
 class RemoveStateOptionIcon extends ImageView implements MouseListener {
-    StateOptionRectangle optionRectangle;
-    RemoveStateOptionIcon(StateOptionRectangle optionRectangle){
+    StateSettingsRectangle settingsRectangle;
+    RemoveStateOptionIcon(StateSettingsRectangle settingsRectangle){
         super(Ressources.getRessource("remove_state.png"));
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -313,7 +313,7 @@ class RemoveStateOptionIcon extends ImageView implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TuringMachineDrawer.getInstance().graphPane.removeState(this.optionRectangle.currentState);
+        TuringMachineDrawer.getInstance().graphPane.removeState(this.settingsRectangle.currentState);
         return true;
     }
 

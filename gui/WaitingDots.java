@@ -6,21 +6,14 @@ import javafx.scene.shape.Circle;
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-public class WaitingDots extends Group {
-    Circle left;
-    Circle middle;
-    Circle right;
-
-    CoordinatesProperties coords;
+class WaitingDots extends Group {
 
     private static final int MARGIN = 3;
 
     WaitingDots(){
-        left = new Circle(1);
-        middle = new Circle(1);
-        right = new Circle(1);
-
-        coords = new CoordinatesProperties();
+        Circle left = new Circle(1);
+        Circle middle = new Circle(1);
+        Circle right = new Circle(1);
 
         this.getChildren().addAll(left, middle, right);
 

@@ -33,8 +33,8 @@ import java.util.Set;
  */
 class GraphPane extends Pane implements MouseListener {
 
-    StateOptionRectangle stateOptionRectangle;
-    TransitionOptionRectangle transitionOptionRectangle;
+    StateSettingsRectangle stateSettingsRectangle;
+    TransitionSettingsRectangle transitionSettingsRectangle;
 
     StringEnumerator stringEnumerator;
 
@@ -56,11 +56,11 @@ class GraphPane extends Pane implements MouseListener {
 
         this.graphGroup = new Group();
 
-        this.stateOptionRectangle = new StateOptionRectangle( this);
-        this.stateOptionRectangle.setVisible(false);
+        this.stateSettingsRectangle = new StateSettingsRectangle( this);
+        this.stateSettingsRectangle.setVisible(false);
 
-        this.transitionOptionRectangle = new TransitionOptionRectangle(this);
-        this.transitionOptionRectangle.setVisible(false);
+        this.transitionSettingsRectangle = new TransitionSettingsRectangle(this);
+        this.transitionSettingsRectangle.setVisible(false);
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
@@ -78,7 +78,7 @@ class GraphPane extends Pane implements MouseListener {
         });
 
         this.getChildren().addAll(this.graphGroup);
-        graphGroup.getChildren().addAll(this.stateOptionRectangle, this.transitionOptionRectangle);
+        graphGroup.getChildren().addAll(this.stateSettingsRectangle, this.transitionSettingsRectangle);
 
 
         Rectangle graphClip = new Rectangle();
@@ -106,10 +106,10 @@ class GraphPane extends Pane implements MouseListener {
         lastCurrentStateGroup = null;
         stringEnumerator = new StringEnumerator();
 
-        closeStateOptionRectangle();
-        closeTransitionOptionRectangle();
-        stateOptionRectangle.clear();
-        transitionOptionRectangle.clear();
+        closeStateSettingsRectangle();
+        closeTransitionSettingsRectangle();
+        stateSettingsRectangle.clear();
+        transitionSettingsRectangle.clear();
     }
 
 
@@ -142,8 +142,8 @@ class GraphPane extends Pane implements MouseListener {
 
     void removeState(Integer state){
         StateGroup stateGroup = stateGroupToState.removeV(state);
-        this.closeStateOptionRectangle();
-        this.closeTransitionOptionRectangle();
+        this.closeStateSettingsRectangle();
+        this.closeTransitionSettingsRectangle();
         graphGroup.getChildren().remove(stateGroup);
 
         Set<Map.Entry<StateGroup, Integer>> entries = new HashSet<>(stateGroupToState.entrySet());
@@ -167,12 +167,12 @@ class GraphPane extends Pane implements MouseListener {
         return stateGroupToState.getV(stateGroup);
     }
 
-    Transition addTransition(StateGroup start, StateGroup end){
+    void addTransition(StateGroup start, StateGroup end){
         if(!TuringMachineDrawer.getInstance().editGraphMode)
-            return null;
+            return;
         Integer input = stateGroupToState.getV(start);
         Integer output = stateGroupToState.getV(end);
-        return TuringMachineDrawer.getInstance().addTransition(input, output);
+        TuringMachineDrawer.getInstance().addTransition(input, output);
     }
 
     void addTransition(Transition transition,
@@ -212,8 +212,8 @@ class GraphPane extends Pane implements MouseListener {
 
     void removeTransition(Transition transition){
         TransitionGroup transitionGroup = transitionGroupToTransition.removeV(transition);
-        this.closeStateOptionRectangle();
-        this.closeTransitionOptionRectangle();
+        this.closeStateSettingsRectangle();
+        this.closeTransitionSettingsRectangle();
         graphGroup.getChildren().remove(transitionGroup);
     }
 
@@ -268,8 +268,8 @@ class GraphPane extends Pane implements MouseListener {
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         arrow.addReadSymbol(tape, head, symbol);
 
-        if(transitionOptionRectangle.currentTransitionGroup == arrow)
-            transitionOptionRectangle.addReadSymbol(tape, head, symbol);
+        if(transitionSettingsRectangle.currentTransitionGroup == arrow)
+            transitionSettingsRectangle.addReadSymbol(tape, head, symbol);
     }
 
     void removeReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
@@ -282,8 +282,8 @@ class GraphPane extends Pane implements MouseListener {
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         arrow.removeReadSymbol(tape, head, symbol);
-        if(transitionOptionRectangle.currentTransitionGroup == arrow)
-            transitionOptionRectangle.removeReadSymbol(tape, head, symbol);
+        if(transitionSettingsRectangle.currentTransitionGroup == arrow)
+            transitionSettingsRectangle.removeReadSymbol(tape, head, symbol);
     }
 
     void addAction(TransitionGroup transitionGroup, Tape tape, int head, String actionSymbol) {
@@ -325,8 +325,8 @@ class GraphPane extends Pane implements MouseListener {
 
         transitionGroup.addAction(tape, head, actionSymbol);
 
-        if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
-            transitionOptionRectangle.addAction(tape, head, actionSymbol);
+        if(transitionSettingsRectangle.currentTransitionGroup == transitionGroup)
+            transitionSettingsRectangle.addAction(tape, head, actionSymbol);
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
@@ -339,55 +339,55 @@ class GraphPane extends Pane implements MouseListener {
         TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
         transitionGroup.removeAction(index);
 
-        if(transitionOptionRectangle.currentTransitionGroup == transitionGroup)
-            transitionOptionRectangle.removeAction(index);
+        if(transitionSettingsRectangle.currentTransitionGroup == transitionGroup)
+            transitionSettingsRectangle.removeAction(index);
         TuringMachineDrawer.getInstance().setEnableToSave();
     }
 
     void addSymbol(String symbol) {
-        this.transitionOptionRectangle.addSymbol(symbol);
+        this.transitionSettingsRectangle.addSymbol(symbol);
     }
 
     void editSymbol(int index, String previousSymbol, String symbol) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.editSymbol(previousSymbol, symbol);
-        this.transitionOptionRectangle.editSymbol(index, previousSymbol, symbol);
+        this.transitionSettingsRectangle.editSymbol(index, previousSymbol, symbol);
     }
 
     void removeSymbol(int index, String symbol) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.removeSymbol(symbol);
-        this.transitionOptionRectangle.removeSymbol(index, symbol);
+        this.transitionSettingsRectangle.removeSymbol(index, symbol);
     }
 
     void addTape(Tape tape) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.addTape(tape);
-        this.transitionOptionRectangle.addTape(tape);
+        this.transitionSettingsRectangle.addTape(tape);
     }
 
     void removeTape(Tape tape) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.removeTape(tape);
-        this.transitionOptionRectangle.removeTape(tape);
+        this.transitionSettingsRectangle.removeTape(tape);
     }
 
     void addHead(Tape tape, Color color) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.addHead(tape, color);
-        this.transitionOptionRectangle.addHead(tape, color);
+        this.transitionSettingsRectangle.addHead(tape, color);
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.editHeadColor(tape, head, color);
-        this.transitionOptionRectangle.editHeadColor(tape, head, color);
+        this.transitionSettingsRectangle.editHeadColor(tape, head, color);
     }
 
     void removeHead(Tape tape, int head) {
         for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
             transitionGroup.removeHead(tape, head);
-        this.transitionOptionRectangle.removeHead(tape, head);
+        this.transitionSettingsRectangle.removeHead(tape, head);
     }
 
     Set<String> getReadSymbols(TransitionGroup transitionGroup, Tape tape, int head) {
@@ -412,44 +412,44 @@ class GraphPane extends Pane implements MouseListener {
     }
 
 
-    void openStateOptionRectangle(StateGroup stateGroup){
-        stateOptionRectangle.setCurrentState(null);
-        stateOptionRectangle.setLayoutX(stateGroup.getLayoutX());
-        stateOptionRectangle.setLayoutY(stateGroup.getLayoutY() - TuringMachineDrawer.STATE_RADIUS
-                * TuringMachineDrawer.STATE_OPTION_RECTANGLE_DISTANCE_RATIO);
-        stateOptionRectangle.setTranslateX(stateGroup.getTranslateX());
-        stateOptionRectangle.setTranslateY(stateGroup.getTranslateY());
-        stateOptionRectangle.setCurrentState(stateGroup);
-        stateOptionRectangle.toFront();
-        stateOptionRectangle.setVisible(true);
-        stateOptionRectangle.maximize();
+    void openStateSettingsRectangle(StateGroup stateGroup){
+        stateSettingsRectangle.setCurrentState(null);
+        stateSettingsRectangle.setLayoutX(stateGroup.getLayoutX());
+        stateSettingsRectangle.setLayoutY(stateGroup.getLayoutY() - TuringMachineDrawer.STATE_RADIUS
+                * TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_DISTANCE_RATIO);
+        stateSettingsRectangle.setTranslateX(stateGroup.getTranslateX());
+        stateSettingsRectangle.setTranslateY(stateGroup.getTranslateY());
+        stateSettingsRectangle.setCurrentState(stateGroup);
+        stateSettingsRectangle.toFront();
+        stateSettingsRectangle.setVisible(true);
+        stateSettingsRectangle.maximize();
     }
 
-    void closeStateOptionRectangle(){
-        closeStateOptionRectangle(true);
+    void closeStateSettingsRectangle(){
+        closeStateSettingsRectangle(true);
     }
-    void closeStateOptionRectangle(boolean animate){
-        stateOptionRectangle.minimize(animate);
-    }
-
-    void openTransitionOptionRectangle(TransitionGroup transitionGroup){
-        transitionOptionRectangle.setCurrentTransitionGroup(null);
-        transitionOptionRectangle.setLayoutX(transitionGroup.getCenterX());
-        transitionOptionRectangle.setLayoutY(transitionGroup.getCenterY());
-        transitionOptionRectangle.setCurrentTransitionGroup(transitionGroup);
-        transitionOptionRectangle.toFront();
-        transitionOptionRectangle.setVisible(true);
-        transitionOptionRectangle.maximize();
+    void closeStateSettingsRectangle(boolean animate){
+        stateSettingsRectangle.minimize(animate);
     }
 
-    void closeTransitionOptionRectangle() { closeTransitionOptionRectangle(true); }
-    void closeTransitionOptionRectangle(boolean animate){
-        transitionOptionRectangle.minimize(animate);
+    void openTransitionSettingsRectangle(TransitionGroup transitionGroup){
+        transitionSettingsRectangle.setCurrentTransitionGroup(null);
+        transitionSettingsRectangle.setLayoutX(transitionGroup.getCenterX());
+        transitionSettingsRectangle.setLayoutY(transitionGroup.getCenterY());
+        transitionSettingsRectangle.setCurrentTransitionGroup(transitionGroup);
+        transitionSettingsRectangle.toFront();
+        transitionSettingsRectangle.setVisible(true);
+        transitionSettingsRectangle.maximize();
     }
 
-    void closeAllOptionRectangle() {
-        closeStateOptionRectangle(false);
-        closeTransitionOptionRectangle(false);
+    void closeTransitionSettingsRectangle() { closeTransitionSettingsRectangle(true); }
+    void closeTransitionSettingsRectangle(boolean animate){
+        transitionSettingsRectangle.minimize(animate);
+    }
+
+    void closeAllSettingsRectangle() {
+        closeStateSettingsRectangle(false);
+        closeTransitionSettingsRectangle(false);
     }
 
     Timeline getChangeCurrentStateTimeline(Integer state) {
@@ -622,12 +622,12 @@ class GraphPane extends Pane implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        if(this.stateOptionRectangle.isMaximized()){
-            this.closeStateOptionRectangle();
+        if(this.stateSettingsRectangle.isMaximized()){
+            this.closeStateSettingsRectangle();
             return true;
         }
-        else if(this.transitionOptionRectangle.isMaximized()){
-            this.closeTransitionOptionRectangle();
+        else if(this.transitionSettingsRectangle.isMaximized()){
+            this.closeTransitionSettingsRectangle();
             return true;
         }
 

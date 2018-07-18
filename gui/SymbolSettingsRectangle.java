@@ -9,12 +9,12 @@ import util.widget.VirtualKeyboard;
 
 import java.util.Optional;
 
-class SymbolOptionRectangle extends OptionRectangle {
+class SymbolSettingsRectangle extends SettingsRectangle {
 
     SymbolsMenu symbolsMenu;
     int currentSymbolIndex;
 
-    SymbolOptionRectangle(SymbolsMenu symbolsMenu) {
+    SymbolSettingsRectangle(SymbolsMenu symbolsMenu) {
         super();
         this.symbolsMenu = symbolsMenu;
 
@@ -22,9 +22,9 @@ class SymbolOptionRectangle extends OptionRectangle {
         RemoveSymbolIcon removeSymbolIcon = new RemoveSymbolIcon(this);
 
         editSymbolIcon.setLayoutX(
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
-                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING
-                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2
+                TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH
+                        + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING
+                        + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE / 2
                         - editSymbolIcon.getBoundsInLocal().getWidth() / 2
         );
 
@@ -34,9 +34,9 @@ class SymbolOptionRectangle extends OptionRectangle {
 
 
         removeSymbolIcon.setLayoutX(
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
-                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE * 3 / 2
-                        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING * 3
+                TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH
+                        + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE * 3 / 2
+                        + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING * 3
                         - removeSymbolIcon.getBoundsInLocal().getWidth() / 2
         );
         removeSymbolIcon.setLayoutY(
@@ -49,28 +49,28 @@ class SymbolOptionRectangle extends OptionRectangle {
     }
 
     @Override
-    protected double getMaximizedHeight() {
+    double getMaximizedHeight() {
         return TuringMachineDrawer.TAPES_MENU_HEIGHT - 2;
     }
     @Override
-    protected double getMaximizedWidth() {
-        return  TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH
-                + TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE * 2
-                + TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING * 3;
+    double getMaximizedWidth() {
+        return  TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE * 2
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING * 3;
     }
 
     @Override
-    protected double getOffsetY() {
+    double getOffsetY() {
         return - TuringMachineDrawer.TAPES_MENU_HEIGHT / 2 + 1;
     }
 
     @Override
-    protected double getOffsetX() {
-        return -TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2;
+    double getOffsetX() {
+        return -TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH / 2;
     }
 
     @Override
-    protected Node associatedNode() {
+    Node associatedNode() {
         return null;
     }
 
@@ -79,17 +79,17 @@ class SymbolOptionRectangle extends OptionRectangle {
     }
 
     @Override
-    public void clear() {
+    void clear() {
         currentSymbolIndex = 0;
     }
 }
 
 class EditSymbolIcon extends ImageView implements MouseListener {
-    SymbolOptionRectangle optionRectangle;
+    SymbolSettingsRectangle settingsRectangle;
 
-    EditSymbolIcon(SymbolOptionRectangle optionRectangle){
+    EditSymbolIcon(SymbolSettingsRectangle settingsRectangle){
         super(Ressources.getRessource("cursor_icon.png"));
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -105,7 +105,7 @@ class EditSymbolIcon extends ImageView implements MouseListener {
 
         Optional<String> result = virtualKeyboard.showAndWait();
         if(result.isPresent())
-            TuringMachineDrawer.getInstance().editSymbol(this.optionRectangle.currentSymbolIndex, result.get());
+            TuringMachineDrawer.getInstance().editSymbol(this.settingsRectangle.currentSymbolIndex, result.get());
 
         return true;
     }
@@ -122,11 +122,11 @@ class EditSymbolIcon extends ImageView implements MouseListener {
 }
 
 class RemoveSymbolIcon extends ImageView implements MouseListener {
-    SymbolOptionRectangle optionRectangle;
+    SymbolSettingsRectangle settingsRectangle;
 
-    RemoveSymbolIcon(SymbolOptionRectangle optionRectangle){
+    RemoveSymbolIcon(SymbolSettingsRectangle settingsRectangle){
         super(Ressources.getRessource("remove_symbol.png"));
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -136,7 +136,7 @@ class RemoveSymbolIcon extends ImageView implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        TuringMachineDrawer.getInstance().removeSymbol(this.optionRectangle.currentSymbolIndex);
+        TuringMachineDrawer.getInstance().removeSymbol(this.settingsRectangle.currentSymbolIndex);
         return true;
     }
 

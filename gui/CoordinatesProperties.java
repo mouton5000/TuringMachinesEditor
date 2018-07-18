@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-public class CoordinatesProperties {
+class CoordinatesProperties {
 
     private DoubleProperty xProperty;
     private DoubleProperty yProperty;

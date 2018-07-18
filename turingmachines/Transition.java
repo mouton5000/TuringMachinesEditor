@@ -16,7 +16,7 @@ import java.util.*;
  *
  * The transition may be fired if and only if
  * <ul>
- *     <li>The current state pointed at by the state register is the input state.</li>
+ *     <li>The current state pointed by the state register is the input state.</li>
  *     <li>The set of read symbols is consistent with what is written on the tapes</li>
  * </ul>
  * In that case, if the transition is fired, all the actions are executed in the order given by the list of actions.

@@ -109,7 +109,7 @@ class TransitionDisplaySymbolsHBox extends HBox {
         this.tapes = new HashMap<>();
         this.setSpacing(TuringMachineDrawer.TRANSITION_DISPLAY_SPACING);
 
-        starLabel = new Label("*");
+        starLabel = new Label(TuringMachineDrawer.ALL_SYMBOLS_SYMBOL);
         starLabel.managedProperty().bind(starLabel.visibleProperty());
 
         starLabel.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,

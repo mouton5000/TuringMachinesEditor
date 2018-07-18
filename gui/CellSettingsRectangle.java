@@ -26,47 +26,47 @@ import java.util.Iterator;
 /**
  * Created by dimitri.watel on 11/06/18.
  */
-class CellOptionRectangle extends OptionRectangle{
+class CellSettingsRectangle extends SettingsRectangle {
 
     final TapePane tapePane;
 
-    private final CellOptionRectangleSymbolsOptionsGroup symbolsGroup;
-    private final CellOptionRectangleHeadOptionsGroup headsGroup;
+    private final CellSettingsRectangleSymbolsOptionsGroup symbolsGroup;
+    private final CellSettingsRectangleHeadOptionsGroup headsGroup;
 
     Tape currentTape;
     int currentLine;
     int currentColumn;
 
-    CellOptionRectangle(TapePane tapePane) {
+    CellSettingsRectangle(TapePane tapePane) {
         super();
         this.tapePane = tapePane;
         this.currentTape = tapePane.tapeBorderPane.tape;
 
-        symbolsGroup = new CellOptionRectangleSymbolsOptionsGroup(this);
-        headsGroup = new CellOptionRectangleHeadOptionsGroup(this);
+        symbolsGroup = new CellSettingsRectangleSymbolsOptionsGroup(this);
+        headsGroup = new CellSettingsRectangleHeadOptionsGroup(this);
 
-        Line separator = new Line(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2,
-                TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2,
-                TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
-                        - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 2);
+        Line separator = new Line(-TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
+                        - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 2);
         this.getChildren().addAll(symbolsGroup, headsGroup, separator);
 
 
-        symbolsGroup.setLayoutX(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+        symbolsGroup.setLayoutX(-TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING);
         symbolsGroup.setLayoutY(
-                - TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT / 4
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT / 4
         );
 
-        headsGroup.setLayoutX(-TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2
-                + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+        headsGroup.setLayoutX(-TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING);
         headsGroup.setLayoutY(
-                - TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE / 2
-                - TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
-                + TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE / 2
+                - TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT * 3 / 4
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
         );
 
     }
@@ -97,36 +97,36 @@ class CellOptionRectangle extends OptionRectangle{
     void removeHead(int head) {headsGroup.removeHead(head);}
 
     @Override
-    protected Node associatedNode() {
+    Node associatedNode() {
         return tapePane;
     }
 
     @Override
-    public void clear() {
+    void clear() {
         this.setLineAndColumn(0, 0);
     }
 }
 
-class CellOptionRectangleSymbolsOptionsGroup extends HBox implements MouseListener {
+class CellSettingsRectangleSymbolsOptionsGroup extends HBox implements MouseListener {
 
     private double offsetX;
     private ImageView symbolsIcon;
-    private CellOptionRectangle optionRectangle;
+    private CellSettingsRectangle settingsRectangle;
     private Double dragX;
 
-    CellOptionRectangleSymbolsOptionsGroup(CellOptionRectangle optionRectangle) {
-        this.optionRectangle = optionRectangle;
+    CellSettingsRectangleSymbolsOptionsGroup(CellSettingsRectangle settingsRectangle) {
+        this.settingsRectangle = settingsRectangle;
 
         this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
         this.setAlignment(Pos.CENTER);
-        this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING);
+        this.setSpacing(TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING);
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         symbolsIcon = new ImageView(Ressources.getRessource("edit-icon.png"));
         this.getChildren().add(symbolsIcon);
         symbolsIcon.setTranslateY(- symbolsIcon.getBoundsInLocal().getHeight() / 2
-        + TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE / 2);
+        + TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE / 2);
 
         this.addSymbol(TuringMachineDrawer.BLANK_SYMBOL);
         Iterator<String> it = TuringMachineDrawer.getInstance().machine.getSymbols();
@@ -140,11 +140,11 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox implements MouseListen
 
         int nbSymbols = this.getChildren().size() - 1;
         if(dx < offsetX - symbolsIcon.getBoundsInLocal().getWidth()
-                - (nbSymbols - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING +
-        TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE))
+                - (nbSymbols - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING +
+        TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE))
             dx = offsetX - symbolsIcon.getBoundsInLocal().getWidth()
-                    - (nbSymbols - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SPACING +
-                    TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+                    - (nbSymbols - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SPACING +
+                    TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE);
 
         if(dx == 0)
             return;
@@ -155,21 +155,21 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox implements MouseListen
     }
 
     void addSymbol(String symbol){
-        CellOptionRectangleChooseSymbolOptionLabel label = new CellOptionRectangleChooseSymbolOptionLabel(optionRectangle, symbol);
+        CellSettingsRectangleChooseSymbolOptionLabel label = new CellSettingsRectangleChooseSymbolOptionLabel(settingsRectangle, symbol);
         label.setFont(Font.font(TuringMachineDrawer.SYMBOL_FONT_NAME,
-                TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_FONT_SIZE));
+                TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_FONT_SIZE));
         label.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
-        label.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
-        label.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_SYMBOL_SIZE);
+        label.setMinWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE);
+        label.setMaxWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE);
+        label.setMinHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE);
+        label.setMaxHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_SYMBOL_SIZE);
 
         this.getChildren().add(label);
     }
 
     void editSymbol(int index, String symbol){
-        ((CellOptionRectangleChooseSymbolOptionLabel) this.getChildren().get(index + 2)).setText(symbol);
+        ((CellSettingsRectangleChooseSymbolOptionLabel) this.getChildren().get(index + 2)).setText(symbol);
     }
 
     void removeSymbol(int index) {
@@ -203,13 +203,13 @@ class CellOptionRectangleSymbolsOptionsGroup extends HBox implements MouseListen
     }
 }
 
-class CellOptionRectangleChooseSymbolOptionLabel extends Label implements MouseListener{
+class CellSettingsRectangleChooseSymbolOptionLabel extends Label implements MouseListener{
 
-    CellOptionRectangle optionRectangle;
+    CellSettingsRectangle settingsRectangle;
 
-    CellOptionRectangleChooseSymbolOptionLabel(CellOptionRectangle optionRectangle, String s) {
+    CellSettingsRectangleChooseSymbolOptionLabel(CellSettingsRectangle settingsRectangle, String s) {
         super(s);
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
     }
 
     @Override
@@ -217,13 +217,13 @@ class CellOptionRectangleChooseSymbolOptionLabel extends Label implements MouseL
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        CellOptionRectangle optionRectangle = this.optionRectangle;
-        int line = optionRectangle.currentLine;
-        int column = optionRectangle.currentColumn;
+        CellSettingsRectangle settingsRectangle = this.settingsRectangle;
+        int line = settingsRectangle.currentLine;
+        int column = settingsRectangle.currentColumn;
 
         String symbol = this.getText();
         symbol = symbol.equals(TuringMachineDrawer.BLANK_SYMBOL)?null:symbol;
-        TuringMachineDrawer.getInstance().setInputSymbol(optionRectangle.tapePane.tapeBorderPane.tape, line, column, symbol);
+        TuringMachineDrawer.getInstance().setInputSymbol(settingsRectangle.tapePane.tapeBorderPane.tape, line, column, symbol);
 
         return true;
     }
@@ -239,22 +239,22 @@ class CellOptionRectangleChooseSymbolOptionLabel extends Label implements MouseL
     }
 }
 
-class CellOptionRectangleHeadOptionsGroup extends HBox implements MouseListener{
+class CellSettingsRectangleHeadOptionsGroup extends HBox implements MouseListener{
 
-    private CellOptionRectangle optionRectangle;
+    private CellSettingsRectangle settingsRectangle;
     private double offsetX;
     private Double dragX;
 
     private AddHeadOptionIcon addHeadIcon;
 
-    CellOptionRectangleHeadOptionsGroup(CellOptionRectangle optionRectangle) {
-        this.optionRectangle = optionRectangle;
+    CellSettingsRectangleHeadOptionsGroup(CellSettingsRectangle settingsRectangle) {
+        this.settingsRectangle = settingsRectangle;
         this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
-        this.setSpacing(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
+        this.setSpacing(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING);
 
-        addHeadIcon = new AddHeadOptionIcon(this.optionRectangle);
+        addHeadIcon = new AddHeadOptionIcon(this.settingsRectangle);
         addHeadIcon.setTranslateY(- addHeadIcon.getBoundsInLocal().getHeight() / 2
-                + TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE / 2);
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE / 2);
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
         this.getChildren().add(addHeadIcon);
@@ -262,20 +262,20 @@ class CellOptionRectangleHeadOptionsGroup extends HBox implements MouseListener{
 
     void addHead(Color color) {
 
-        CellOptionRectangleChooseHead headRectangle = new CellOptionRectangleChooseHead(
-                optionRectangle,
+        CellSettingsRectangleChooseHead headRectangle = new CellSettingsRectangleChooseHead(
+                settingsRectangle,
                 0, 0,
-                TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE,
-                TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+                TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE,
+                TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
         headRectangle.setFill(Color.WHITE);
         headRectangle.setStroke(color);
-        headRectangle.setStrokeWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_STROKE_WIDTH);
+        headRectangle.setStrokeWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_STROKE_WIDTH);
         headRectangle.setTranslateX(-offsetX);
         this.getChildren().add(headRectangle);
     }
 
     void editHeadColor(int head, Color color) {
-        ((CellOptionRectangleChooseHead) this.getChildren().get(head + 1)).setStroke(color);
+        ((CellSettingsRectangleChooseHead) this.getChildren().get(head + 1)).setStroke(color);
     }
 
     void removeHead(int head) {
@@ -287,8 +287,8 @@ class CellOptionRectangleHeadOptionsGroup extends HBox implements MouseListener{
             dx = offsetX;
 
         int nbHeads = this.getChildren().size() - 1;
-        if(dx < offsetX - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING))
-            dx = offsetX - (nbHeads - 1) * (TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SPACING);
+        if(dx < offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING))
+            dx = offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING);
 
         if(dx == 0)
             return;
@@ -325,13 +325,13 @@ class CellOptionRectangleHeadOptionsGroup extends HBox implements MouseListener{
     }
 }
 
-class CellOptionRectangleChooseHead extends Rectangle implements MouseListener{
-    CellOptionRectangle optionRectangle;
+class CellSettingsRectangleChooseHead extends Rectangle implements MouseListener{
+    CellSettingsRectangle settingsRectangle;
 
-    CellOptionRectangleChooseHead(CellOptionRectangle optionRectangle,
+    CellSettingsRectangleChooseHead(CellSettingsRectangle settingsRectangle,
                                   double v, double v1, double v2, double v3) {
         super(v, v1, v2, v3);
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
@@ -341,11 +341,11 @@ class CellOptionRectangleChooseHead extends Rectangle implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        CellOptionRectangle optionRectangle = this.optionRectangle;
+        CellSettingsRectangle settingsRectangle = this.settingsRectangle;
         Color color = (Color) this.getStroke();
 
-        int line = optionRectangle.currentLine;
-        int column = optionRectangle.currentColumn;
+        int line = settingsRectangle.currentLine;
+        int column = settingsRectangle.currentColumn;
         Pair<Tape, Integer> pair = TuringMachineDrawer.getInstance().getHead(color);
         TuringMachineDrawer.getInstance().moveHead(pair.first, line, column, pair.second);
 
@@ -364,28 +364,28 @@ class CellOptionRectangleChooseHead extends Rectangle implements MouseListener{
 }
 
 class AddHeadOptionIcon extends Group {
-    CellOptionRectangle optionRectangle;
+    CellSettingsRectangle settingsRectangle;
 
-    AddHeadOptionIcon(CellOptionRectangle optionRectangle) {
+    AddHeadOptionIcon(CellSettingsRectangle settingsRectangle) {
         super();
 
-        this.optionRectangle = optionRectangle;
+        this.settingsRectangle = settingsRectangle;
         ImageView addHeadIcon = new ImageView(Ressources.getRessource("add_head.png"));
 
         ColorPicker changeColorPicker = new ColorPicker();
 
-        changeColorPicker.setMinWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
-        changeColorPicker.setMaxWidth(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
-        changeColorPicker.setMinHeight(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
-        changeColorPicker.setMaxHeight(TuringMachineDrawer.OPTION_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMinWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMaxWidth(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMinHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
+        changeColorPicker.setMaxHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
 
         changeColorPicker.setOpacity(0);
 
         changeColorPicker.setOnAction(actionEvent ->{
             Color color = changeColorPicker.getValue();
-            Tape tape = optionRectangle.currentTape;
-            Integer line = optionRectangle.currentLine;
-            Integer column = optionRectangle.currentColumn;
+            Tape tape = settingsRectangle.currentTape;
+            Integer line = settingsRectangle.currentLine;
+            Integer column = settingsRectangle.currentColumn;
             TuringMachineDrawer.getInstance().addHead(tape, line, column, color);
         });
 

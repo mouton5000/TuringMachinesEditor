@@ -14,18 +14,18 @@ import util.MouseListener;
 /**
  * Created by dimitri.watel on 06/06/18.
  */
-abstract class OptionRectangle extends Group implements MouseListener {
+abstract class SettingsRectangle extends Group implements MouseListener {
 
-    private MinimizedOptionRectangle minimizedRectangle;
+    private MinimizedSettingsRectangle minimizedRectangle;
     private Rectangle maximizedRectangle;
 
     Timeline timeline;
 
     private boolean maximized;
 
-    OptionRectangle(){
+    SettingsRectangle(){
 
-        minimizedRectangle = new MinimizedOptionRectangle(this);
+        minimizedRectangle = new MinimizedSettingsRectangle(this);
         minimizedRectangle.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         Rectangle clipRectangle = new Rectangle();
@@ -38,10 +38,10 @@ abstract class OptionRectangle extends Group implements MouseListener {
         maximizedRectangle.widthProperty().bindBidirectional(clipRectangle.widthProperty());
         maximizedRectangle.heightProperty().bindBidirectional(clipRectangle.heightProperty());
 
-        maximizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
-        maximizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-        maximizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
-        maximizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
+        maximizedRectangle.setWidth(TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH);
+        maximizedRectangle.setHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT);
+        maximizedRectangle.setFill(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_INNER_COLOR);
+        maximizedRectangle.setStroke(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_OUTER_COLOR);
 
         timeline = new Timeline();
 
@@ -50,7 +50,7 @@ abstract class OptionRectangle extends Group implements MouseListener {
         this.getChildren().addAll(maximizedRectangle, minimizedRectangle);
 
         maximizedRectangle.setX(- maximizedRectangle.getWidth() / 2);
-        maximizedRectangle.setY(- maximizedRectangle.getHeight() + TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
+        maximizedRectangle.setY(- maximizedRectangle.getHeight() + TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2);
     }
 
     boolean isMaximized(){
@@ -75,18 +75,18 @@ abstract class OptionRectangle extends Group implements MouseListener {
                 getMaximizedHeight());
     }
 
-    protected double getMaximizedWidth(){
-        return TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH;
+    double getMaximizedWidth(){
+        return TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH;
     }
 
-    protected double getMaximizedHeight(){
-        return TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_HEIGHT;
+    double getMaximizedHeight(){
+        return TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
-    protected double getOffsetX(){return -TuringMachineDrawer.OPTION_RECTANGLE_MAXIMIZED_WIDTH / 2;}
+    double getOffsetX(){return -TuringMachineDrawer.SETTINGS_RECTANGLE_MAXIMIZED_WIDTH / 2;}
 
-    protected double getOffsetY(){
-        return TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2
+    double getOffsetY(){
+        return TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - getMaximizedHeight();
     }
 
@@ -101,16 +101,16 @@ abstract class OptionRectangle extends Group implements MouseListener {
                 TuringMachineDrawer.getInstance().animating = false;
                 this.setVisible(false);
             });
-            animateSize(minimizedRectangle.getLayoutX() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2,
-                    minimizedRectangle.getLayoutY() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2,
-                    TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH,
-                    TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+            animateSize(minimizedRectangle.getLayoutX() - TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH / 2,
+                    minimizedRectangle.getLayoutY() - TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2,
+                    TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH,
+                    TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT);
         }
         else {
-            maximizedRectangle.setX(minimizedRectangle.getLayoutX() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH / 2);
-            maximizedRectangle.setY(minimizedRectangle.getLayoutY() - TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT / 2);
-            maximizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
-            maximizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
+            maximizedRectangle.setX(minimizedRectangle.getLayoutX() - TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH / 2);
+            maximizedRectangle.setY(minimizedRectangle.getLayoutY() - TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2);
+            maximizedRectangle.setWidth(TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH);
+            maximizedRectangle.setHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT);
             this.setVisible(false);
         }
     }
@@ -125,14 +125,14 @@ abstract class OptionRectangle extends Group implements MouseListener {
         KeyValue kw = new KeyValue(maximizedRectangle.widthProperty(), width, Interpolator.EASE_BOTH);
         KeyValue kh = new KeyValue(maximizedRectangle.heightProperty(), height, Interpolator.EASE_BOTH);
         timeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(TuringMachineDrawer.OPTION_RECTANGLE_TIMELINE_DURATION), kx, ky, kh, kw)
+                new KeyFrame(Duration.millis(TuringMachineDrawer.SETTINGS_RECTANGLE_TIMELINE_DURATION), kx, ky, kh, kw)
         );
         timeline.play();
     }
 
-    protected abstract Node associatedNode();
+    abstract Node associatedNode();
 
-    public abstract void clear();
+    abstract void clear();
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
@@ -150,19 +150,19 @@ abstract class OptionRectangle extends Group implements MouseListener {
     }
 }
 
-class MinimizedOptionRectangle extends Group implements MouseListener{
-    OptionRectangle optionRectangle;
+class MinimizedSettingsRectangle extends Group implements MouseListener{
+    SettingsRectangle settingsRectangle;
     private Rectangle minimizedRectangle;
     private WaitingDots waitingDots;
 
-    MinimizedOptionRectangle(OptionRectangle optionRectangle) {
-        this.optionRectangle = optionRectangle;
+    MinimizedSettingsRectangle(SettingsRectangle settingsRectangle) {
+        this.settingsRectangle = settingsRectangle;
 
         minimizedRectangle = new Rectangle();
-        minimizedRectangle.setWidth(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_WIDTH);
-        minimizedRectangle.setHeight(TuringMachineDrawer.OPTION_RECTANGLE_MINIMIZED_HEIGHT);
-        minimizedRectangle.setFill(TuringMachineDrawer.STATE_OPTION_RECTANGLE_INNER_COLOR);
-        minimizedRectangle.setStroke(TuringMachineDrawer.STATE_OPTION_RECTANGLE_OUTER_COLOR);
+        minimizedRectangle.setWidth(TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH);
+        minimizedRectangle.setHeight(TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT);
+        minimizedRectangle.setFill(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_INNER_COLOR);
+        minimizedRectangle.setStroke(TuringMachineDrawer.STATE_SETTINGS_RECTANGLE_OUTER_COLOR);
 
         waitingDots = new WaitingDots();
 
@@ -176,7 +176,7 @@ class MinimizedOptionRectangle extends Group implements MouseListener{
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        this.optionRectangle.minimize(true);
+        this.settingsRectangle.minimize(true);
         return true;
     }
 

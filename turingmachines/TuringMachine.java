@@ -562,7 +562,7 @@ public class TuringMachine {
 
 
     /**
-     * @return the state currently pointed at by the state registered during the execution or null if the machine is
+     * @return the state currently pointed by the state registered during the execution or null if the machine is
      * not executing.
      */
     public Integer getCurrentState() {
@@ -570,7 +570,7 @@ public class TuringMachine {
     }
 
     /**
-     * Set the state currently pointed at by the state registered during the execution
+     * Set the state currently pointed by the state registered during the execution
      *
      * A {@link #SUBSCRIBER_MSG_CURRENT_STATE_CHANGED} message is broadcast to the class {@link util.Subscriber} if
      * log is true.
@@ -603,7 +603,7 @@ public class TuringMachine {
      * @return the i-th tape if i is between 0 and the number of tapes and null otherwise.
      */
     public Tape getTape(int i){
-        if(i < 0 || i >= symbols.size())
+        if(i < 0 || i >= tapes.size())
             return null;
         return tapes.get(i);
     }
@@ -830,14 +830,14 @@ public class TuringMachine {
     }
 
     /**
-     * @return true if and only if the state currently pointed at by the state registered during the execution is final.
+     * @return true if and only if the state currently pointed by the state registered during the execution is final.
      */
     public boolean isTerminated(){
         return isFinal(currentState);
     }
 
     /**
-     * @return true if and only if the state currently pointed at by the state registered during the execution is
+     * @return true if and only if the state currently pointed by the state registered during the execution is
      * accepting.
      */
     public boolean isAccepting(){
@@ -857,7 +857,7 @@ public class TuringMachine {
     }
 
     /**
-     * @return the list of transitions that can be fired by the machine from the current state pointed at by the
+     * @return the list of transitions that can be fired by the machine from the current state pointed by the
      * state register.
      */
     private List<Transition> currentValidArcs(){

@@ -92,7 +92,7 @@ class TapesVBox extends VBox {
         tapesPane.addHead(tape, line, column, color);
     }
 
-    public void moveHead(Tape tape, int line, int column, int head) {
+    void moveHead(Tape tape, int line, int column, int head) {
         tapesPane.moveHead(tape, line, column, head);
     }
 
@@ -135,10 +135,10 @@ class TapesVBox extends VBox {
         this.tapesPane.centerOn(tape);
     }
 
-    void closeAllOptionRectangle() {
-        tapesHeadMenu.closeAllOptionRectangle();
-        symbolsMenu.closeAllOptionRectangle();
-        tapesPane.closeAllOptionRectangle();
+    void closeAllSettingsRectangle() {
+        tapesHeadMenu.closeAllSettingsRectangle();
+        symbolsMenu.closeAllSettingsRectangle();
+        tapesPane.closeAllSettingsRectangle();
     }
 
     Timeline getHeadWriteTimeline(Tape tape, Integer head) {
