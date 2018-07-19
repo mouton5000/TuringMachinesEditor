@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.geometry.Insets;
@@ -95,11 +99,6 @@ class CellSettingsRectangle extends SettingsRectangle {
     }
 
     void removeHead(int head) {headsGroup.removeHead(head);}
-
-    @Override
-    Node associatedNode() {
-        return tapePane;
-    }
 
     @Override
     void clear() {

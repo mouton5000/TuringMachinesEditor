@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package turingmachines;
 
 import util.Subscriber;
@@ -34,12 +38,12 @@ public class Transition {
     /**
      * The input state of the transition
      */
-    private Integer input;
+    private int input;
 
     /**
      * The output state of the transition
      */
-    private Integer output;
+    private int output;
 
     /**
      * Set of read symbols of the transition. For each tape and each head (represented by its index in the list of
@@ -98,14 +102,14 @@ public class Transition {
     /**
      * @return the input state of the transition
      */
-    public Integer getInput() {
+    public int getInput() {
         return input;
     }
 
     /**
      * @return the output state of the transition
      */
-    public Integer getOutput() {
+    public int getOutput() {
         return output;
     }
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.scene.Node;
@@ -271,11 +275,6 @@ class TapeSettingsRectangle extends SettingsRectangle {
         inf_line_top_icon_gray.setVisible(infinite);
         add_line_top_icon.setVisible(border);
         remove_lines_top_icon.setVisible(!border);
-    }
-
-    @Override
-    Node associatedNode() {
-        return tapeBorderPane.tapePane;
     }
 
     @Override

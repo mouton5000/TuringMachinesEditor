@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package turingmachines;
 
 import util.Pair;
@@ -527,14 +531,10 @@ public class TuringMachine {
         // For each transtion, we check if the trnasition is an input transition of the state
         // We also check if the input/output state of the transition has a greater index than the removed state in which
         // case this index is decreased by one.
-        for(int state2 = 0; state2 < getNbStates(); state2++){
-            for(Transition transition : outputTransitions.get(state2)) {
-                if(state == transition.getOutput())
+        for(int state2 = 0; state2 < getNbStates(); state2++) {
+            for (Transition transition : outputTransitions.get(state2)) {
+                if (state == transition.getOutput())
                     transitions.add(transition);
-                if(state < transition.getInput())
-                    transition.setInput(transition.getInput() - 1);
-                if(state < transition.getOutput())
-                    transition.setOutput(transition.getOutput() - 1);
             }
         }
 
@@ -542,6 +542,14 @@ public class TuringMachine {
         for(Transition transition : transitions)
             this.removeTransition(transition);
 
+        for(int state2 = 0; state2 < getNbStates(); state2++) {
+            for (Transition transition : outputTransitions.get(state2)) {
+                if(state < transition.getInput())
+                    transition.setInput(transition.getInput() - 1);
+                if(state < transition.getOutput())
+                    transition.setOutput(transition.getOutput() - 1);
+            }
+        }
 
         outputTransitions.remove(state);
         nbStates--;
@@ -1266,7 +1274,7 @@ public class TuringMachine {
      * @see util.Subscriber
      */
     public void manualFireTransition(Transition transition){
-        if(!transition.getInput().equals(this.currentState)){
+        if(this.currentState != null && transition.getInput() != this.currentState){
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Cannot fire transition, invalid current state.");
             return;
         }

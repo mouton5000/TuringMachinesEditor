@@ -1,9 +1,12 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -17,17 +20,28 @@ import util.widget.VirtualKeyboard;
 import java.util.Optional;
 
 /**
- * Created by dimitri.watel on 06/06/18.
+ * Widget containing the settings of a stateGroup of the machine.
+ * It allows the user to
+ * <ul>
+ *     <li>set the stateGroup final, accepting and/or initial,</li>
+ *     <li>change the name of the stateGroup,</li>
+ *     <li>delete the node.</li>
+ * </ul>
  */
 class StateSettingsRectangle extends SettingsRectangle implements MouseListener {
 
+    /**
+     * State the settings rectangle is currently associated with.
+     */
     StateGroup currentState;
-    private GraphPane graphPane;
+
+    /**
+     * Listener to the layoutY of the stateGroup this settings rectangle is currently associated with
+     */
     private ChangeListener<Number> changeListener;
 
-    StateSettingsRectangle(GraphPane pane) {
+    StateSettingsRectangle() {
         super();
-        this.graphPane = pane;
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         changeListener = (observableValue, oldVal, newVal) ->
@@ -85,9 +99,15 @@ class StateSettingsRectangle extends SettingsRectangle implements MouseListener 
 
     }
 
-    void setCurrentState(StateGroup state) {
+    /**
+     * Change the stateGroup this rectangle currently associated with.
+     * If stateGroup is null, this rectangle is not associated with anymore node.
+     * @param stateGroup
+     */
+    void setCurrentState(StateGroup stateGroup) {
 
-        if (state == null){
+        if (stateGroup == null){
+            // Remove all the position listeners.
             if(this.currentState != null)
                 this.currentState.layoutYProperty().removeListener(changeListener);
             this.layoutXProperty().unbind();
@@ -96,21 +116,18 @@ class StateSettingsRectangle extends SettingsRectangle implements MouseListener 
         }
 
 
-        this.currentState = state;
+        this.currentState = stateGroup;
 
-        if(state == null)
+        if(stateGroup == null)
             return;
 
-        this.layoutXProperty().bind(state.layoutXProperty());
-        state.layoutYProperty().addListener(changeListener);
-        this.translateXProperty().bind(state.translateXProperty());
-        this.translateYProperty().bind(state.translateYProperty());
+        // Set the position listeners. the layoutY is different as the rectangle is not exactly on the stateGroup it is
+        // associated with.
+        this.layoutXProperty().bind(stateGroup.layoutXProperty());
+        stateGroup.layoutYProperty().addListener(changeListener);
+        this.translateXProperty().bind(stateGroup.translateXProperty());
+        this.translateYProperty().bind(stateGroup.translateYProperty());
 
-    }
-
-    @Override
-    Node associatedNode() {
-        return graphPane;
     }
 
     @Override
@@ -120,9 +137,12 @@ class StateSettingsRectangle extends SettingsRectangle implements MouseListener 
 
 }
 
+/**
+ * Icon the user can click on to make the stateGroup (associated with the settings rectangle) final
+ */
 class FinalStateOption extends Group implements MouseListener {
 
-    StateSettingsRectangle settingsRectangle;
+    private StateSettingsRectangle settingsRectangle;
 
     FinalStateOption(StateSettingsRectangle settingsRectangle) {
         this.settingsRectangle = settingsRectangle;
@@ -161,8 +181,11 @@ class FinalStateOption extends Group implements MouseListener {
     }
 }
 
+/**
+ * Icon the user can click on to make the stateGroup (associated with the settings rectangle) accepting
+ */
 class AcceptingStateOption extends Group implements MouseListener {
-    StateSettingsRectangle settingsRectangle;
+    private StateSettingsRectangle settingsRectangle;
 
     AcceptingStateOption(StateSettingsRectangle settingsRectangle){
         this.settingsRectangle = settingsRectangle;
@@ -211,8 +234,11 @@ class AcceptingStateOption extends Group implements MouseListener {
     }
 }
 
+/**
+ * Icon the user can click on to make the stateGroup (associated with the settings rectangle) initial.
+ */
 class InitialStateOption extends Group implements MouseListener {
-    StateSettingsRectangle settingsRectangle;
+    private StateSettingsRectangle settingsRectangle;
 
     InitialStateOption(StateSettingsRectangle settingsRectangle){
         this.settingsRectangle = settingsRectangle;
@@ -260,6 +286,9 @@ class InitialStateOption extends Group implements MouseListener {
     }
 }
 
+/**
+ * Icon the user can click on to change the name of the stateGroup (associated with the settings rectangle)
+ */
 class EditStateNameOptionIcon extends ImageView implements MouseListener {
     StateSettingsRectangle settingsRectangle;
     EditStateNameOptionIcon(StateSettingsRectangle settingsRectangle){
@@ -276,15 +305,13 @@ class EditStateNameOptionIcon extends ImageView implements MouseListener {
 
         StateGroup stateGroup = this.settingsRectangle.currentState;
 
-        VirtualKeyboard virtualKeyboard = new VirtualKeyboard(stateGroup.getName());
+        VirtualKeyboard virtualKeyboard = new VirtualKeyboard(TuringMachineDrawer.getInstance().machine
+                .getStateName(stateGroup.state));
         virtualKeyboard.setX(mouseEvent.getScreenX() - virtualKeyboard.getWidth() / 2);
         virtualKeyboard.setY(mouseEvent.getScreenY());
 
         Optional<String> result = virtualKeyboard.showAndWait();
-        if(result.isPresent()) {
-            Integer state = TuringMachineDrawer.getInstance().graphPane.getState(stateGroup);
-            TuringMachineDrawer.getInstance().editStateName(state, result.get());
-        }
+        result.ifPresent(s -> TuringMachineDrawer.getInstance().editStateName(stateGroup.state, s));
         return true;
     }
 
@@ -299,6 +326,9 @@ class EditStateNameOptionIcon extends ImageView implements MouseListener {
     }
 }
 
+/**
+ * Icon the user can click on to remove the stateGroup (associated with the settings rectangle)
+ */
 class RemoveStateOptionIcon extends ImageView implements MouseListener {
     StateSettingsRectangle settingsRectangle;
     RemoveStateOptionIcon(StateSettingsRectangle settingsRectangle){

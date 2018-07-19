@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.beans.value.ObservableValue;
@@ -22,33 +26,98 @@ import util.Ressources;
 import java.util.*;
 
 /**
- * Created by dimitri.watel on 06/06/18.
+ * Widget containing the settings of a state of the machine.
+ * It allows the user to
+ * <ul>
+ *     <li>change the read symbols and the actions of the transition</li>
+ *     <li>delete the transition.</li>
+ * </ul>
+ * In order to choose a read symbol or an action, the user must firstly choose a head. The rectangle is then
+ * separated in four parts, from top to bottom:
+ * <ul>
+ *     <li>A menu to select either the read symbols submenu or the actions submenu. This line contains also the
+ *     delete icon.</li>
+ *     <li>A line where the user can select a head.</li>
+ *     <li>A line where the user can either select a read symbol or an action related to the head that is currently
+ *     selected.
+ *     </li>
+ *     <li>A line where all the read symbols or all the actions of the transitions are displayed.
+ *     </li>
+ * </ul>
  */
 class TransitionSettingsRectangle extends SettingsRectangle {
 
+    /**
+     * Icon the user can click on to enter the submenu of the settings to change the read symbols of the transition
+     */
     private final ReadIcon readIcon;
+
+    /**
+     * Icon the user can click on to enter the submenu of the settings to change the actions of the transition
+     */
     private final ActionsIcon actionsIcon;
-    private final ActionDisplay actionsDisplay;
+
+    /**
+     * True if the submenu used to set the read symbols of the transition is selected. If false, the actions are
+     * displayed.
+     */
     private boolean readMenuSelected;
 
+    /**
+     * Transition currently associated with this settings rectangle.
+     */
     TransitionGroup currentTransitionGroup;
-    GraphPane graphPane;
 
+    /**
+     * Widget containing icons the user can click on to select a head on a tape and, then, adding read symbols and
+     * actions related to that head.
+     */
     private HeadOptionsGroup headOptionsGroup;
+
+    /**
+     * Icon the user can click on to remove the transition
+     */
     private RemoveTransitionIcon removeTransitionIcon;
-    private ReadSymbolMenu readSymbolMenu;
+
+    /**
+     * Widget containing icons the user can click on to set the read symbols of the transition.
+     */
+    private ReadSymbolsMenu readSymbolsMenu;
+
+    /**
+     * Widget of the settings used to display the list of read symbols of the transition.
+     */
+    private ReadSymbolsDisplay readSymbolsDisplay;
+
+    /**
+     * Widget containing icons the user can click on to set the actions of the transition.
+     */
     private ActionsMenu actionsMenu;
-    private TransitionSettingsRectangleSymbolsDisplay transitionSettingsRectangleSymbolsDisplay;
+
+    /**
+     * Widget of the settings used to display the list of actions of the transition.
+     */
+    private final ActionDisplay actionsDisplay;
 
     private VBox vbox;
 
+    /**
+     * Color of the head currently chosen by the user.
+     */
     private Color currentColor;
+
+    /**
+     * Tape of the head currently chosen by the user
+     */
     Tape currentTape;
+
+    /**
+     * Head currently chosen by the user.
+     */
     int currentHead;
 
-    TransitionSettingsRectangle(GraphPane graphPane) {
+    TransitionSettingsRectangle() {
         super();
-        this.graphPane = graphPane;
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         vbox = new VBox();
@@ -70,15 +139,15 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         iconsHBox.getChildren().addAll(readIcon, actionsIcon, removeTransitionIcon);
 
         headOptionsGroup = new HeadOptionsGroup(this);
-        readSymbolMenu = new ReadSymbolMenu(this);
-        transitionSettingsRectangleSymbolsDisplay = new TransitionSettingsRectangleSymbolsDisplay( this);
+        readSymbolsMenu = new ReadSymbolsMenu(this);
+        readSymbolsDisplay = new ReadSymbolsDisplay( this);
         actionsMenu = new ActionsMenu(this);
         actionsDisplay = new ActionDisplay( this);
 
         vbox.getChildren().addAll(
                 iconsHBox, new Separator(),
                 headOptionsGroup, new Separator(),
-                readSymbolMenu, new Separator(), transitionSettingsRectangleSymbolsDisplay);
+                readSymbolsMenu, new Separator(), readSymbolsDisplay);
 
         vbox.setLayoutX(- getMaximizedWidth() / 2);
         vbox.setLayoutY(TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
@@ -97,6 +166,12 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         return TuringMachineDrawer.TRANSITION_SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
+
+    /**
+     * Change the transition this rectangle currently associated with.
+     * If transition is null, this rectangle is not associated with anymore transition.
+     * @param transitionGroup
+     */
     void setCurrentTransitionGroup(TransitionGroup transitionGroup) {
 
         this.layoutXProperty().unbind();
@@ -109,18 +184,17 @@ class TransitionSettingsRectangle extends SettingsRectangle {
 
         chooseHead(currentTape, currentHead);
 
+        // The rectangle is always on the middle point of the transition.
         this.layoutXProperty().bind(transitionGroup.centerXProperty());
         this.layoutYProperty().bind(transitionGroup.centerYProperty());
 
-        transitionSettingsRectangleSymbolsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
+        readSymbolsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
         actionsDisplay.setCurrentTransitionArrowGroup(transitionGroup);
     }
 
-    @Override
-    Node associatedNode() {
-        return graphPane;
-    }
-
+    /**
+     * Display the submenu related to the read symbols.
+     */
     void selectReadMenu(){
         if(readMenuSelected)
             return;
@@ -130,11 +204,15 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         actionsIcon.setSelected(false);
 
         vbox.getChildren().remove(4);
-        vbox.getChildren().add(4, readSymbolMenu);
+        vbox.getChildren().add(4, readSymbolsMenu);
         vbox.getChildren().remove(6);
-        vbox.getChildren().add(6, transitionSettingsRectangleSymbolsDisplay);
+        vbox.getChildren().add(6, readSymbolsDisplay);
     }
 
+
+    /**
+     * Display the submenu related to the actions.
+     */
     void selectActionsMenu(){
         if(!readMenuSelected)
             return;
@@ -150,17 +228,17 @@ class TransitionSettingsRectangle extends SettingsRectangle {
 
     void addTape(Tape tape){
         headOptionsGroup.addTape(tape);
-        transitionSettingsRectangleSymbolsDisplay.addTape(tape);
+        readSymbolsDisplay.addTape(tape);
     }
 
     void removeTape(Tape tape){
         headOptionsGroup.removeTape(tape);
-        transitionSettingsRectangleSymbolsDisplay.removeTape(tape);
+        readSymbolsDisplay.removeTape(tape);
     }
 
     void addHead(Tape tape, Color color) {
         headOptionsGroup.addHead(tape, color);
-        transitionSettingsRectangleSymbolsDisplay.addHead(tape, color);
+        readSymbolsDisplay.addHead(tape, color);
         if(currentColor == null){
             chooseHead(tape, tape.getNbHeads() - 1);
         }
@@ -168,7 +246,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
 
     void removeHead(Tape tape, int head){
         Color color = headOptionsGroup.removeHead(tape, head);
-        transitionSettingsRectangleSymbolsDisplay.removeHead(tape, head);
+        readSymbolsDisplay.removeHead(tape, head);
         if(currentColor == color){
             Pair<Tape, Integer> pair = headOptionsGroup.getArbitraryHead();
             if(pair != null)
@@ -182,7 +260,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         headOptionsGroup.editHeadColor(tape, head, color);
         if(tape == currentTape && head == currentHead)
             chooseHead(tape, head);
-        transitionSettingsRectangleSymbolsDisplay.editHeadColor(tape, head, color);
+        readSymbolsDisplay.editHeadColor(tape, head, color);
         actionsDisplay.editHeadColor(tape, head, color);
     }
 
@@ -192,7 +270,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         currentHead = head;
 
         if(tape == null){
-            readSymbolMenu.setVisible(false);
+            readSymbolsMenu.setVisible(false);
             actionsMenu.setVisible(false);
             currentColor = null;
             return;
@@ -202,39 +280,39 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         Color color = headOptionsGroup.getColor(tape, head);
 
         if(currentColor == null){
-            readSymbolMenu.setVisible(true);
+            readSymbolsMenu.setVisible(true);
             actionsMenu.setVisible(true);
         }
         currentColor = color;
-        readSymbolMenu.changeColor(tape, head, color);
+        readSymbolsMenu.changeColor(tape, head, color);
         actionsMenu.changeColor(color);
     }
 
     void addSymbol(String symbol) {
-        readSymbolMenu.addSymbol(symbol);
+        readSymbolsMenu.addSymbol(symbol);
         actionsMenu.addSymbol(symbol);
     }
 
     void editSymbol(int index, String previousSymbol, String symbol){
-        readSymbolMenu.editSymbol(index, symbol);
+        readSymbolsMenu.editSymbol(index, symbol);
         actionsMenu.editSymbol(index, symbol);
         actionsDisplay.editSymbol(previousSymbol, symbol);
     }
 
     void removeSymbol(int index, String symbol) {
-        readSymbolMenu.removeSymbol(index);
+        readSymbolsMenu.removeSymbol(index);
         actionsMenu.removeSymbol(index);
         actionsDisplay.removeSymbol(symbol);
     }
 
     void addReadSymbol(Tape tape, int head, String symbol) {
         if(currentTape == tape && currentHead == head)
-            readSymbolMenu.addReadSymbol(symbol);
+            readSymbolsMenu.addReadSymbol(symbol);
     }
 
     void removeReadSymbol(Tape tape, int head, String symbol) {
         if(currentTape == tape && currentHead == head)
-            readSymbolMenu.removeReadSymbol(symbol);
+            readSymbolsMenu.removeReadSymbol(symbol);
     }
 
     void addAction(Tape tape, int head, String actionSymbol) {
@@ -567,13 +645,13 @@ class TransitionSettingsRectangleChooseHead extends Rectangle implements MouseLi
     }
 }
 
-class ReadSymbolMenu extends HBox implements MouseListener {
+class ReadSymbolsMenu extends HBox implements MouseListener {
     TransitionSettingsRectangle settingsRectangle;
     private double offsetX;
 
     private Double dragX;
 
-    ReadSymbolMenu(TransitionSettingsRectangle settingsRectangle) {
+    ReadSymbolsMenu(TransitionSettingsRectangle settingsRectangle) {
         this.settingsRectangle = settingsRectangle;
         this.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
         this.setAlignment(Pos.CENTER_LEFT);
@@ -764,14 +842,14 @@ class ChooseSymbolOptionLabel extends Label implements MouseListener {
     }
 }
 
-class TransitionSettingsRectangleSymbolsDisplay extends HBox implements MouseListener {
+class ReadSymbolsDisplay extends HBox implements MouseListener {
     TransitionSettingsRectangle settingsRectangle;
 
     private Map<Tape, TapeSymbolsDisplay> tapes;
     private double offsetX;
     private Double dragX;
 
-    TransitionSettingsRectangleSymbolsDisplay(TransitionSettingsRectangle settingsRectangle) {
+    ReadSymbolsDisplay(TransitionSettingsRectangle settingsRectangle) {
         this.settingsRectangle = settingsRectangle;
         this.tapes = new HashMap<>();
 

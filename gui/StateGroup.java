@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.animation.Interpolator;
@@ -15,24 +19,73 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import org.json.JSONObject;
+import turingmachines.TuringMachine;
 import util.MouseListener;
 import util.Ressources;
 
+/**
+ * Widget corresponding to a state of the machine.
+ *
+ * The widget is a group containing the circle representing the state itself, the label displaying the name of the
+ * state and other shapes or images to display the state as final, accepting and/or initial.
+ */
 class StateGroup extends Group implements MouseListener {
 
-    boolean animating;
+    /**
+     * The state of the machine this state is associated with.
+     */
+    int state;
 
+    /**
+     * Main circle of the state
+     */
     private Circle outerCircle;
+
+    /**
+     * Inner circle drawn when the state is final or accepting.
+     */
     private Circle innerCircle;
+
+    /**
+     * Small icon drawn when the state is accepting.
+     */
     private ImageView acceptIcon;
+
+    /**
+     * Line drawn when the state is initial.
+     */
     private Line initLine1;
+
+    /**
+     * Line drawn when the state is initial.
+     */
     private Line initLine2;
+
+    /**
+     * Label containing the name of the state
+     */
     private Label label;
 
+    /**
+     * When the user press the mouse on the state, the widget gets darker during a fixed period of time. This parameter
+     * is true if the user is pressing the state and if the timer has not ended.
+     */
+    private boolean animating;
 
+    /**
+     * When the user press the mouse on the state, using this timeline, the widget gets darker during a fixed period of
+     * time.
+     */
     private Timeline timeline;
 
-    StateGroup(String name){
+    /**
+     * Build a new widget corresponding to a state with the given name.
+     * @param state
+     */
+    StateGroup(Integer state){
+        this.state = state;
+        String name = TuringMachineDrawer.getInstance().machine.getStateName(state);
+
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
 
@@ -90,50 +143,60 @@ class StateGroup extends Group implements MouseListener {
         setUnselected();
     }
 
+    /**
+     * Draw the state as selected (used when the user click on the state)
+     * @see #setUnselected()
+     */
     void setSelected(){
         outerCircle.setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
         innerCircle.setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
     }
 
+    /**
+     * Draw the state as not selected (used when the user unselect the state)
+     * @see #setSelected()
+     */
     void setUnselected(){
         outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
         innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
     }
 
-    boolean isFinal(){
-        return innerCircle.isVisible() && !acceptIcon.isVisible();
-    }
-
-    boolean isAccepting(){
-        return acceptIcon.isVisible();
-    }
-
-    boolean isInitial(){
-        return initLine1.isVisible();
-    }
-
+    /**
+     * Draw the widget as final if and only if isFinal is true
+     * @param isFinal
+     */
     void setFinal(boolean isFinal){
         innerCircle.setVisible(isFinal);
     }
 
+    /**
+     * Draw the widget as accepting if and only if isAccepting is true
+     * @param isAccepting
+     */
     void setAccepting(boolean isAccepting){
         acceptIcon.setVisible(isAccepting);
     }
 
+    /**
+     * Draw the widget as initial if and only if isInitial is true
+     * @param isInitial
+     */
     void setInitial(boolean isInitial){
         initLine1.setVisible(isInitial);
         initLine2.setVisible(isInitial);
     }
 
-    String getName(){
-        return label.getText();
-    }
-
+    /**
+     * Change the name displayed in the state.
+     * @param name
+     */
     void setName(String name) {
         this.label.setText(name);
     }
 
-
+    /**
+     * Start an animation darkening the state.
+     */
     void startTimeline(){
         this.animating = true;
         timeline.getKeyFrames().clear();
@@ -153,6 +216,10 @@ class StateGroup extends Group implements MouseListener {
         timeline.play();
     }
 
+    /**
+     * Stop the animation darkening the state.
+     * @see #startTimeline()
+     */
     void stopTimeline(){
         timeline.stop();
         this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
@@ -160,26 +227,38 @@ class StateGroup extends Group implements MouseListener {
         this.animating = false;
     }
 
+    /**n
+     * @return an animation key used to animate the coloring of the node when it is declared as the current node
+     * (pointed by the state register when the machine is executed).
+     */
     KeyValue getCurrentStateKeyValue() {
         return new KeyValue(this.outerCircle.fillProperty(),
                 TuringMachineDrawer.STATE_CURRENT_COLOR,
                 Interpolator.EASE_BOTH);
     }
 
-    KeyValue getNoCurrentStateKeyValue() {
+    /**
+     * @return an animation key used to animate the coloring of the node when it is declared as not the current node
+     * (pointed by the state register when the machine is executed).
+     */
+    KeyValue getNotCurrentStateKeyValue() {
         return new KeyValue(this.outerCircle.fillProperty(),
                 TuringMachineDrawer.UNSELECTED_STATE_COLOR,
                 Interpolator.EASE_BOTH);
     }
 
+    /**
+     * @return a JSON representation of the widget.
+     */
     JSONObject getJSON() {
+        TuringMachine turingMachine = TuringMachineDrawer.getInstance().machine;
         return new JSONObject()
                 .put("x", this.getLayoutX())
                 .put("y", this.getLayoutY())
-                .put("name", this.getName())
-                .put("isFinal", this.isFinal())
-                .put("isAccepting", this.isAccepting())
-                .put("isInitial", this.isInitial());
+                .put("name", turingMachine.getStateName(this.state))
+                .put("isFinal", turingMachine.isFinal(this.state))
+                .put("isAccepting", turingMachine.isAccepting(this.state))
+                .put("isInitial", turingMachine.isInitial(this.state));
     }
 
     @Override
@@ -189,6 +268,7 @@ class StateGroup extends Group implements MouseListener {
 
         GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
 
+        // Close any settings rectangle if such a rectangle is opened
         if(graphPane.stateSettingsRectangle.isMaximized()){
             graphPane.closeStateSettingsRectangle();
             return true;
@@ -198,16 +278,22 @@ class StateGroup extends Group implements MouseListener {
             return true;
         }
 
+        // If the "manual firing mode" is selected, declare the state as the current state.
         if(TuringMachineDrawer.getInstance().manualMode)
             TuringMachineDrawer.getInstance().manualSelectCurrentState(this);
         else {
+
+            // Otherwise, check if the user pressed the state during enough time.
             boolean pressFinished = !this.animating;
             this.stopTimeline();
 
+            // In that case open the settings rectangle associated with that state
             if (pressFinished) {
                 graphPane.unselect();
                 graphPane.openStateSettingsRectangle(this);
             } else {
+                // Otherwise select/unselect the node if no other node is selected and add a new transition if
+                // another node was selected.
                 Node selected = graphPane.getSelected();
                 if (selected == null)
                     graphPane.select(this);
@@ -227,9 +313,13 @@ class StateGroup extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
+        // Stop the animation darkening the node and drags the node
         this.stopTimeline();
         GraphPane graphPane = TuringMachineDrawer.getInstance().graphPane;
         graphPane.select(this);
+
+        // Translate the node
+        // getX and getY return the coordinates of the mouse in the node reference.
         graphPane.moveStateGroup(this,this.getLayoutX() + mouseEvent.getX(),
                 this.getLayoutY() + mouseEvent.getY());
         return true;
@@ -240,6 +330,7 @@ class StateGroup extends Group implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
+        // Start the animation darkening the node
         if(!TuringMachineDrawer.getInstance().graphPane.stateSettingsRectangle.isMaximized()
                 && !TuringMachineDrawer.getInstance().graphPane.transitionSettingsRectangle.isMaximized())
             this.startTimeline();
