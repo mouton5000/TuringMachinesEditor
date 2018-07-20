@@ -16,14 +16,28 @@ import java.util.*;
 
 
 /**
- * Created by dimitri.watel on 19/06/18.
+ * Widget containing the tapes of the edited machine and some menus to manage them.
  */
 class TapesVBox extends VBox {
 
-    TapesHeadMenu tapesHeadMenu;
-    SymbolsMenu symbolsMenu;
-    TapeBorderPanesHBox tapesPane;
+    /**
+     * Widget displaying the menu where the user can manage the tapes and the heads of the machine.
+     */
+    private TapesHeadMenu tapesHeadMenu;
 
+    /**
+     * Widget displaying the menu where the user can manage the symbols of the machine.
+     */
+    private SymbolsMenu symbolsMenu;
+
+    /**
+     * Widget displaying the tapes of the machine.
+     */
+    private TapeBorderPanesHBox tapesPane;
+
+    /**
+     * Initialize the widget
+     */
     TapesVBox() {
         this.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
 
@@ -33,9 +47,11 @@ class TapesVBox extends VBox {
         tapesHeadMenu.setTranslateX(TuringMachineDrawer.TAPE_COORDINATES_WIDTH);
         symbolsMenu = new SymbolsMenu();
 
+        // Clip for the head menu so that its children do not appear outside (particularly, in the symbols menu).
         Rectangle tapesHeadClip = new Rectangle(0, 0, 0, TuringMachineDrawer.TAPES_MENU_HEIGHT);
         tapesHeadMenu.setClip(tapesHeadClip);
 
+        // Clip for the head menu so that its children do not appear outside (particularly, in the heads menu).
         Rectangle symbolclip = new Rectangle(0, 0, 0, TuringMachineDrawer.TAPES_MENU_HEIGHT);
         symbolsMenu.setClip(symbolclip);
 
@@ -45,6 +61,9 @@ class TapesVBox extends VBox {
 
         this.getChildren().addAll(hbox, new Separator(), tapesPane);
 
+        // Bind the width and height properties of the children with the width and height of this widget.
+        // This widget change its height and width when the user resize the window or resize the widget by moving
+        // the separation between the tapes and the graph panes.
         this.layoutBoundsProperty().addListener((obs, oldVal, newVal) -> {
             double width = newVal.getWidth();
             double height = newVal.getHeight();
@@ -61,55 +80,129 @@ class TapesVBox extends VBox {
         });
     }
 
+    /**
+     * Add a new symbol to this widget. It consists in adding it in the symbols menu and in the rectangle containing
+     * the cells settings.
+     * @param symbol
+     */
     void addSymbol(String symbol){
         this.symbolsMenu.addSymbol(symbol);
         this.tapesPane.addSymbol(symbol);
     }
 
+    /**
+     * Change the name of a symbol (identified by its index in the list of symbols of the machine and its previous
+     * name).
+     * It consists in changing it in the symbols menu and in the rectangle containing the cells settings.
+     * @param index
+     * @param previousSymbol
+     * @param symbol new name of the symbol.
+     */
     void editSymbol(int index, String previousSymbol, String symbol){
         this.symbolsMenu.editSymbol(index, symbol);
         this.tapesPane.editSymbol(index, previousSymbol, symbol);
     }
 
+    /**
+     * Remove a symbol from this widget. It consists in removing it from the symbols menu and from the rectangle
+     * containing
+     * the cells settings.
+     * @param symbol
+     */
     void removeSymbol(int index, String symbol) {
         this.symbolsMenu.removeSymbol(index);
         this.tapesPane.removeSymbol(index, symbol);
     }
 
+    /**
+     * Add a new tape to this widget and center the view on its (0, 0) coordinate. The tape is also added to the
+     * tapes and heads menu.
+     * @param tape
+     */
     void addTape(Tape tape) {
         tapesHeadMenu.addTape(tape);
         tapesPane.addTape(tape);
         this.centerOn(tape);
     }
 
+    /**
+     * Remove the tape from this widget and from the tapes and heads menu.
+     * @param tape
+     */
     void removeTape(Tape tape) {
         this.tapesHeadMenu.removeTape(tape);
         this.tapesPane.removeTape(tape);
     }
 
+    /**
+     * Add a new head to this widget on the given tape at the given coordinates. The color of the head is the given
+     * coordinates. The head is also added to the tapes and heads menu and the cells settings. It is added at the end
+     * of the
+     * lists
+     * of heads
+     * of the tape.
+     * @param tape
+     * @param color
+     * @param line
+     * @param column
+     */
     void addHead(Tape tape, Color color, int line, int column) {
         tapesHeadMenu.addHead(tape, color);
         tapesPane.addHead(tape, line, column, color);
     }
 
+    /**
+     * Move the given head (identified by its tape and its index in the list of heads of the tape) to the given
+     * coordinates of the tape.
+     * @param tape
+     * @param line
+     * @param column
+     * @param head
+     */
     void moveHead(Tape tape, int line, int column, int head) {
         tapesPane.moveHead(tape, line, column, head);
     }
 
+    /**
+     * Remove the given head (identified by its tape and its index in the list of heads of the tape) from the widget.
+     * The head is also removed from the tapes and heads menu and the cells settings.
+     * @param tape
+     * @param head
+     */
     void removeHead(Tape tape, int head){
         tapesHeadMenu.removeHead(tape, head);
         tapesPane.removeHead(tape, head);
     }
 
+    /**
+     * Change the color of the given head (identified by its tape and its index in the list of heads of the tape) to
+     * the given color. The color is also changed in the tapes and heads menu and in the cells settings.
+     * @param tape
+     * @param head
+     * @param color
+     */
     void editHeadColor(Tape tape, Integer head, Color color) {
         tapesHeadMenu.editHeadColor(tape, head, color);
         tapesPane.editHeadColor(tape, head, color);
     }
 
+    /**
+     * Write the given symbol in the cell of the given tape at the given coordinates. This changes the input symbol
+     * of the machine and not the currently written word during an execution.
+     * @param tape
+     * @param line
+     * @param column
+     * @param symbol
+     */
     void setInputSymbol(Tape tape, int line, int column, String symbol){
         tapesPane.setInputSymbol(tape, line, column, symbol);
     }
 
+    /**
+     * Change the left bound of the given tape to the given bound.
+     * @param tape
+     * @param left
+     */
     void setTapeLeftBound(Tape tape, Integer left){
         tapesPane.setTapeLeftBound(tape, left);
     }
