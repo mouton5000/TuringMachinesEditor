@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.scene.Node;
@@ -67,11 +71,6 @@ class SymbolSettingsRectangle extends SettingsRectangle {
     @Override
     double getOffsetX() {
         return -TuringMachineDrawer.SETTING_RECTANGLE_MINIMIZED_WIDTH / 2;
-    }
-
-    @Override
-    Node associatedNode() {
-        return null;
     }
 
     void setSymbolIndex(int currentSymbolIndex) {

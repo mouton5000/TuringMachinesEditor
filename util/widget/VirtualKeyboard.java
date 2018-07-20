@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package util.widget;
 
 import javafx.scene.control.Button;

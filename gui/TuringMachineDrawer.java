@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.animation.ParallelTransition;
@@ -1463,7 +1467,7 @@ public class TuringMachineDrawer extends Application {
      * If the GUI is not in "Edit Graph mode", do nothing.
      * @param state
      * @see #removeState(Integer, boolean)
-     * @see #removeStateFromMachine(Integer)
+     * @see #removeStateFromMachine(int)
      */
     void removeState(Integer state) {
         removeState(state, true);
@@ -1478,7 +1482,7 @@ public class TuringMachineDrawer extends Application {
      * @see #setEditGraph()
      * @see #setNotEditGraph()
      * @see #removeState(Integer)
-     * @see #removeStateFromMachine(Integer)
+     * @see #removeStateFromMachine(int)
      */
     void removeState(Integer state, boolean doConfirm){
         if(!editGraphMode)
@@ -1504,7 +1508,7 @@ public class TuringMachineDrawer extends Application {
      * @see #removeState(Integer)
      * @see #removeState(Integer, boolean)
      */
-    private void removeStateFromMachine(Integer state){
+    private void removeStateFromMachine(int state){
         graphPane.removeState(state);
         this.setEnableToSave();
     }
@@ -2011,7 +2015,7 @@ public class TuringMachineDrawer extends Application {
             return;
         if(this.playing)
             return;
-        machine.manualSetCurrentState(graphPane.getState(stateGroup));
+        machine.manualSetCurrentState(stateGroup.state);
         this.goToFirstConfiguration();
     }
 
@@ -2027,7 +2031,7 @@ public class TuringMachineDrawer extends Application {
             return;
         if(this.playing)
             return;
-        machine.manualFireTransition(graphPane.getTransition(transitionGroup));
+        machine.manualFireTransition(transitionGroup.transition);
 
         this.playing = true;
         this.machineTimeLine.setOnFinished(actionEvent -> this.playing = false);

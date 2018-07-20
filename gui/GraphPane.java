@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.animation.KeyFrame;
@@ -19,11 +23,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import turingmachines.*;
 import util.*;
+import util.Vector;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This widget displays the graph of the edited Turing machine.
@@ -46,14 +48,15 @@ class GraphPane extends Pane implements MouseListener {
     private StringEnumerator stringEnumerator;
 
     /**
-     * Bidirectional map linking each state to the associated widget displayed on the pane.
+     * List associating each state (represented by the index of the state in the list of states of the machine) to
+     * the corresponding widget displayed don the pane.
      */
-    private BidirMap<StateGroup, Integer> stateGroupToState;
+    private List<StateGroup> stateGroups;
 
     /**
      * Bidirectional map linking each transition to the associated widget displayed on the pane.
      */
-    private BidirMap<TransitionGroup, Transition> transitionGroupToTransition;
+    private Map<Transition, TransitionGroup> transitionToTransitionGroup;
 
     /**
      * Widget corresponding to the last state that was declared as the current state pointer by the state register of
@@ -117,10 +120,10 @@ class GraphPane extends Pane implements MouseListener {
         });
 
         // Add the settings rectangles to the graph group
-        this.stateSettingsRectangle = new StateSettingsRectangle( this);
+        this.stateSettingsRectangle = new StateSettingsRectangle();
         this.stateSettingsRectangle.setVisible(false);
 
-        this.transitionSettingsRectangle = new TransitionSettingsRectangle(this);
+        this.transitionSettingsRectangle = new TransitionSettingsRectangle();
         this.transitionSettingsRectangle.setVisible(false);
         graphGroup.getChildren().addAll(this.stateSettingsRectangle, this.transitionSettingsRectangle);
 
@@ -139,8 +142,8 @@ class GraphPane extends Pane implements MouseListener {
             graphClip.setHeight(newValue.getHeight());
         });
 
-        stateGroupToState = new BidirMap<>();
-        transitionGroupToTransition = new BidirMap<>();
+        stateGroups = new ArrayList<>();
+        transitionToTransitionGroup = new HashMap<>();
 
         // Init some parameters to default values
         clear();
@@ -177,9 +180,10 @@ class GraphPane extends Pane implements MouseListener {
      * @return a String that is not currently used by the other states of the machine.
      */
     String nextStateName(){
+        TuringMachine turingMachine = TuringMachineDrawer.getInstance().machine;
         Set<String> names = new HashSet<>();
-        for(int i = 0; i < this.stateGroupToState.size(); i++){
-            names.add(TuringMachineDrawer.getInstance().machine.getStateName(i));
+        for(int i = 0; i < turingMachine.getNbStates(); i++){
+            names.add(turingMachine.getStateName(i));
         }
         String s =  stringEnumerator.next();
         while(names.contains(s)){
@@ -195,18 +199,19 @@ class GraphPane extends Pane implements MouseListener {
      * @param state
      */
     void addState(double x, double y, Integer state){
-        String name = TuringMachineDrawer.getInstance().machine.getStateName(state);
-        StateGroup circle = new StateGroup(name);
+        StateGroup stateGroup = new StateGroup(state);
 
         Vector p = new Vector(x - graphGroup.getTranslateX(), y - graphGroup.getTranslateY());
         Vector c = new Vector(this.getWidth() / 2, this.getHeight() / 2);
         Vector n = p.diff(c).mult(1 / graphScale.getY()).add(c);
         x = n.x;
         y = n.y;
-        this.moveStateGroup(circle, x, y);
+        this.moveStateGroup(stateGroup, x, y);
 
-        stateGroupToState.put(circle, state);
-        graphGroup.getChildren().add(circle);
+        while(stateGroups.size() < state)
+            stateGroups.add(null);
+        stateGroups.add(stateGroup);
+        graphGroup.getChildren().add(stateGroup);
     }
 
     /**
@@ -215,7 +220,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param name
      */
     void editStateName(Integer state, String name){
-        StateGroup stateGroup = stateGroupToState.getK(state);
+        StateGroup stateGroup = stateGroups.get(state);
         stateGroup.setName(name);
     }
 
@@ -224,24 +229,21 @@ class GraphPane extends Pane implements MouseListener {
      * @param stateGroup
      */
     void removeState(StateGroup stateGroup) {
-        TuringMachineDrawer.getInstance().removeState(stateGroupToState.getV(stateGroup));
+        TuringMachineDrawer.getInstance().removeState(stateGroup.state);
     }
 
     /**
      * Remove the widget associated with the given state from the pane.
      * @param state
      */
-    void removeState(Integer state){
-        StateGroup stateGroup = stateGroupToState.removeV(state);
+    void removeState(int state){
+        StateGroup stateGroup = stateGroups.remove(state);
         this.closeStateSettingsRectangle();
         this.closeTransitionSettingsRectangle();
         graphGroup.getChildren().remove(stateGroup);
 
-        Set<Map.Entry<StateGroup, Integer>> entries = new HashSet<>(stateGroupToState.entrySet());
-        for(Map.Entry<StateGroup, Integer> entry : entries){
-            if(entry.getValue() >= state)
-                stateGroupToState.put(entry.getKey(), entry.getValue() - 1);
-        }
+        for(int i = state; i < stateGroups.size(); i++)
+            stateGroups.get(i).state -= 1;
     }
 
     /**
@@ -259,15 +261,6 @@ class GraphPane extends Pane implements MouseListener {
     }
 
     /**
-     * Return the state associated with the given widget.
-     * @param stateGroup
-     * @return
-     */
-    Integer getState(StateGroup stateGroup) {
-        return stateGroupToState.getV(stateGroup);
-    }
-
-    /**
      * Request the machine to add a transition from the state associated with the start widget to the state
      * associated with the end widget.
      * @param start
@@ -276,8 +269,9 @@ class GraphPane extends Pane implements MouseListener {
     void addTransition(StateGroup start, StateGroup end){
         if(!TuringMachineDrawer.getInstance().editGraphMode)
             return;
-        Integer input = stateGroupToState.getV(start);
-        Integer output = stateGroupToState.getV(end);
+        Integer input = start.state;
+        Integer output = end.state;
+        System.out.println(input+" "+output);
         TuringMachineDrawer.getInstance().addTransition(input, output);
     }
 
@@ -295,16 +289,16 @@ class GraphPane extends Pane implements MouseListener {
         Integer input = transition.getInput();
         Integer output = transition.getOutput();
 
-        StateGroup start = stateGroupToState.getK(input);
-        StateGroup end = stateGroupToState.getK(output);
+        StateGroup start = stateGroups.get(input);
+        StateGroup end = stateGroups.get(output);
 
-        TransitionGroup transitionGroup = new TransitionGroup(start, end);
+        TransitionGroup transitionGroup = new TransitionGroup(transition, start, end);
         if(control1X != null)
             transitionGroup.setControl1(control1X, control1Y);
         if(control2X != null)
             transitionGroup.setControl2(control2X, control2Y);
 
-        transitionGroupToTransition.put(transitionGroup, transition);
+        transitionToTransitionGroup.put(transition, transitionGroup);
         graphGroup.getChildren().add(transitionGroup);
         transitionGroup.toBack();
 
@@ -325,8 +319,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param transitionGroup
      */
     void removeTransition(TransitionGroup transitionGroup){
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        TuringMachineDrawer.getInstance().removeTransition(transition);
+        TuringMachineDrawer.getInstance().removeTransition(transitionGroup.transition);
     }
 
     /**
@@ -334,19 +327,10 @@ class GraphPane extends Pane implements MouseListener {
      * @param transition
      */
     void removeTransition(Transition transition){
-        TransitionGroup transitionGroup = transitionGroupToTransition.removeV(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.remove(transition);
         this.closeStateSettingsRectangle();
         this.closeTransitionSettingsRectangle();
         graphGroup.getChildren().remove(transitionGroup);
-    }
-
-    /**
-     *
-     * @param transitionGroup
-     * @return the transition associated with the given widget.
-     */
-    Transition getTransition(TransitionGroup transitionGroup) {
-        return transitionGroupToTransition.getV(transitionGroup);
     }
 
     /**
@@ -354,11 +338,12 @@ class GraphPane extends Pane implements MouseListener {
      * @param stateGroup
      */
     void toggleFinal(StateGroup stateGroup){
-        Integer state = stateGroupToState.getV(stateGroup);
-        if(stateGroup.isAccepting())
-            TuringMachineDrawer.getInstance().setAcceptingState(state, false);
+        Integer state = stateGroup.state;
+        TuringMachineDrawer drawer = TuringMachineDrawer.getInstance();
+        if(drawer.machine.isAccepting(state))
+            drawer.setAcceptingState(state, false);
         else
-            TuringMachineDrawer.getInstance().setFinalState(state, !stateGroup.isFinal());
+            drawer.setFinalState(state, !drawer.machine.isFinal(state));
     }
 
     /**
@@ -366,11 +351,12 @@ class GraphPane extends Pane implements MouseListener {
      * @param stateGroup
      */
     void toggleAccepting(StateGroup stateGroup){
-        Integer state = stateGroupToState.getV(stateGroup);
-        if(stateGroup.isAccepting())
-            TuringMachineDrawer.getInstance().setFinalState(state, false);
+        Integer state = stateGroup.state;
+        TuringMachineDrawer drawer = TuringMachineDrawer.getInstance();
+        if(drawer.machine.isAccepting(state))
+            drawer.setFinalState(state, false);
         else
-            TuringMachineDrawer.getInstance().setAcceptingState(state, true);
+            drawer.setAcceptingState(state, true);
     }
 
     /**
@@ -378,8 +364,9 @@ class GraphPane extends Pane implements MouseListener {
      * @param stateGroup
      */
     void toggleInitial(StateGroup stateGroup){
-        Integer state = stateGroupToState.getV(stateGroup);
-        TuringMachineDrawer.getInstance().setInitialState(state, !stateGroup.isInitial());
+        Integer state = stateGroup.state;
+        TuringMachineDrawer.getInstance().setInitialState(state, !TuringMachineDrawer.getInstance().machine.isInitial
+                (state));
     }
 
     /**
@@ -388,8 +375,8 @@ class GraphPane extends Pane implements MouseListener {
      * @param state
      * @param isFinal
      */
-    void setFinalState(Integer state, boolean isFinal){
-        StateGroup stateGroup = stateGroupToState.getK(state);
+    void setFinalState(int state, boolean isFinal){
+        StateGroup stateGroup = stateGroups.get(state);
         stateGroup.setFinal(isFinal);
     }
 
@@ -399,8 +386,8 @@ class GraphPane extends Pane implements MouseListener {
      * @param state
      * @param isAccepting
      */
-    void setAcceptingState(Integer state, boolean isAccepting){
-        StateGroup stateGroup = stateGroupToState.getK(state);
+    void setAcceptingState(int state, boolean isAccepting){
+        StateGroup stateGroup = stateGroups.get(state);
         stateGroup.setAccepting(isAccepting);
     }
 
@@ -411,8 +398,8 @@ class GraphPane extends Pane implements MouseListener {
      * @param state
      * @param isInitial
      */
-    void setInitialState(Integer state, boolean isInitial){
-        StateGroup stateGroup = stateGroupToState.getK(state);
+    void setInitialState(int state, boolean isInitial){
+        StateGroup stateGroup = stateGroups.get(state);
         stateGroup.setInitial(isInitial);
     }
 
@@ -426,8 +413,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol
      */
     void addReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        TuringMachineDrawer.getInstance().addReadSymbol(transition, tape, head, symbol);
+        TuringMachineDrawer.getInstance().addReadSymbol(transitionGroup.transition, tape, head, symbol);
     }
 
     /**
@@ -440,7 +426,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol
      */
     void addReadSymbol(Transition transition, Tape tape, int head, String symbol){
-        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         transitionGroup.addReadSymbol(tape, head, symbol);
@@ -459,8 +445,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol
      */
     void removeReadSymbol(TransitionGroup transitionGroup, Tape tape, int head, String symbol){
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        TuringMachineDrawer.getInstance().removeReadSymbol(transition, tape, head, symbol);
+        TuringMachineDrawer.getInstance().removeReadSymbol(transitionGroup.transition, tape, head, symbol);
     }
 
 
@@ -474,7 +459,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol
      */
     void removeReadSymbol(Transition transition, Tape tape, int head, String symbol){
-        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
         if(symbol == null)
             symbol = TuringMachineDrawer.BLANK_SYMBOL;
         transitionGroup.removeReadSymbol(tape, head, symbol);
@@ -495,9 +480,9 @@ class GraphPane extends Pane implements MouseListener {
      * @param actionSymbol
      */
     void addAction(TransitionGroup transitionGroup, Tape tape, int head, String actionSymbol) {
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        TuringMachineDrawer.getInstance().addAction(transition, tape, head, actionSymbol);
+        TuringMachineDrawer.getInstance().addAction(transitionGroup.transition, tape, head, actionSymbol);
     }
+
     /**
      * Add an action to the widget associated with the given transition. The action deals with the given tape and
      * the given head (identified with the index of the head in the list of heads of the tape). The type of action
@@ -511,7 +496,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param value
      */
     void addAction(Transition transition, Tape tape, int head, ActionType type, Object value){
-        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
 
         String actionSymbol = null;
         switch (type){
@@ -555,8 +540,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param transitionGroup
      */
     void removeAction(TransitionGroup transitionGroup){
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
-        TuringMachineDrawer.getInstance().removeAction(transition);
+        TuringMachineDrawer.getInstance().removeAction(transitionGroup.transition);
     }
 
     /**
@@ -565,7 +549,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param index
      */
     void removeAction(Transition transition, int index){
-        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
         transitionGroup.removeAction(index);
 
         if(transitionSettingsRectangle.currentTransitionGroup == transitionGroup)
@@ -590,7 +574,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol new name of the symbol
      */
     void editSymbol(int index, String previousSymbol, String symbol) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.editSymbol(previousSymbol, symbol);
         this.transitionSettingsRectangle.editSymbol(index, previousSymbol, symbol);
     }
@@ -601,7 +585,7 @@ class GraphPane extends Pane implements MouseListener {
      * @param symbol
      */
     void removeSymbol(int index, String symbol) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.removeSymbol(symbol);
         this.transitionSettingsRectangle.removeSymbol(index, symbol);
     }
@@ -612,18 +596,18 @@ class GraphPane extends Pane implements MouseListener {
      * @param tape
      */
     void addTape(Tape tape) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.addTape(tape);
         this.transitionSettingsRectangle.addTape(tape);
     }
 
     /**
-     * Remove the given tape to the pane (which consists in removing it from the strings displayed next to each
+     * Remove the given tape from the pane (which consists in removing it from the strings displayed next to each
      * transition and from the settings of the transitions).
      * @param tape
      */
     void removeTape(Tape tape) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.removeTape(tape);
         this.transitionSettingsRectangle.removeTape(tape);
     }
@@ -636,13 +620,13 @@ class GraphPane extends Pane implements MouseListener {
      * @param color
      */
     void addHead(Tape tape, Color color) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.addHead(tape, color);
         this.transitionSettingsRectangle.addHead(tape, color);
     }
 
     /**
-     * Change the color of the given head (identified by the given tape and the index of hte head in the list of
+     * Change the color of the given head (identified by the given tape and the index of the head in the list of
      * heads of the tape) to the given color in the pane (which consists in changing it in the strings displayed next
      * to each transition and in the settings of the transitions)
      * @param tape
@@ -650,21 +634,20 @@ class GraphPane extends Pane implements MouseListener {
      * @param color
      */
     void editHeadColor(Tape tape, int head, Color color) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.editHeadColor(tape, head, color);
         this.transitionSettingsRectangle.editHeadColor(tape, head, color);
     }
 
     /**
-     * Remove the given head (identified by the given tape and the index of hte head in the list of
+     * Remove the given head (identified by the given tape and the index of the head in the list of
      * heads of the tape) from the pane (which consists in removing it from the strings displayed next
      * to each transition and from the settings of the transitions)
      * @param tape
      * @param head
-     * @param color
      */
     void removeHead(Tape tape, int head) {
-        for(TransitionGroup transitionGroup : transitionGroupToTransition.keySet())
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
             transitionGroup.removeHead(tape, head);
         this.transitionSettingsRectangle.removeHead(tape, head);
     }
@@ -677,13 +660,12 @@ class GraphPane extends Pane implements MouseListener {
      * tape and the given head (identified with the index of the head in the list of heads of the given tape).
      */
     Set<String> getReadSymbols(TransitionGroup transitionGroup, Tape tape, int head) {
-        Transition transition = transitionGroupToTransition.getV(transitionGroup);
 
-        if(transition == null)
+        if(transitionGroup.transition == null)
             return new HashSet<>();
 
         // Request the machine directly
-        Iterator<String> it =  transition.getReadSymbols(tape, head);
+        Iterator<String> it =  transitionGroup.transition.getReadSymbols(tape, head);
         Set<String> set = new HashSet<>();
         while(it.hasNext()){
             String symbol = it.next();
@@ -781,8 +763,8 @@ class GraphPane extends Pane implements MouseListener {
      * machine execution. The next current state is the given state.
      * @see #lastCurrentStateGroup
      */
-    Timeline getChangeCurrentStateTimeline(Integer state) {
-        StateGroup stateGroup = stateGroupToState.getK(state);
+    Timeline getChangeCurrentStateTimeline(int state) {
+        StateGroup stateGroup = stateGroups.get(state);
 
         Timeline timeline = new Timeline();
 
@@ -793,7 +775,7 @@ class GraphPane extends Pane implements MouseListener {
         // If there was already a state pointed by the state register, animate the fact that it is not anymore
         // pointed by.
         if(lastCurrentStateGroup != null){
-            KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
+            KeyValue klast = lastCurrentStateGroup.getNotCurrentStateKeyValue();
             keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), klast, knew);
         }
         else
@@ -815,7 +797,7 @@ class GraphPane extends Pane implements MouseListener {
             Timeline timeline = new Timeline();
 
             KeyFrame keyFrame;
-            KeyValue klast = lastCurrentStateGroup.getNoCurrentStateKeyValue();
+            KeyValue klast = lastCurrentStateGroup.getNotCurrentStateKeyValue();
             keyFrame = new KeyFrame(Duration.millis(TuringMachineDrawer.ANIMATION_DURATION), klast);
             timeline.getKeyFrames().add(keyFrame);
             lastCurrentStateGroup = null;
@@ -831,7 +813,7 @@ class GraphPane extends Pane implements MouseListener {
      * @return the timeline animating a firing transition.
      */
     Timeline getFiredTransitionTimeline(Transition transition) {
-        TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+        TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
 
         Timeline timeline = new Timeline();
 
@@ -849,12 +831,12 @@ class GraphPane extends Pane implements MouseListener {
      */
     JSONObject getJSON() {
         JSONArray jsonStates = new JSONArray();
-        for(int state = 0; state < stateGroupToState.size(); state++)
-            jsonStates.put(stateGroupToState.getK(state).getJSON());
+        for(int state = 0; state < TuringMachineDrawer.getInstance().machine.getNbStates(); state++)
+            jsonStates.put(stateGroups.get(state).getJSON());
 
         JSONArray jsonTransition = new JSONArray();
-        for(Map.Entry<TransitionGroup, Transition> entry: transitionGroupToTransition.entrySet())
-            jsonTransition.put(entry.getKey().getJSON());
+        for(TransitionGroup transitionGroup : transitionToTransitionGroup.values())
+            jsonTransition.put(transitionGroup.getJSON());
 
         return new JSONObject().put("states", jsonStates).put("transitions", jsonTransition);
     }
@@ -871,8 +853,9 @@ class GraphPane extends Pane implements MouseListener {
             double y = jsonState.getDouble("y");
             String name = jsonState.getString("name");
 
+            // Add a state to the machine and the associated state group
             int state = TuringMachineDrawer.getInstance().addState(x, y, name);
-            StateGroup stateGroup = stateGroupToState.getK(state);
+            StateGroup stateGroup = stateGroups.get(state);
 
             if(jsonState.getBoolean("isInitial"))
                 this.toggleInitial(stateGroup);
@@ -897,10 +880,11 @@ class GraphPane extends Pane implements MouseListener {
             double control2X = jsonTransition.getDouble("control2X");
             double control2Y = jsonTransition.getDouble("control2Y");
 
+            // Add a transition to the machine and the associated transition group
             Transition transition = TuringMachineDrawer.getInstance().addTransition(inputState, outputState,
                     control1X, control1Y,
                     control2X, control2Y);
-            TransitionGroup transitionGroup = transitionGroupToTransition.getK(transition);
+            TransitionGroup transitionGroup = transitionToTransitionGroup.get(transition);
 
             JSONObject jsonDisplay = jsonTransition.getJSONObject("display");
             JSONArray jsonReadSymbols = jsonDisplay.getJSONArray("readSymbols");
@@ -941,7 +925,7 @@ class GraphPane extends Pane implements MouseListener {
         selected = node;
 
         if(node instanceof TransitionGroup)
-            ((TransitionGroup) node).setSelected(true);
+            ((TransitionGroup) node).setSelected();
         else if(node instanceof StateGroup)
             ((StateGroup) node).setSelected();
     }
@@ -956,7 +940,7 @@ class GraphPane extends Pane implements MouseListener {
 
         if(selected instanceof TransitionGroup) {
             TransitionGroup transitionGroup = (TransitionGroup) selected;
-            transitionGroup.setSelected(false);
+            transitionGroup.setUnselected();
             selected = null;
         }
         else if(selected instanceof StateGroup){
@@ -981,7 +965,7 @@ class GraphPane extends Pane implements MouseListener {
         if(TuringMachineDrawer.getInstance().buildMode || TuringMachineDrawer.getInstance().manualMode)
             return false;
 
-        // Close any settings recntalge is such a rectangle is opened
+        // Close any settings rectangle if such a rectangle is opened
         if(this.stateSettingsRectangle.isMaximized()){
             this.closeStateSettingsRectangle();
             return true;

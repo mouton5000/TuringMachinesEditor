@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Dimitri Watel
+ */
+
 package gui;
 
 import javafx.animation.Interpolator;
@@ -15,35 +19,123 @@ import javafx.scene.shape.*;
 import javafx.util.Duration;
 import org.json.JSONObject;
 import turingmachines.Tape;
+import turingmachines.Transition;
 import util.MouseListener;
 import util.Pair;
 import util.Vector;
 
 import java.util.List;
 
+
+/**
+ * Widget corresponding to a transition of the machine.
+ *
+ * The widget is a group containing
+ * <ul>
+ *     <li>a cubic bezier curve as main line</li>
+ *     <li>a invisible and large cubic bezier curve over the main line used as a hitbox</li>
+ *     <li>two lines representing the arrow</li>
+ *     <li>other circles and lines to let the user edit the curve</li>
+ * </ul>
+ */
 class TransitionGroup extends Group {
+    /**
+     * Transition associated with the widget
+     */
+    Transition transition;
+
+    /**
+     * Widget associated with the input state of the transition. It is stored here to make the transition
+     * transformation faster.
+     */
     private final StateGroup input;
+
+    /**
+     * Widget associated with the output state of the transition. It is stored here to make the transition
+     * transformation faster.
+     */
     private final StateGroup output;
 
+    /**
+     * Main line of the group.
+     */
     private CubicCurve centerLine;
+
+    /**
+     * Line used as a hitbox of the group.
+     */
     private TransitionArrowInvisibleLine invisibleLine;
+
+    /**
+     * Line of the arrow of the transition.
+     */
     private Line arrowLine1;
+
+    /**
+     * Line of the arrow of the transition.
+     */
     private Line arrowLine2;
 
+    /**
+     * Circle displayed when the user wants to edit the curve. It is always positioned where the first control key of
+     * the main curve is.
+     */
     private TransitionArrowControl1KeyCircle control1Key;
+
+    /**
+     * Circle displayed when the user wants to edit the curve. It is always positioned where the second control key of
+     * the main curve is.
+     */
     private TransitionArrowControl2KeyCircle control2Key;
+
+    /**
+     * Line displayed when the user wants to edit the curve, linking the center of the input state to the first control
+     * key.
+     */
     private Line control1Line;
+
+    /**
+     * Line displayed when the user wants to edit the curve, linking the center of the ouput state to the second
+     * control key.
+     */
     private Line control2Line;
 
+    /**
+     * Label displayed near the transition and containing the read symbols and the actions of the transition.
+     */
     private TransitionDisplay transitionDisplay;
 
+    /**
+     * Property containing the abscissa of the middle point of the main line of the transition.
+     */
     private DoubleProperty centerX;
+
+    /**
+     * Property containing the ordinate of the middle point of the main line of the transition.
+     */
     private DoubleProperty centerY;
 
+    /**
+     * When the user press the mouse on the hitbox of the transition ({@link #invisibleLine}, the widget gets darker
+     * during a fixed period of time. This parameter is true if the user is pressing the transition and if the timer
+     * has not ended.
+     */
     boolean animating;
+
+    /**
+     * When the user press the mouse on the transition, using this timeline, the widget gets darker during a fixed
+     * period of time.
+     */
     private Timeline timeline;
 
-    TransitionGroup(StateGroup input, StateGroup output) {
+    /**
+     * Build a widget associated with the given transition from the given input state to the given output state.
+     * @param transition
+     * @param input
+     * @param output
+     */
+    TransitionGroup(Transition transition, StateGroup input, StateGroup output) {
+        this.transition = transition;
         this.input = input;
         this.output = output;
 
@@ -84,6 +176,9 @@ class TransitionGroup extends Group {
         this.getChildren().addAll(centerLine, arrowLine1, arrowLine2, transitionDisplay, invisibleLine, control1Line, control2Line,
                 control1Key, control2Key);
 
+        // When the input/output state coordinate is changed, change the drawing of the transition
+        // Note that Editing the coordinates of the center line changes the coordinates of the other widgets contained
+        // in this group.
         ChangeListener<Number> inputXChangeListener = (obs, oldVal, newVal) -> {
             centerLine.setStartX(centerLine.getStartX() + newVal.doubleValue() - oldVal.doubleValue());
             centerLine.setControlX1(centerLine.getControlX1() + newVal.doubleValue() - oldVal.doubleValue());
@@ -111,7 +206,7 @@ class TransitionGroup extends Group {
         output.layoutYProperty().addListener(outputYChangeListener);
         output.translateYProperty().addListener(outputYChangeListener);
 
-
+        // When the center line is edited, update the other shapes of the group.
         centerLine.startXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
@@ -175,19 +270,28 @@ class TransitionGroup extends Group {
             setArrow();
         });
 
-
+        // Initialize the drawing depending on the position of the nodes
         computeCoordinates();
-        setSelected(false);
+        setUnselected();
     }
 
+    /**
+     * @return the property pointing to the abscissa of the middle point of the main line of the transition.
+     */
     DoubleProperty centerXProperty() {
         return centerX;
     }
 
+    /**
+     * @return the property pointing to the ordinate of the middle point of the main line of the transition.
+     */
     DoubleProperty centerYProperty() {
         return centerY;
     }
 
+    /**
+     * Compute the main line coordinates considering where the input and output states are.
+     */
     private void computeCoordinates() {
         if (input != output)
             computeCoordinatesNotSame();
@@ -195,22 +299,34 @@ class TransitionGroup extends Group {
             computeCoordinatesSame();
     }
 
+    /**
+     * Compute the main line coordinates considering where the input and output states are in the case where those
+     * states are not the sames.
+     *
+     * This default drawing is a straight line from the input state to the output state.
+     */
     private void computeCoordinatesNotSame(){
         Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
                 input.getLayoutY() + input.getTranslateY());
         Vector v2 = new Vector(output.getLayoutX() + output.getTranslateX(),
                 output.getLayoutY() + output.getTranslateY());
         Vector w = v2.diff(v1);
-        double dist = w.mag();
 
+        double dist = w.mag();
         w.multIP(1/dist); // Normalize (could have call normalize but we need dist)
         w.multIP(TuringMachineDrawer.STATE_RADIUS);
+
+        // Set v1 and v2 pointing to the intersection of the circles corresponding to the input and output state
+        // and the straight line linking those two states.
         v1.addIP(w);
         v2.diffIP(w);
 
-        dist -= 2 * TuringMachineDrawer.STATE_RADIUS;
+        dist -= 2 * TuringMachineDrawer.STATE_RADIUS; // Dist is now the distance of the current (v2 - v1)
         w.multIP(dist * TuringMachineDrawer.TRANSITION_KEY_DISTANCE_RATIO / TuringMachineDrawer.STATE_RADIUS);
+        // |w| is the distance between the border of the states and the keys of the curve
 
+        // Draw the center line.
+        // All other shapes will be updated using the property listeners initialized in the constructor.
         centerLine.setStartX(v1.x);
         centerLine.setStartY(v1.y);
         centerLine.setEndX(v2.x);
@@ -221,6 +337,13 @@ class TransitionGroup extends Group {
         centerLine.setControlY2(v2.y - w.y);
     }
 
+
+    /**
+     * Compute the main line coordinates considering where the input and output states are in the case where those
+     * states are the same state.
+     *
+     * This default drawing is a curve below the state (going from and to that state).
+     */
     private void computeCoordinatesSame(){
         Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
                 input.getLayoutY() + input.getTranslateY());
@@ -228,12 +351,20 @@ class TransitionGroup extends Group {
         Vector w = new Vector(0, TuringMachineDrawer.STATE_RADIUS);
         w.rotateIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE);
         v1.addIP(w);
-        w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
+        // v1 is on the intersection of the circle of the state with a line doing an angle of value
+        // TRANSITION_SAME_STATE_DEFAULT_CONTROL_ANGLE with the vertical line.
 
+        w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
+        // |w| is the distance between the border of the states and the keys of the curve
+
+        // Draw the first part of the center line.
+        // All other shapes will be updated using the property listeners initialized in the constructor.
         centerLine.setStartX(v1.x);
         centerLine.setStartY(v1.y);
         centerLine.setControlX1(v1.x + w.x);
         centerLine.setControlY1(v1.y + w.y);
+
+        // Symetric case for the second part of the center line.
 
         v1.set(input.getLayoutX(), input.getLayoutY());
         w.set(0, TuringMachineDrawer.STATE_RADIUS);
@@ -241,12 +372,21 @@ class TransitionGroup extends Group {
         v1.addIP(w);
         w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
 
+        // Draw the second part of the center line.
         centerLine.setEndX(v1.x);
         centerLine.setEndY(v1.y);
         centerLine.setControlX2(v1.x + w.x);
         centerLine.setControlY2(v1.y + w.y);
     }
 
+    /**
+     * Replace and rotate the string associated with the transition displaying the read symbols and the actions of that
+     * transition.
+     *
+     * The orientation of the string follows the straight line linking the input and output states of the transition.
+     * Place that string near the middle point of the main line ("above" it if we consider the horizontal line as the
+     * line linking the states of the transition).
+     */
     private void replaceDisplay(){
         Vector vc =
                 new Vector(centerX.getValue() - transitionDisplay.getMaxWidth() / 2,
@@ -270,62 +410,57 @@ class TransitionGroup extends Group {
         transitionDisplay.setRotate(angle * 360 / (2 * Math.PI));
     }
 
-    void setSelected(boolean visible){
-
-        if(visible){
-            invisibleLine.setVisible(false);
-            control1Line.setVisible(true);
-            control1Key.setVisible(true);
-            control2Line.setVisible(true);
-            control2Key.setVisible(true);
-            input.toBack();
-            output.toBack();
-            this.toFront();
-        }
-        else{
-            invisibleLine.setVisible(true);
-            control1Line.setVisible(false);
-            control1Key.setVisible(false);
-            control2Line.setVisible(false);
-            control2Key.setVisible(false);
-            input.toFront();
-            output.toFront();
-            this.toBack();
-        }
+    /**
+     * Draw the transition as selected (used when the user click on the transition)
+     */
+    void setSelected(){
+        invisibleLine.setVisible(false);
+        control1Line.setVisible(true);
+        control1Key.setVisible(true);
+        control2Line.setVisible(true);
+        control2Key.setVisible(true);
+        input.toBack();
+        output.toBack();
+        this.toFront();
     }
 
+    /**
+     * Draw the transition as not selected (used when the user unselect the transition)
+     */
+    void setUnselected(){
+        invisibleLine.setVisible(true);
+        control1Line.setVisible(false);
+        control1Key.setVisible(false);
+        control2Line.setVisible(false);
+        control2Key.setVisible(false);
+        input.toFront();
+        output.toFront();
+        this.toBack();
+    }
+
+    /**
+     * Set the position of the first control key of the main line of the transition to the given coordinates.
+     * @param x
+     * @param y
+     */
     void setControl1(double x, double y) {
         this.centerLine.setControlX1(x);
         this.centerLine.setControlY1(y);
-
-        Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
-                input.getLayoutY() + input.getTranslateY());
-        Vector v2 = new Vector(x, y);
-        v2.diffIP(v1);
-        v2.normalizeIP();
-        v2.multIP(TuringMachineDrawer.STATE_RADIUS);
-        v2.addIP(v1);
-
-        this.centerLine.setStartX(v2.x);
-        this.centerLine.setStartY(v2.y);
     }
 
+    /**
+     * Set the position of the second control key of the main line of the transition to the given coordinates.
+     * @param x
+     * @param y
+     */
     void setControl2(double x, double y) {
         this.centerLine.setControlX2(x);
         this.centerLine.setControlY2(y);
-
-        Vector v1 = new Vector(output.getLayoutX() + output.getTranslateX(),
-                output.getLayoutY() + output.getTranslateY());
-        Vector v2 = new Vector(x, y);
-        v2.diffIP(v1);
-        v2.normalizeIP();
-        v2.multIP(TuringMachineDrawer.STATE_RADIUS);
-        v2.addIP(v1);
-
-        this.centerLine.setEndX(v2.x);
-        this.centerLine.setEndY(v2.y);
     }
 
+    /**
+     * Draw the arrow of the transition.
+     */
     private void setArrow(){
         Vector v1 = new Vector(centerLine.getControlX2(), centerLine.getControlY2());
         Vector v2 = new Vector(centerLine.getEndX(), centerLine.getEndY());
@@ -347,15 +482,24 @@ class TransitionGroup extends Group {
         arrowLine2.setEndY(v2.y);
     }
 
+    /**
+     * @return the abcissa of the middle point of the main line of the transition.
+     */
     double getCenterX() {
         return tPointX(0.5);
     }
 
+    /**
+     * @return the ordinate of the middle point of the main line of the transition.
+     */
     double getCenterY() {
         return tPointY(0.5);
     }
 
-    double getAngle() {
+    /**
+     * @return the angle between an horizontal line and the line linking the input and the output state.
+     */
+    private double getAngle() {
         Vector v1 = new Vector(centerLine.getStartX(), centerLine.getStartY());
         Vector v2 = new Vector(centerLine.getEndX(), centerLine.getEndY());
         v2.diffIP(v1);
@@ -364,6 +508,12 @@ class TransitionGroup extends Group {
         return v2.angle(v1);
     }
 
+    /**
+     * @param t a double between 0 and 1
+     * @return the abcissa of the point of the main line (a bezier curve) at position t. If t = 0, this is the starting
+     * coordinate and, if t = 1, the ending coordinate. For any other value of t, the point evolve linearly on the
+     * line.
+     */
     private double tPointX(double t){
         double x1, x2, x3, x4, x12, x23, x34, x1223, x2334;
         x1 = centerLine.getStartX();
@@ -382,6 +532,12 @@ class TransitionGroup extends Group {
         return x1223 + (x2334 - x1223) * t;
     }
 
+    /**
+     * @param t a double between 0 and 1
+     * @return the ordinate of the point of the main line (a bezier curve) at position t. If t = 0, this is the
+     * starting coordinate and, if t = 1, the ending coordinate. For any other value of t, the point evolve linearly
+     * on the line.
+     */
     private double tPointY(double t){
         double y1, y2, y3, y4, y12, y23, y34, y1223, y2334;
         y1 = centerLine.getStartY();
@@ -399,48 +555,119 @@ class TransitionGroup extends Group {
         return y1223 + (y2334 - y1223) * t;
     }
 
-
-
+    /**
+     * Add the given tape to the string displayed next to the transition
+     * @param tape
+     */
     void addTape(Tape tape) {
         transitionDisplay.addTape(tape);
     }
 
+    /**
+     * Remove the given tape from the string displayed next to the transition.
+     * @param tape
+     */
     void removeTape(Tape tape) {
         transitionDisplay.removeTape(tape);
     }
 
+
+    /**
+     * Add a new head to the string displayed next to the transition. The head is added to the given tape and has the
+     * given color.
+     *
+     * @param tape
+     * @param color
+     */
     void addHead(Tape tape, Color color) {
         transitionDisplay.addHead(tape, color);
     }
 
+    /**
+     * Change the color of the given head (identified by the given tape and the index of the head in the list of
+     * heads of the tape) to the given color in the string displayed next to the transition.
+     * @param tape
+     * @param head
+     * @param color
+     */
     void editHeadColor(Tape tape, int head, Color color) {
         transitionDisplay.editHeadColor(tape, head, color);
     }
 
+    /**
+     * Remove the given head (identified by the given tape and the index of the head in the list of
+     * heads of the tape) from the string displayed next to the transition.
+     * @param tape
+     * @param head
+     */
     void removeHead(Tape tape, int head) {
         transitionDisplay.removeHead(tape, head);
     }
 
+    /**
+     * Change the name of the symbol (identified by its previous name) by the given name in the string displayed next
+     * to the transition.
+     * @param previousSymbol
+     * @param symbol new name of the symbol
+     */
     void editSymbol(String previousSymbol, String symbol){ transitionDisplay.editSymbol(previousSymbol, symbol); }
 
+    /**
+     * Remove the given symbol (identified y its name) from the string displayed next to the transition.
+     * @param symbol
+     */
     void removeSymbol(String symbol){ transitionDisplay.removeSymbol(symbol); }
 
+    /**
+     * Add a read symbol to the string displayed next to the transition. The read symbol
+     * consists in the triplet containing the given tape, the given head (identified with the index of the head in
+     * the list of heads of the tape) and the given symbol.
+     * @param tape
+     * @param head
+     * @param symbol
+     */
     void addReadSymbol(Tape tape, int head, String symbol) {
         transitionDisplay.addReadSymbol(tape, head, symbol);
     }
 
+    /**
+     * Remove a read symbol from the string displayed next to the transition. The read symbol
+     * consists in the triplet containing the given tape, the given head (identified with the index of the head in
+     * the list of heads of the tape) and the given symbol.
+     * @param tape
+     * @param head
+     * @param symbol
+     */
     void removeReadSymbol(Tape tape, int head, String symbol) {
         transitionDisplay.removeReadSymbol(tape, head, symbol);
     }
 
+    /**
+     * Add an action to the the string displayed next to the transition. The action deals with the given tape and
+     * the given head (identified with the index of the head in the list of heads of the tape). The type of action
+     * (moving a head or writing on the tape) is the given type. The value is either the direction of the moving or
+     * the symbol that should be written.
+     *
+     * @param tape
+     * @param head
+     * @param actionSymbol
+     */
     void addAction(Tape tape, int head, String actionSymbol) {
         transitionDisplay.addAction(tape, head, actionSymbol);
     }
 
+    /**
+     * Remove an action at the given index in the list of actions of the transition from the the string displayed next
+     * to the transition.
+     * @param index
+     */
     void removeAction(int index){
         transitionDisplay.removeAction(index);
     }
 
+    /**
+     * Start an animation darkening the transition.
+     */
     void startTimeline(){
         this.animating = true;
         timeline.getKeyFrames().clear();
@@ -455,20 +682,37 @@ class TransitionGroup extends Group {
         timeline.play();
     }
 
+    /**
+     * Stop an animation darkening the transition.
+     * @see #startTimeline()
+     */
     void stopTimeline(){
         timeline.stop();
         this.invisibleLine.setOpacity(0);
         this.animating = false;
     }
 
+    /**
+     * @param tape
+     * @param head
+     * @return a property associated with the string containing all the read symbols associated with the given tape
+     * and the given head (identified with the index of the head in the list of heads of the tape).
+     */
     ObservableValue<String> getSymbolDisplayTextProperty(Tape tape, int head) {
         return transitionDisplay.getSymbolDisplayTextProperty(tape, head);
     }
 
+    /**
+     * @return The list of strings displaying the actions of the transition. Each string is associated with a color
+     * corresponding the the head associated with the given action.
+     */
     List<Pair<String, Color>> getActionsDisplay() {
         return transitionDisplay.getActionsDisplay();
     }
 
+    /**
+     * @return an animation key used to animate the firing of the transition.
+     */
     KeyFrame getFiredKeyValue() {
         KeyFrame keyFrame;
 
@@ -498,10 +742,13 @@ class TransitionGroup extends Group {
         return keyFrame;
     }
 
+    /**
+     * @return a JSON description of the transition
+     */
     JSONObject getJSON() {
         return new JSONObject()
-                .put("input", TuringMachineDrawer.getInstance().graphPane.getState(input))
-                .put("output", TuringMachineDrawer.getInstance().graphPane.getState(output))
+                .put("input", input.state)
+                .put("output", output.state)
                 .put("control1X", centerLine.getControlX1())
                 .put("control1Y", centerLine.getControlY1())
                 .put("control2X", centerLine.getControlX2())
@@ -510,6 +757,9 @@ class TransitionGroup extends Group {
     }
 }
 
+/**
+ * This widget represents the hitbox of a transition on the GUI. It is a path acting like a large bezier curve.
+ */
 class TransitionArrowInvisibleLine extends Path implements MouseListener {
     TransitionGroup transitionGroup;
 
@@ -623,6 +873,10 @@ class TransitionArrowInvisibleLine extends Path implements MouseListener {
     }
 }
 
+/**
+ * This class is a circle positionned on the first control key of the main line of the widget associated with a
+ * transition.
+ */
 class TransitionArrowControl1KeyCircle extends Circle implements MouseListener {
 
     TransitionGroup transitionGroup;
@@ -655,6 +909,12 @@ class TransitionArrowControl1KeyCircle extends Circle implements MouseListener {
         return false;
     }
 }
+
+
+/**
+ * This class is a circle positioned on the second control key of the main line of the widget associated with a
+ * transition.
+ */
 class TransitionArrowControl2KeyCircle extends Circle implements MouseListener {
 
     TransitionGroup transitionGroup;
