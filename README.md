@@ -2,7 +2,7 @@
 
 This application is a graphical Turing Machine editor written in Java8 with JavaFX. For more informations on Turing machine, see https://en.wikipedia.org/wiki/Turing_machine 
 
-## What can I do with this application?
+## What can I do with this application?
 
 With this application, you can create, edit, save, debug and execute a Turing machine. It works with either deterministic and non deterministic machines.
 
