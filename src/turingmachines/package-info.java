@@ -20,7 +20,7 @@
  * (In order to simplify the implementation, the same class and methods are used for the two cases, which means that
  * the deterministic machine is seen as a non deterministic machine with only one possible computational path.)
  *
- * In order to simplify the machines (and their production/development), some usual improvement of the machines were
+ * In order to simplify the machines (and their production/development), some usual improvements of the machines were
  * implemented:
  * <ul>
  *     <li>A machine may have any number of tapes, heads and symbols.</li>
