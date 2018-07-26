@@ -45,8 +45,6 @@ Now we are going to move the black head on the first cell of the word. Click on 
 
 And, finally, we are going to add a new red head on the last cell of the word. Click on the last cell, click on the rectangle containing a "+" and choose the color red.
 
-![Click on the last cell and click on the rectangle with a "+".](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart07.png)
-
 ![Click on the color red to add a head.](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart08.png)
 
 ### Build the graph of the machine
