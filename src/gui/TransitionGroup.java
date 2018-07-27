@@ -207,6 +207,7 @@ class TransitionGroup extends Group {
         output.translateYProperty().addListener(outputYChangeListener);
 
         // When the center line is edited, update the other shapes of the group.
+        // StartX, StartY, endX, endY are updated with the control keys
         centerLine.startXProperty().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
             invisibleLine.setStartX(nv);
@@ -237,6 +238,7 @@ class TransitionGroup extends Group {
         });
         centerLine.controlX1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
+            replaceStart();
             invisibleLine.setControlX1(nv);
             control1Key.setCenterX(nv);
             control1Line.setEndX(nv);
@@ -245,6 +247,7 @@ class TransitionGroup extends Group {
         });
         centerLine.controlY1Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
+            replaceStart();
             invisibleLine.setControlY1(nv);
             control1Key.setCenterY(nv);
             control1Line.setEndY(nv);
@@ -253,6 +256,7 @@ class TransitionGroup extends Group {
         });
         centerLine.controlX2Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
+            replaceEnd();
             invisibleLine.setControlX2(nv);
             control2Key.setCenterX(nv);
             control2Line.setEndX(nv);
@@ -262,6 +266,7 @@ class TransitionGroup extends Group {
         });
         centerLine.controlY2Property().addListener((obs, oldVal, newVal) -> {
             double nv = newVal.doubleValue();
+            replaceEnd();
             invisibleLine.setControlY2(nv);
             control2Key.setCenterY(nv);
             control2Line.setEndY(nv);
@@ -325,12 +330,9 @@ class TransitionGroup extends Group {
         w.multIP(dist * TuringMachineDrawer.TRANSITION_KEY_DISTANCE_RATIO / TuringMachineDrawer.STATE_RADIUS);
         // |w| is the distance between the border of the states and the keys of the curve
 
-        // Draw the center line.
-        // All other shapes will be updated using the property listeners initialized in the constructor.
-        centerLine.setStartX(v1.x);
-        centerLine.setStartY(v1.y);
-        centerLine.setEndX(v2.x);
-        centerLine.setEndY(v2.y);
+        // Draw the control keys of the center line.
+        // All other shapes and properties (including StartX, StartY, endX, endY) will be
+        // updated using the property listeners initialized in the constructor.
         centerLine.setControlX1(v1.x + w.x);
         centerLine.setControlY1(v1.y + w.y);
         centerLine.setControlX2(v2.x - w.x);
@@ -357,10 +359,9 @@ class TransitionGroup extends Group {
         w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
         // |w| is the distance between the border of the states and the keys of the curve
 
-        // Draw the first part of the center line.
-        // All other shapes will be updated using the property listeners initialized in the constructor.
-        centerLine.setStartX(v1.x);
-        centerLine.setStartY(v1.y);
+        // Draw the first control key of the center line.
+        // All other shapes and properties (including StartX, StartY, endX, endY) will be
+        // updated using the property listeners initialized in the constructor.
         centerLine.setControlX1(v1.x + w.x);
         centerLine.setControlY1(v1.y + w.y);
 
@@ -373,10 +374,36 @@ class TransitionGroup extends Group {
         w.multIP(TuringMachineDrawer.TRANSITION_SAME_STATE_DEFAULT_CONTROL_DISTANCE_RATIO);
 
         // Draw the second part of the center line.
-        centerLine.setEndX(v1.x);
-        centerLine.setEndY(v1.y);
         centerLine.setControlX2(v1.x + w.x);
         centerLine.setControlY2(v1.y + w.y);
+    }
+
+    private void replaceStart() {
+        Vector v1 = new Vector(input.getLayoutX() + input.getTranslateX(),
+                input.getLayoutY() + input.getTranslateY());
+        Vector w = new Vector(centerLine.getControlX1(), centerLine.getControlY1());
+
+        w.diffIP(v1);
+        w.normalizeIP();
+        w.multIP(TuringMachineDrawer.STATE_RADIUS);
+
+        w.addIP(v1);
+        centerLine.setStartX(w.x);
+        centerLine.setStartY(w.y);
+    }
+
+    private void replaceEnd() {
+        Vector v1 = new Vector(output.getLayoutX() + output.getTranslateX(),
+                output.getLayoutY() + output.getTranslateY());
+        Vector w = new Vector(centerLine.getControlX2(), centerLine.getControlY2());
+
+        w.diffIP(v1);
+        w.normalizeIP();
+        w.multIP(TuringMachineDrawer.STATE_RADIUS);
+
+        w.addIP(v1);
+        centerLine.setEndX(w.x);
+        centerLine.setEndY(w.y);
     }
 
     /**
