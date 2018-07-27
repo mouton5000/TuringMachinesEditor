@@ -148,6 +148,23 @@ You can now complete the transitions table of the graph:
 
 ![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart32.png)
 
+### Save the machine
+
+Click on the "Save" icon to save the machine.
+
+![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart33.png)
+
+On the left of this icon is the "Open" icon to load a saved machine. On the left again is the "New" icon to clear the screen and start a new machine.
+
 ### Execute the machine
 
-Coming soon
+When the machine is complete, you can click on the Gear wheel icon to enter the "Automatic firing" mode. The menu change. Click again on the same icon to return to the main menu. 
+
+![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart34.png)
+![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart35.png)
+
+The initial state becomes blue, meaning it is the current state of the machine at the begining of the execution. Click on the play icon in the menu to run the machine. The execution is animated. By clicking on the stop icon, you return to the first configuration of the machine, you can then start the execution again. If you want to change the input word of the machine or change the states or the transitions of the graph, you have to quit the "Automatic firing" mode by clicking again on the Gear wheel icon.
+
+### More...
+
+Full help is displayed if you click on the "?" icon of the menu. 
