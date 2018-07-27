@@ -35,7 +35,7 @@ We are going to make a machine which accepts palindromes. It works with a 1D inf
 
 Each head is placed at an extremity of the word. If the two heads read the same symbol, they delete it by writing a BLANK symbol and move the the next symbol (one head move to the right and the other to the left). If the two heads do not read the same symbol, the machine answers NO. If the two heads read a BLANK, the machine return YES.
 
-The machine has then three states A, B and C. The state B is final refusing and the state C is final accepting. The machine has the following transition table:
+The machine has then three states A, B and C. The state A is initial, the state B is final refusing and the state C is final accepting. The machine has the following transition table:
 
 | Input | Output | First head symbol | Second head symbol | First head actions | Second head actions |
 |-------|--------|-------------------|--------------------|--------------------|---------------------|
@@ -52,7 +52,7 @@ First click on the cells of the tape to write a symbol on that tape.
 
 ![Click on a cell.](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart02.png) ![Click on a symbol to write it in the cell.](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart03.png)
 
-Do that until you write a complete input word. 
+Do that until you write a complete input word. If you make a mistake, you can erase a symbol of a cell by clicking on that cell and by selecting another symbol. The symbol &#x2205; is the BLANK symbol.
 
 ![Complete input](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart04.png) 
 
@@ -81,7 +81,7 @@ Click on the leftmost icon to enter the "Add/Remove nodes/transitions" mode. Whi
 
 ![Edit graph mode](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart12.png)
 
-You can now click three time on the white screen to add three nodes A, B and C. You can drag and drop the nodes to move them. If you added a fourth node by accident, you can ignore it for now.
+You can now click three time on the white screen to add three nodes A, B and C. You can drag and drop the nodes to move them. If you add other nodes by accident, you can ignore them for now, we will remove them later.
 
 ![Click on the white screen to add nodes](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart13.png)
 
@@ -95,9 +95,27 @@ Then click on the transition. You can edit the shape of the transition by draggi
 ![Edit the shape of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart16.png)
 ![Edit the shape of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart17.png)
 
-You can now add another transition from A to B and a transition from A to C to complete the graph.
+You can now add four other transitions : two from A to A, one from A to B and one from A to C. Once this is done, you can click again on the leftmost icon of the menu to quit the "Add/Remove nodes/transitions" mode.
 
 ![Complete the graph](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart18.png)
+
+If you add other transitions by accident, you can ignore them for now, we will remove them later.
+ 
+### Initial and final states
+
+Long click on a state, until its color is darkened, to display the settings of a state. 
+
+![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart19.png)
+![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart20.png)
+
+Note : you can remove any node you added by accident by opening, for each of those states, this menu and by clicking on the bottom right icon. This only works if you first enter the "Add/Remove nodes/transitions" mode.
+
+Click on the top right icon to make the state A as an initial state. Open the same menu for B and click on the top left icon to make B as a final state. By default, if the machine solves a decision problem, a final state corresponds to the answer NO.  Open the menu for C and click on the top center icon to make C as a final accepting state corresponding to the answer YES.
+
+![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart21.png)
+
+We now have to edit the transitions in order to include the informations of the transitions tables : the read symbols of the tape and the actions. 
+
 
 
 ### Execute the machine
