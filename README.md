@@ -14,7 +14,7 @@ The machines can be restricted to usual basic machines (a single 1D-tape, a sing
 ## Who is this application for?
 
 This application is for
-* students and teachers for Computational complexity theory courses (especially teachers who work with an interactive whiteboard).
+* students and teachers of Computational complexity theory courses (especially teachers who work with an interactive whiteboard or students who want to practice).
 * people who love Turing machines and want a great graphical editor.
 
 ## How to install and run it?
