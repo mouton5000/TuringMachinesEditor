@@ -31,7 +31,7 @@ When you run the application, you start with the following window.
 
 ### The machine
 
-We are going to make a machine which accepts palindroms. It works with a 1D infinite tape and two heads. 
+We are going to make a machine which accepts palindromes. It works with a 1D infinite tape and two heads. 
 
 Each head is placed at an extremity of the word. If the two heads read the same symbol, they delete it by writing a BLANK symbol and move the the next symbol (one head move to the right and the other to the left). If the two heads do not read the same symbol, the machine answers NO. If the two heads read a BLANK, the machine return YES.
 
