@@ -31,7 +31,7 @@ When you run the application, you start with the following window.
 
 ### The machine
 
-We are going to make a machine which accepts palindromes. It works with a 1D infinite tape and two heads. 
+We are going to make a machine which accepts palindromes. It works with a 1D infinite tape and two heads. In order to simplify the machine, we assume the size of the input word is even.
 
 Each head is placed at an extremity of the word. If the two heads read the same symbol, they delete it by writing a BLANK symbol and move the the next symbol (one head move to the right and the other to the left). If the two heads do not read the same symbol, the machine answers NO. If the two heads read a BLANK, the machine return YES.
 
@@ -125,12 +125,28 @@ Long click on one of the transitions from A to A, until its color is darkened, t
 
 Note : you can remove any transition you added by accident by opening, for each of those transitions, this menu and by clicking on the top right icon. This only works if you first enter the "Add/Remove nodes/transitions" mode.
 
-We want this transition to be fired if the black head and the red head read a "1". Click on the symbol 1. Then click on the red rectangle and finally again on the symbol 1. You should see a black 1 and a red 1 meaning that the two heads should read a 1. 
+We want this transition to be fired if the black head and the red head read a "1". Click on the symbol 1. Then click on the red rectangle to select the red head and finally again on the symbol 1. You should see a black 1 and a red 1 meaning that the two heads should read a 1. 
 
 ![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart24.png)
 ![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart25.png)
 ![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart26.png)
 
+If this transition is fired, we want the black head to delete the symbol on its current position and to move to the right and we want the red head to delete its symbol and to move to the left.
+
+Click on the top center symbol to quit the submenu related to the read symbols and enter the submenu related to the actions.
+
+![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart27.png)
+
+Now click on the black rectangle to select the black head, drag the arrow symbols to the left and click on the BLANK symbol (&#x2205;). This means that the black head will write a BLANK symbol if this transition is fired. Then click on the right arrow, meaning that the black head will move to the right. Then select the red head and click again on the BLANK symbol and on the left arrow. If you make a mistake, you can remove the last action of the list by clicking on the trash icon (to the left of the symbols). 
+
+![Actions of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart28.png)
+![Actions of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart29.png)
+![Actions of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart30.png)
+![Actions of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart31.png)
+
+You can now complete the transitions table of the graph:
+
+![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart32.png)
 
 ### Execute the machine
 
