@@ -163,7 +163,11 @@ When the machine is complete, you can click on the Gear wheel icon to enter the 
 ![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart34.png)
 ![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart35.png)
 
-The initial state becomes blue, meaning it is the current state of the machine at the begining of the execution. Click on the play icon in the menu to run the machine. The execution is animated. By clicking on the stop icon, you return to the first configuration of the machine, you can then start the execution again. If you want to change the input word of the machine or change the states or the transitions of the graph, you have to quit the "Automatic firing" mode by clicking again on the Gear wheel icon.
+The initial state becomes blue, meaning it is the current state of the machine at the begining of the execution. Click on the play icon in the menu to run the machine. The execution is animated. By clicking on the stop icon, you return to the first configuration of the machine, you can then start the execution again. 
+
+![Complete the transitions](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart36.png)
+
+If you want to change the input word of the machine or change the states or the transitions of the graph, you have to quit the "Automatic firing" mode by clicking again on the Gear wheel icon.
 
 ### More...
 
