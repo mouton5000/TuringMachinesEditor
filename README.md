@@ -103,7 +103,7 @@ If you add other transitions by accident, you can ignore them for now, we will r
  
 ### Initial and final states
 
-Long click on a state, until its color is darkened, to display the settings of a state. 
+Long click on the state A, until its color is darkened, to display the settings of that state. 
 
 ![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart19.png)
 ![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart20.png)
@@ -113,9 +113,23 @@ Note : you can remove any node you added by accident by opening, for each of tho
 Click on the top right icon to make the state A as an initial state. Open the same menu for B and click on the top left icon to make B as a final state. By default, if the machine solves a decision problem, a final state corresponds to the answer NO.  Open the menu for C and click on the top center icon to make C as a final accepting state corresponding to the answer YES.
 
 ![Settings of a state](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart21.png)
+ 
+### Transitions table
 
-We now have to edit the transitions in order to include the informations of the transitions tables : the read symbols of the tape and the actions. 
+We now have to edit the transitions in order to include the informations of the transitions table: the read symbols of the tape and the actions.
 
+Long click on one of the transitions from A to A, until its color is darkened, to display the settings of the transition.
+
+![Settings of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart22.png)
+![Settings of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart23.png)
+
+Note : you can remove any transition you added by accident by opening, for each of those transitions, this menu and by clicking on the top right icon. This only works if you first enter the "Add/Remove nodes/transitions" mode.
+
+We want this transition to be fired if the black head and the red head read a "1". Click on the symbol 1. Then click on the red rectangle and finally again on the symbol 1. You should see a black 1 and a red 1 meaning that the two heads should read a 1. 
+
+![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart24.png)
+![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart25.png)
+![Read symbols of a transition](https://raw.githubusercontent.com/mouton5000/TuringMachinesEditor/master/doc/quickstart26.png)
 
 
 ### Execute the machine
