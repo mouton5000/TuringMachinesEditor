@@ -11,6 +11,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
+import java.util.Arrays;
+import java.util.List;
+
 class Settings {
     long duration;
     int nbIterations;
@@ -79,8 +82,11 @@ class Settings {
 
         hbox2.getChildren().addAll(tapeEditCheckBox);
 
+        Label errorLabel = new Label();
+        errorLabel.setWrapText(true);
+        errorLabel.setMinHeight(TuringMachineDrawer.SETTINGS_ERROR_LABEL_HEIGHT);
 
-        vbox2.getChildren().addAll(hbox2, tapeEditTextArea);
+        vbox2.getChildren().addAll(hbox2, tapeEditTextArea, errorLabel);
         vbox.getChildren().addAll(hbox, hbox3, vbox2);
 
         dialogPane.setContent(vbox);
@@ -94,18 +100,85 @@ class Settings {
                         return;
 
                     String tapesDescription = tapeEditTextArea.getText();
-                    String tapeBoundRegex = "((-?\\d+|I) ){3}(-?\\d+|I)\\n";
-                    String tapeNbHeadsRegex = "\\d+\\n";
-                    String tapeHeadDescriptionRegex = "((\\d+ ){4}\\d+\\n)*";
-                    String tapeInputCoordinatesRegex = "\\d+ \\d+\\n";
-                    String tapeInputRegex = "([0-9A-Z ]*\\n?)*";
-                    String taperegex = tapeBoundRegex + tapeNbHeadsRegex + tapeHeadDescriptionRegex +
-                            tapeInputCoordinatesRegex + tapeInputRegex;
-                    String regex =
-                            "([A-Z0-9] )*[A-Z0-9]?\\n("+taperegex+";\\n)*("+taperegex+")?";
-                    System.out.println(regex);
-                    if(!tapesDescription.matches(regex))
+
+                    String[] lines = tapesDescription.split("\n");
+                    int size = lines.length;
+
+                    String symbolsRegex = "([A-Z0-9] )*[A-Z0-9]?";
+                    if(size <= 0 || !lines[0].matches(symbolsRegex)) {
+                        errorLabel.setText("The first line should contain only valid symbols (0, 1, ..., 9, " +
+                                "A, B, ..., Z) separated by a space.");
                         event.consume();
+                        return;
+                    }
+
+                    List<String> symbols = Arrays.asList(lines[0].split(" "));
+
+                    String tapeBoundRegex = "((-?\\d+|I) ){3}(-?\\d+|I)";
+                    String tapeNbHeadsRegex = "\\d+";
+                    String tapeHeadDescriptionRegex = "(-?\\d+ ){4}-?\\d+";
+                    String tapeInputCoordinatesRegex = "\\d+ \\d+";
+
+                    String tapeInputRegex = "(" + String.join("|", symbols) + ")*";
+
+
+                    int i = 1;
+                    while(true){
+                        if(size <= i || !lines[i].matches(tapeBoundRegex)){
+                            errorLabel.setText("Line " + (i + 1) + " should contain only four (positive or negative) " +
+                                    "integers or the symbol I separated by a space.");
+                            event.consume();
+                            return;
+                        }
+                        if(size <= i + 1 || !lines[i + 1].matches(tapeNbHeadsRegex)) {
+                            errorLabel.setText("Line " + (i + 1) + " should contain only one positive integer.");
+                            event.consume();
+                            return;
+                        }
+                        Integer nbHeads = Integer.valueOf(lines[i + 1]);
+                        for(int j = 0; j < nbHeads; j++){
+                            if(size <= i + 2 + j || !lines[i + 2 + j].matches(tapeHeadDescriptionRegex)) {
+                                errorLabel.setText("Line " + (i + 2 + j + 1) + " should contain only five integers " +
+                                        "separated by a space.");
+                                event.consume();
+                                return;
+                            }
+                            String[] x = lines[i + 2 + j].split(" ");
+                            for(int xi = 2; xi < 5; xi++){
+                                int xx = Integer.valueOf(x[xi]);
+                                if(xx < 0 || xx > 255){
+                                    errorLabel.setText("The three last integers of line " + (i + 2 + j + 1) + " " +
+                                            "should be between 0 and 255.");
+                                    event.consume();
+                                    return;
+                                }
+                            }
+                        }
+                        i = i + 2 + nbHeads;
+                        if(size <= i || !lines[i].matches(tapeInputCoordinatesRegex)) {
+                            errorLabel.setText("Line " + (i + 1) + " should contain only two (positive or negative " +
+                                    "integers.");
+                            event.consume();
+                            return;
+                        }
+
+                        i++;
+                        while(i < size && !lines[i].equals(";")){
+                            if(!lines[i].matches(tapeInputRegex)) {
+                                errorLabel.setText("Line " + (i + 1) + " should contain only the symbols given on the" +
+                                        " first line.");
+                                event.consume();
+                                return;
+                            }
+                            i++;
+                        }
+
+                        if(i >= size)
+                            break;
+                        i++;
+                    }
+                    errorLabel.setText("");
+
                 }
         );
 

@@ -296,6 +296,12 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_ERROR = "TMError";
 
     /**
+     * The initial value of the variable {@link #maximumNonDeterministicSearch}
+     * @see #maximumNonDeterministicSearch
+     */
+    private static final int INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH = 100000;
+
+    /**
      * The maximum number of iterations before the machine stops its execution.
      *
      * Each detemrinistic/non deterministic machine search for an accepting path. If the search uses more iterations
@@ -304,7 +310,8 @@ public class TuringMachine {
      * the number of iterations of the computation of the machine. For a non deterministic machine, it equals the
      * number of explored nodes in the exploration tree used to find an accepting path.
      *
-     * Its initial value is 10000.
+     * Its initial value is given by {@link #INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH}.
+     * @see #INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH
      */
     private int maximumNonDeterministicSearch;
 
@@ -377,7 +384,6 @@ public class TuringMachine {
      */
     private Configuration manualInitialConfiguration;
 
-
     /**
      * Construction of the machine.
      *
@@ -385,7 +391,7 @@ public class TuringMachine {
      */
     public TuringMachine(){
         nbStates = 0;
-        maximumNonDeterministicSearch = 10000;
+        maximumNonDeterministicSearch = INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH;
 
         outputTransitions = new ArrayList<>();
         statesNames = new ArrayList<>();

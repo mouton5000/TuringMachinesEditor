@@ -462,6 +462,7 @@ class TapeBorderPane extends BorderPane implements MouseListener {
 
     void eraseTape(String tapeDescription) {
         try {
+            TuringMachineDrawer drawer = TuringMachineDrawer.getInstance();
             tapeDescription = tapeDescription.trim();
             String[] tapeCellsDescriptionAr = tapeDescription.split("\n");
 
@@ -477,25 +478,26 @@ class TapeBorderPane extends BorderPane implements MouseListener {
                 top = bottom;
 
             if(right != null && right < 0) {
-                TuringMachineDrawer.getInstance().setTapeLeftBound(tape, left);
-                TuringMachineDrawer.getInstance().setTapeRightBound(tape, right);
+                drawer.setTapeLeftBound(tape, left);
+                drawer.setTapeRightBound(tape, right);
             }
             else{
-                TuringMachineDrawer.getInstance().setTapeRightBound(tape, right);
-                TuringMachineDrawer.getInstance().setTapeLeftBound(tape, left);
+                drawer.setTapeRightBound(tape, right);
+                drawer.setTapeLeftBound(tape, left);
             }
 
             if(top != null && top < 0) {
-                TuringMachineDrawer.getInstance().setTapeBottomBound(tape, bottom);
-                TuringMachineDrawer.getInstance().setTapeTopBound(tape, top);
+                drawer.setTapeBottomBound(tape, bottom);
+                drawer.setTapeTopBound(tape, top);
             }
             else{
-                TuringMachineDrawer.getInstance().setTapeTopBound(tape, top);
-                TuringMachineDrawer.getInstance().setTapeBottomBound(tape, bottom);
+                drawer.setTapeTopBound(tape, top);
+                drawer.setTapeBottomBound(tape, bottom);
             }
 
-
             int nbHeads = Integer.valueOf(tapeCellsDescriptionAr[1].trim());
+            int prevNbHead = tape.getNbHeads();
+
             for(int i = 2; i < nbHeads + 2; i++){
                 String[] headInfo = tapeCellsDescriptionAr[i].trim().split(" ");
                 if(headInfo.length != 5){
@@ -508,14 +510,23 @@ class TapeBorderPane extends BorderPane implements MouseListener {
                 int green = Integer.valueOf(headInfo[3]);
                 int blue = Integer.valueOf(headInfo[4]);
 
-                TuringMachineDrawer drawer = TuringMachineDrawer.getInstance();
                 Color color = Color.rgb(red, green, blue);
-                if(drawer.isAvailable(color))
-                    drawer.addHead(tape, line, column, color);
+
+                if(drawer.isAvailable(color)) {
+                    if(prevNbHead >= i - 1)
+                        drawer.editHeadColor(tape, i - 2, color);
+                    else
+                        drawer.addHead(tape, line, column, color);
+                }
                 else {
                     Pair<Tape, Integer> pair = drawer.getHead(color);
-                    if(tape == pair.first)
-                        drawer.moveHead(tape, line, column, pair.second);
+                    if(tape == pair.first && i - 2 == pair.second)
+                        continue;
+                    if(prevNbHead < i - 1){
+                        Color c2 = drawer.getAvailableColor();
+                        drawer.addHead(tape, line, column, c2);
+                    }
+                    drawer.swapHeadColor(tape, i - 2, pair.first, pair.second);
                 }
             }
 

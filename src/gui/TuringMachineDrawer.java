@@ -393,6 +393,8 @@ public class TuringMachineDrawer extends Application {
     static final Color MENU_CLICKABLE_ICON_COLOR = Color.BLACK;
     static final Color MENU_NON_CLICKABLE_ICON_COLOR = Color.LIGHTGRAY;
 
+    static final int SETTINGS_ERROR_LABEL_HEIGHT = 50;
+
     /**
      * Set to true when an animation is started. Enable or block the user possibilities when an animation starts.
      */
@@ -1253,6 +1255,53 @@ public class TuringMachineDrawer extends Application {
         graphPane.editHeadColor(tape, head, color);
         tapesPane.editHeadColor(tape, head, color);
         this.headsColors.put(color, new Pair<>(tape, head));
+        setEnableToSave();
+    }
+
+    /**
+     * @return a color not used by any head of the machine.
+     */
+    Color getAvailableColor(){
+        int r = 0, g = 0, b = 0;
+        while(!this.isAvailable(Color.rgb(r, g, b))){
+            if(r == 255)
+                r = 0;
+            else{
+                r++;
+                continue;
+            }
+
+            if(g == 255)
+                g = 0;
+            else{
+                g++;
+                continue;
+            }
+
+            if(b == 255)
+                return null;
+            else
+                b++;
+        }
+        return Color.rgb(r, g, b);
+    }
+
+    /**
+     * Swap the colors of the two given heads.
+     * @param tape
+     * @param head
+     * @param tape2
+     * @param head2
+     */
+    void swapHeadColor(Tape tape, int head, Tape tape2, int head2) {
+        Color swap = getAvailableColor();
+        Color c1 = getColorOfHead(tape, head);
+        Color c2 = getColorOfHead(tape2, head2);
+
+        editHeadColor(tape, head, swap);
+        editHeadColor(tape2, head2, c1);
+        editHeadColor(tape, head, c2);
+
         setEnableToSave();
     }
 
