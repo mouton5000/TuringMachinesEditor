@@ -119,7 +119,7 @@ class Settings {
                     String tapeHeadDescriptionRegex = "(-?\\d+ ){4}-?\\d+";
                     String tapeInputCoordinatesRegex = "\\d+ \\d+";
 
-                    String tapeInputRegex = "(" + String.join("|", symbols) + ")*";
+                    String tapeInputRegex = "(" + String.join("|", symbols) + "| )*";
 
 
                     int i = 1;
