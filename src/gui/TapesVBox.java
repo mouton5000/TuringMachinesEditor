@@ -352,6 +352,7 @@ class TapesVBox extends VBox {
         for(String symbol : symbolsDescriptionAr)
             TuringMachineDrawer.getInstance().addSymbol(symbol);
 
+
         tapesPane.eraseTapes(tapesCellsDescription.substring(index + 1));
     }
 

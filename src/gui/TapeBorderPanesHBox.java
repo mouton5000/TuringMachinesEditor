@@ -513,15 +513,19 @@ class TapeBorderPane extends BorderPane implements MouseListener {
                 Color color = Color.rgb(red, green, blue);
 
                 if(drawer.isAvailable(color)) {
-                    if(prevNbHead >= i - 1)
+                    if(prevNbHead >= i - 1) {
                         drawer.editHeadColor(tape, i - 2, color);
+                        drawer.moveHead(tape, line, column, i - 2);
+                    }
                     else
                         drawer.addHead(tape, line, column, color);
                 }
                 else {
                     Pair<Tape, Integer> pair = drawer.getHead(color);
-                    if(tape == pair.first && i - 2 == pair.second)
+                    if(tape == pair.first && i - 2 == pair.second) {
+                        drawer.moveHead(tape, line, column, i - 2);
                         continue;
+                    }
                     if(prevNbHead < i - 1){
                         Color c2 = drawer.getAvailableColor();
                         drawer.addHead(tape, line, column, c2);
