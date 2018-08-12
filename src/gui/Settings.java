@@ -116,8 +116,8 @@ class Settings {
 
                     String tapeBoundRegex = "((-?\\d+|I) ){3}(-?\\d+|I)";
                     String tapeNbHeadsRegex = "\\d+";
-                    String tapeHeadDescriptionRegex = "(-?\\d+ ){4}-?\\d+";
-                    String tapeInputCoordinatesRegex = "\\d+ \\d+";
+                    String tapeHeadDescriptionRegex = "-?\\d+ -?\\d+ \\d+ \\d+ \\d+";
+                    String tapeInputCoordinatesRegex = "-?\\d+ -?\\d+";
 
                     String tapeInputRegex = "(" + String.join("|", symbols) + "| )*";
 
