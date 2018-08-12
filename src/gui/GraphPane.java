@@ -271,7 +271,6 @@ class GraphPane extends Pane implements MouseListener {
             return;
         Integer input = start.state;
         Integer output = end.state;
-        System.out.println(input+" "+output);
         TuringMachineDrawer.getInstance().addTransition(input, output);
     }
 
