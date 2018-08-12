@@ -559,6 +559,7 @@ public class TuringMachine {
 
         outputTransitions.remove(state);
         nbStates--;
+        initialStates.remove(state);
         statesNames.remove(state);
         finalStates.remove(state);
         acceptingStates.remove(state);
