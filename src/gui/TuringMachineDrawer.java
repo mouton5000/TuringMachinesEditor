@@ -578,7 +578,7 @@ public class TuringMachineDrawer extends Application {
 
         // For the initialization, this boolean is set to true even if there is nothing to save.
         // The method #setNotEnableToSave is called later to set it to false.
-        this.enableToSave = true;
+        this.enableToSave = false;
         lastSaveFilename = null;
 
         this.animating = false;
@@ -2251,21 +2251,52 @@ public class TuringMachineDrawer extends Application {
 
     /**
      * Clear all the machine, remove all states and transitions of the graph, all the tapes, all the heads and all
-     * the symbols.
+     * the symbols. Ask for confirmation before erasing an existing and unsaved machine.
      */
-    private void clearMachine(){
+    private boolean clearMachine(){
+
+        if(enableToSave) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+
+            alert.setTitle("Clear current machine?");
+            alert.setHeaderText(null);
+            alert.setContentText("The current file has not been save. Do you want to save before clearing the machine?");
+
+
+            ButtonType yes = ButtonType.YES;
+            ButtonType no = ButtonType.NO;
+            ButtonType cancel = ButtonType.CANCEL;
+
+            alert.getButtonTypes().setAll(yes, no, cancel);
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent()) {
+                if (result.get() == yes) {
+                    if(!saveMachine())
+                        return false;
+                } else if (result.get() == cancel)
+                    return false;
+            } else
+                return false;
+        }
+
         if(buildMode)
             this.unbuild();
         this.machine.clear();
         this.graphPane.clear();
         this.tapesPane.clear();
+        return true;
     }
 
     /**
      * Init a new machine with no state, one 1D tape and one head.
+     * Ask for confirmation before erasing an existing and unsaved machine.
      */
     void newMachine(){
-        clearMachine();
+
+        if(!clearMachine())
+            return;
 
         this.addTape();
         this.addHead(this.machine.getTape(0), 0, 0, Color.BLACK);
@@ -2377,8 +2408,10 @@ public class TuringMachineDrawer extends Application {
 
     /**
      * Ask the user to choose a *.tm file and load the machine described in that file.
+     * Ask for confirmation before erasing an existing and unsaved machine.
      */
     void loadMachine(){
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose loadMachine file");
         fileChooser.getExtensionFilters().addAll(
@@ -2393,8 +2426,10 @@ public class TuringMachineDrawer extends Application {
 
     /**
      * Load the machine described in that file.
+     * Ask for confirmation before erasing an existing and unsaved machine.
      */
     private void loadMachine(String filename){
+
         StringBuilder sb = new StringBuilder();
         try {
 
@@ -2403,9 +2438,11 @@ public class TuringMachineDrawer extends Application {
             while((line = br.readLine()) != null)
                 sb.append(line);
 
+            if(!clearMachine())
+                return;
+
             JSONObject jsonObject = new JSONObject(sb.toString());
 
-            clearMachine();
             loadJSON(jsonObject);
 
             br.close();
