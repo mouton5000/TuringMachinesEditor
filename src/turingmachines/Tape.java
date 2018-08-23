@@ -150,7 +150,7 @@ public class Tape{
      * @return the default column of a head added to the tape: the center column if the tape is not
      * vertically semi-infinite and the finite bound otherwise.
      */
-    private int initColumn(){
+    int initColumn(){
         if(tapeLeftBound == null && tapeRightBound == null)
             return 0;
         if(tapeLeftBound == null)
@@ -163,7 +163,7 @@ public class Tape{
      * @return the default line of a head added to the tape: the center line if the tape is not
      * horizontally semi-infinite and the finite bound otherwise.
      */
-    private int initLine(){
+    int initLine(){
         if(tapeTopBound == null && tapeBottomBound == null)
             return 0;
         if(tapeTopBound == null)
@@ -181,22 +181,12 @@ public class Tape{
     }
 
     /**
-     * Add a new head to the tape at the position given by {@link #initColumn()} and {@link #initLine()}.
-     */
-    public void addHead(){
-        int column = initColumn();
-        int line = initLine();
-        addHead(line, column);
-    }
-
-    /**
      * Add a new head to the tape at the given line and column.
-     * A {@link TuringMachine#SUBSCRIBER_MSG_ADD_HEAD} message is broadcast to the class {@link util.Subscriber}.
+     *
      * @param line
      * @param column
-     * @see util.Subscriber
      */
-    public void addHead(int line, int column){
+    void addHead(int line, int column){
         if(tapeLeftBound != null && column < tapeLeftBound)
             return;
         if(tapeRightBound != null && column > tapeRightBound)
@@ -209,22 +199,17 @@ public class Tape{
         nbHeads++;
         initialHeadsColumn.add(column);
         initialHeadsLine.add(line);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD, this.machine, this, nbHeads - 1, line, column);
     }
 
     /**
      * Remove the given head from the tape. Be aware that every head with a greater index identifier will see their
      * index decreased by one.
-     * A {@link TuringMachine#SUBSCRIBER_MSG_ADD_HEAD} message is broadcast to the class {@link util.Subscriber}.
      * @param head index of the head in the list of heads of this tape
-     * @see util.Subscriber
      */
-    public void removeHead(int head){
-        machine.removeHeadFromTransitions(this, head);
+    void removeHead(int head){
         nbHeads--;
         initialHeadsColumn.remove(head);
         initialHeadsLine.remove(head);
-        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this.machine, this, head);
     }
 
     /**
@@ -348,7 +333,7 @@ public class Tape{
     /**
      * Set the column of the given head at the beggining of an execution of the machine to the given column.
      * A {@link TuringMachine#SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED} message is broadcast to the class
-     * {@link util.Subscriber}.
+     * {@link util.Subscriber} if the given column is valid.
      *
      * @param head index of the head in the list of heads of the machine.
      * @param column
@@ -361,7 +346,8 @@ public class Tape{
         if ((tapeLeftBound == null || column >= tapeLeftBound)
                 && (tapeRightBound == null || column <= tapeRightBound)) {
             initialHeadsColumn.set(head, column);
-            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, initialHeadsLine.get(head), column);
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine,
+                    this, head, initialHeadsLine.get(head), column);
         }
     }
 
@@ -386,7 +372,7 @@ public class Tape{
     /**
      * Set the line of the given head at the beggining of an execution of the machine to the given line.
      * A {@link TuringMachine#SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED} message is broadcast to the class
-     * {@link util.Subscriber}.
+     * {@link util.Subscriber} if the given line is valid.
      *
      * @param head index of the head in the list of heads of the machine.
      * @param line
@@ -399,7 +385,8 @@ public class Tape{
         if ((tapeBottomBound == null || line >= tapeBottomBound)
                 && (tapeTopBound == null || line <= tapeTopBound)) {
             initialHeadsLine.set(head, line);
-            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine, this, head, line, initialHeadsColumn.get(head));
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED, this.machine,
+                    this, head, line, initialHeadsColumn.get(head));
 
         }
     }

@@ -441,6 +441,14 @@ public class TuringMachine {
             return null;
         Transition a = new Transition(this, input, output);
         outputTransitions.get(input).add(a);
+
+        for(Tape tape : this.tapes) {
+            a.addTape(tape);
+            for(int head = 0; head < tape.getNbHeads(); head++){
+                a.addHead(tape);
+            }
+        }
+
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION, this, a);
         return a;
     }
@@ -633,6 +641,11 @@ public class TuringMachine {
     public Tape addTape(){
         Tape tape = new Tape(this);
         tapes.add(tape);
+
+        for(int state = 0; state < this.getNbStates(); state++)
+            for(Transition transition : this.outputTransitions.get(state))
+                transition.addTape(tape);
+
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TAPE, this, tape);
         return tape;
     }
@@ -668,6 +681,11 @@ public class TuringMachine {
     public void removeTape(Tape tape){
         for(int head = tape.getNbHeads() - 1; head >= 0; head--)
             tape.removeHead(head);
+
+        for(int state = 0; state < this.getNbStates(); state++)
+            for(Transition transition : this.outputTransitions.get(state))
+                transition.removeTape(tape);
+
         tapes.remove(tape);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TAPE, this, tape);
     }
@@ -685,6 +703,50 @@ public class TuringMachine {
     public int getNbTapes(){
         return tapes.size();
     }
+
+    /**
+     * Add a new head to the tape at the position given by {@link Tape#initColumn()} and {@link Tape#initLine()}.
+     */
+    public void addHead(Tape tape){
+        this.addHead(tape, tape.initLine(), tape.initColumn());
+    }
+
+    /**
+     * Add a new head to the tape at the given line and column.
+     * A {@link TuringMachine#SUBSCRIBER_MSG_ADD_HEAD} message is broadcast to the class {@link util.Subscriber}.
+     * @param line
+     * @param column
+     * @see util.Subscriber
+     */
+    public void addHead(Tape tape, int line, int column){
+        tape.addHead(line, column);
+
+        for(int state = 0; state < this.getNbStates(); state++)
+            for(Transition transition : this.outputTransitions.get(state))
+                transition.addHead(tape);
+
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_HEAD, this, tape, tape.getNbHeads() - 1,
+                line, column);
+    }
+
+    /**
+     * Remove the given head from the given tape. Be aware that every head with a greater index identifier will see
+     * their index decreased by one.
+     * A {@link TuringMachine#SUBSCRIBER_MSG_ADD_HEAD} message is broadcast to the class {@link util.Subscriber}.
+     * @param tape
+     * @param head index of the head in the list of heads of the given tape
+     * @see util.Subscriber
+     */
+    public void removeHead(Tape tape, int head){
+        tape.removeHead(head);
+
+        for(int state = 0; state < this.getNbStates(); state++)
+            for(Transition transition : this.outputTransitions.get(state))
+                transition.removeHead(tape, head);
+
+        Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_HEAD, this, tape, head);
+    }
+
 
     /**
      * Add a new symbol to the machine.
@@ -772,21 +834,6 @@ public class TuringMachine {
         return symbols.size();
     }
 
-    /**
-     * Remove the given head of the given tape from all the transitions (the read symbols and
-     * the actions associated to that head) if the head belongs to the tape.
-     * @param tape
-     * @param head
-     */
-    void removeHeadFromTransitions(Tape tape, int head) {
-        if(head < 0 || head <= tape.getNbHeads())
-            return;
-        for(List<Transition> transitions: this.outputTransitions)
-            for(Transition transition: transitions) {
-                transition.removeAllReadSymbols(tape, head);
-                transition.removeAllActions(tape, head);
-            }
-    }
     /**
      * Declare the state identified by the given index as final. In a machine answering a decision problem;, if the
      * state is final but not accepting, the answer is considered as a NO.
@@ -1458,8 +1505,8 @@ public class TuringMachine {
         t.addSymbol("1");
 
         Tape tape1 = t.addTape();
-        tape1.addHead();
-        tape1.addHead();
+        t.addHead(tape1, 0, 0);
+        t.addHead(tape1, 0, 0);
 
         tape1.writeInput(0, 0, "1");
         tape1.writeInput(0, 1, "0");
@@ -1571,10 +1618,7 @@ public class TuringMachine {
         tape1.setLeftBound(0);
         tape1.setRightBound(2);
 
-        tape1.addHead();
-
-        tape1.setInitialHeadColumn(0, 0);
-        tape1.setInitialHeadLine(0, 0);
+        t.addHead(tape1, 0, 0);
 
         tape1.writeInput(0, 0, "1");
         tape1.writeInput(0, 1, "1");

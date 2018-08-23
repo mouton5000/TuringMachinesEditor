@@ -1171,7 +1171,7 @@ public class TuringMachineDrawer extends Application {
             return;
         }
         this.nextHeadColor = color;
-        tape.addHead(line, column);
+        this.machine.addHead(tape, line, column);
     }
 
     /**
@@ -1348,11 +1348,11 @@ public class TuringMachineDrawer extends Application {
             alert.setContentText("Confirm the deletion.");
             alert.showAndWait().ifPresent(buttonType -> {
                 if(buttonType == ButtonType.OK)
-                    tape.removeHead(head);
+                    this.machine.removeHead(tape, head);
             });
         }
         else
-            tape.removeHead(head);
+            this.machine.removeHead(tape, head);
     }
 
     /**

@@ -113,6 +113,26 @@ public class Transition {
         return output;
     }
 
+    void addTape(Tape tape){
+        this.readSymbols.put(tape, new LinkedList<>());
+    }
+
+    void removeTape(Tape tape){
+        this.readSymbols.remove(tape);
+    }
+
+    void addHead(Tape tape){
+        this.readSymbols.get(tape).add(new HashSet<>());
+    }
+
+    void removeHead(Tape tape, int head){
+        this.removeAllReadSymbols(tape, head);
+        this.removeAllActions(tape, head);
+        this.readSymbols.get(tape).remove(head);
+    }
+
+
+
     /**
      * @return an iterator on the list of actions of the transition.
      */
@@ -255,10 +275,11 @@ public class Transition {
         if(list.size() <= head)
             return;
 
-        Set<String> readSymbols = list.remove(head);
+        Set<String> readSymbols = list.get(head);
         for(String s : readSymbols)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
                     this.machine, this, tape, head, s);
+        readSymbols.clear();
     }
 
     /**

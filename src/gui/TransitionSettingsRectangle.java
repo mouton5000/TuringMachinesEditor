@@ -254,6 +254,9 @@ class TransitionSettingsRectangle extends SettingsRectangle {
             else
                 chooseHead(null, 0);
         }
+        else
+            if(currentTape == tape && currentHead > head)
+                currentHead--;
     }
 
     void editHeadColor(Tape tape, int head, Color color) {
