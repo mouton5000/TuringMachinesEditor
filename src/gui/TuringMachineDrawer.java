@@ -2342,6 +2342,9 @@ public class TuringMachineDrawer extends Application {
      * @return true if the machine was effectively saved by the user
      */
     boolean saveMachine(){
+        if(!enableToSave)
+            return false;
+        
         if(lastSaveFilename != null)
             return saveAsMachine(lastSaveFilename);
         else
@@ -2354,8 +2357,6 @@ public class TuringMachineDrawer extends Application {
      * @return true if the machine was effectively saved by the user
      */
     boolean saveAsMachine() {
-        if(!enableToSave)
-            return false;
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose save file");
@@ -2386,8 +2387,6 @@ public class TuringMachineDrawer extends Application {
      * @return true if the machine was effectively saved
      */
     private boolean saveAsMachine(String filename){
-        if(!enableToSave)
-            return false;
         if(buildMode)
             this.unbuild();
 
