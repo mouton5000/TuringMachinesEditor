@@ -237,9 +237,10 @@ class GraphPane extends Pane implements MouseListener {
      * @param state
      */
     void removeState(int state){
-        StateGroup stateGroup = stateGroups.remove(state);
         this.closeStateSettingsRectangle();
         this.closeTransitionSettingsRectangle();
+
+        StateGroup stateGroup = stateGroups.remove(state);
         graphGroup.getChildren().remove(stateGroup);
 
         for(int i = state; i < stateGroups.size(); i++)
