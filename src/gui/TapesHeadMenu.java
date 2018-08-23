@@ -181,6 +181,18 @@ class TapeHeadMenu extends HBox implements MouseListener {
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
     }
 
+    private HeadMenuSelect getHeadMenuSelect(int head){
+        for(Node child : this.getChildren()){
+            if(child instanceof HeadMenuSelect) {
+                if (head == 0)
+                    return (HeadMenuSelect) child;
+                else
+                    head--;
+            }
+        }
+        return null;
+    }
+
     void addHead(Color color){
         HeadMenuSelect headRectangle = new HeadMenuSelect( this);
         headRectangle.setStroke(color);
@@ -188,12 +200,12 @@ class TapeHeadMenu extends HBox implements MouseListener {
     }
 
     void editHeadColor(int head, Color color) {
-        ((HeadMenuSelect)this.getChildren().get(head + 1)).setStroke(color);
+        getHeadMenuSelect(head).setStroke(color);
     }
 
     void removeHead(int head) {
         this.closeHeadSettingsRectangle(true);
-        this.getChildren().remove(head + 1);
+        this.getChildren().remove(getHeadMenuSelect(head));
     }
 
     void openHeadSettingsRectangle(int head) {
@@ -205,11 +217,12 @@ class TapeHeadMenu extends HBox implements MouseListener {
     }
 
     void closeHeadSettingsRectangle() { closeHeadSettingsRectangle(true); }
-    void closeHeadSettingsRectangle(boolean animate) { headSettingsRectangle.minimize(animate); }
+    void closeHeadSettingsRectangle(boolean animate) {
+        headSettingsRectangle.minimize(animate);
+    }
 
     KeyFrame getHeadWriteKeyFrame(Integer head) {
-        HeadMenuSelect headRectangle = (HeadMenuSelect) this.getChildren().get(head + 1);
-        return headRectangle.getHeadWriteKeyFrame();
+        return getHeadMenuSelect(head).getHeadWriteKeyFrame();
     }
 
     JSONArray getJSON() {

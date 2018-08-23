@@ -27,7 +27,6 @@ import util.Pair;
 import util.Subscriber;
 
 import java.io.*;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -1259,7 +1258,7 @@ public class TuringMachineDrawer extends Application {
     }
 
     /**
-     * @return a color not used by any head of the machine.
+     * @return a color not used by any head of the machine or null if the 16581375 possible colors are already used.
      */
     Color getAvailableColor(){
         int r = 0, g = 0, b = 0;
@@ -1368,12 +1367,11 @@ public class TuringMachineDrawer extends Application {
 
         // Update all the head indexes. Every head with a greater index than the removed head sees its index
         // decreased by one
-        for(Pair<Tape, Integer> pair : new HashSet<>(headsColors.values())) {
-            if (pair.first == tape && pair.second > head) {
-                Color color = headsColors.removeV(pair);
-                pair.second--;
-                headsColors.put(color, pair);
-            }
+        for(int head2 = head + 1; head2 <= tape.getNbHeads(); head2++){
+            Pair<Tape, Integer> pair = new Pair<>(tape, head2);
+            Color color = headsColors.removeV(pair);
+            pair.second--;
+            headsColors.put(color, pair);
         }
 
         // Update the widgets
@@ -1854,10 +1852,9 @@ public class TuringMachineDrawer extends Application {
      * @param right
      * @see #setTapeRightBoundFromMachine(Tape, Integer)
      */
-    void setTapeRightBound(Tape tape, Integer right){
+    void setTapeRightBound(Tape tape, Integer right) {
         tape.setRightBound(right);
     }
-
     /**
      * Response from the machine. The right bound of the given tape was changed to the given value and the
      * GUI must be updated.

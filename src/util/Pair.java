@@ -34,4 +34,9 @@ public class Pair<T, U> {
         return (this.first == pair || this.first != null && this.first.equals(pair.first))
                 || (this.second == pair || this.second != null && this.second.equals(pair.second));
     }
+
+    @Override
+    public String toString() {
+        return "(" + first.toString()+" "+second.toString()+")";
+    }
 }

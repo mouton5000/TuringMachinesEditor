@@ -96,4 +96,9 @@ public class BidirMap<K, V> {
     public boolean containsV(V value) {
         return reverse.containsKey(value);
     }
+
+    @Override
+    public String toString() {
+        return direct.toString();
+    }
 }
