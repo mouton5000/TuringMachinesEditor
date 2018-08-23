@@ -228,7 +228,7 @@ class TransitionDisplaySymbolsByTapeHBox extends HBox {
     void removeHead(int head){
         this.getChildren().remove(head);
         if(this.getChildren().size() == 0)
-            this.setVisible(true);
+            this.setVisible(false);
     }
 
     void editSymbol(String previousSymbol, String symbol){
