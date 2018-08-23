@@ -342,14 +342,14 @@ public class TuringMachine {
     private List<Boolean> acceptingStates;
 
     /**
+     * For each state i, this list contains, at index i, true if and only if the state is initial.
+     */
+    private List<Boolean> initialStates;
+
+    /**
      * The list of tapes of the machine.
      */
     private List<Tape> tapes;
-
-    /**
-     * The set of initial states of the machine.
-     */
-    private Set<Integer> initialStates;
 
     /**
      * The state register pointing to the current state of the execution. Used only when the machine is running.
@@ -396,7 +396,7 @@ public class TuringMachine {
         outputTransitions = new ArrayList<>();
         statesNames = new ArrayList<>();
 
-        initialStates = new HashSet<>();
+        initialStates = new ArrayList<>();
         finalStates = new ArrayList<>();
         acceptingStates = new ArrayList<>();
 
@@ -486,6 +486,7 @@ public class TuringMachine {
         nbStates++;
         statesNames.add(name);
         outputTransitions.add(new ArrayList<>());
+        initialStates.add(false);
         finalStates.add(false);
         acceptingStates.add(false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_STATE, this, nbStates - 1);
@@ -559,10 +560,12 @@ public class TuringMachine {
 
         outputTransitions.remove(state);
         nbStates--;
+
         initialStates.remove(state);
         statesNames.remove(state);
         finalStates.remove(state);
         acceptingStates.remove(state);
+
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_STATE, this, state);
     }
 
@@ -574,7 +577,7 @@ public class TuringMachine {
      * @see util.Subscriber
      */
     public void setInitialState(int state) {
-        initialStates.add(state);
+        initialStates.set(state, true);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE, this, state);
     }
 
@@ -586,7 +589,7 @@ public class TuringMachine {
      * @see util.Subscriber
      */
     public void unsetInitialState(int state) {
-        initialStates.remove(state);
+        initialStates.set(state, false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE, this, state);
     }
 
@@ -594,7 +597,7 @@ public class TuringMachine {
      * @param state Index of a state
      * @return true if and only if the state identified by the given index is initial.
      */
-    public boolean isInitial(Integer state){ return initialStates.contains(state);}
+    public boolean isInitial(Integer state){ return initialStates.get(state);}
 
 
     /**
@@ -1045,6 +1048,7 @@ public class TuringMachine {
             arcFathers.putAll(children);
 
         }
+        System.out.println(iteration);
 
         // If the maximum number of iterations is reached, an error message is broadcase.
         if(iteration == maximumNonDeterministicSearch){
@@ -1103,9 +1107,11 @@ public class TuringMachine {
 
         HashSet<Configuration> initialConfigurations = new HashSet<>();
 
-        for (Integer state : initialStates) {
-            this.setCurrentState(state, false);
-            initialConfigurations.add(saveConfiguration());
+        for (int state = 0; state < this.getNbStates(); state++) {
+            if(this.isInitial(state)) {
+                this.setCurrentState(state, false);
+                initialConfigurations.add(saveConfiguration());
+            }
         }
         builtPath = this.exploreNonDeterministic(initialConfigurations);
         builtIndex = new Pair<>(0, 0);
@@ -1247,8 +1253,14 @@ public class TuringMachine {
         for(Tape tape : tapes)
             tape.reinit();
 
-        manualSetCurrentState(initialStates.iterator().next());
-        manualInitialConfiguration = builtPath.first.get(0);
+        for(int state = 0; state < this.getNbStates(); state++){
+            if(this.isInitial(state)){
+                manualSetCurrentState(state);
+                manualInitialConfiguration = builtPath.first.get(0);
+                break;
+            }
+        }
+
     }
 
     /**
@@ -1388,9 +1400,13 @@ public class TuringMachine {
      * @return true if the machine is deterministic.
      */
     public boolean isDeterministic(){
-        if(initialStates.size() > 1)
-            return false;
+        int nbInitial = 0;
         for(int state = 0; state < nbStates; state++){
+            if(isInitial(state)){
+                nbInitial++;
+                if(nbInitial > 1)
+                    return false;
+            }
             if(!isDeterministic(state))
                 return false;
         }
@@ -1402,10 +1418,14 @@ public class TuringMachine {
      * @return true if the machine is valid : it contains at least ont initial state and ont final state.
      */
     public boolean isValid(){
-        if(initialStates.size() == 0)
-            return false;
+        boolean initialState = false;
+        boolean finalState = false;
         for(int state = 0; state < nbStates; state++){
-            if(isFinal(state))
+            if(!initialState && isInitial(state))
+                initialState = true;
+            if(!finalState && isFinal(state))
+                finalState = true;
+            if(initialState && finalState)
                 return true;
         }
         return false;
