@@ -18,8 +18,29 @@ This application is for
 * people who love Turing machines and want a great graphical editor.
 
 ## How to install and run it?
- 
-Coming soon
+
+### Requirements
+
+In order to run this application, you need
+* a JDK/JRE with Java8 and JavaFX8
+* the external library org.json (https://github.com/stleary/JSON-java)
+
+### Install and run from sources
+
+The projet uses a resource folder, which means that compiling the source code does not consist in trivially using javac. 
+
+
+I suggest here one way to compile the code using the IDE Intellij Idea (version 2018.1).
+
+* Download or clone the projet and put it in your favorite directory DIR
+* Install a JDK for Java8 with JavaFX
+* Install Intellij Idea
+* Create a new project from the sources in DIR/src/
+* Tell the IDE that the project is Java8 (go to File > Project Structure > Project > Select 1.8 in the "Project SDK" list > Select "8 - Lambda, type annotations, ...) in the Project language level.
+* The project uses a resource folder in DIR/src/images (go to File > Project Structure > Modules > Click on src/images in the list > Click on "Resources" above the list.)
+* The project uses an external library (org.json, at https://github.com/stleary/JSON-java). Download the source or the associated jar file and add it to the libraries of the project (go to File > Project Structure > Libraries > Click on the green + > Search for the sources or the jar file.)
+* Run the main method in the TuringMachineDrawer class (Open TuringMachineDrawer.java, search for the main method and click the green arrow on the left of the method.)
+
  
 ## Quick start
 
