@@ -37,7 +37,7 @@ I suggest here one way to compile the code using the IDE Intellij Idea (version 
 * Install Intellij Idea
 * Create a new project from the sources in DIR/src/
 * Tell the IDE that the project is Java8 (go to File > Project Structure > Project > Select 1.8 in the "Project SDK" list > Select "8 - Lambda, type annotations, ...) in the Project language level.
-* The project uses a resource folder in DIR/src/images (go to File > Project Structure > Modules > Click on src/images in the list > Click on "Resources" above the list.)
+* The project uses a resource folder in DIR/images (go to File > Project Structure > Modules > Click on images in the list > Click on "Resources" above the list.)
 * The project uses an external library (org.json, at https://github.com/stleary/JSON-java). Download the source or the associated jar file and add it to the libraries of the project (go to File > Project Structure > Libraries > Click on the green + > Search for the sources or the jar file.)
 * Run the main method in the TuringMachineDrawer class (Open TuringMachineDrawer.java, search for the main method and click the green arrow on the left of the method.)
 
