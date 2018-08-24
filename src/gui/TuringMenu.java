@@ -329,7 +329,7 @@ class EditGraphIcon extends PlayerIcon {
     EditGraphIcon() {
         
 
-        ImageView imageView = new ImageView("images/edit_graph_icon.png");
+        ImageView imageView = new ImageView(Ressources.getRessource("edit_graph_icon.png"));
         imageView.setFitHeight(1.5 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setFitWidth(1.5 * TuringMachineDrawer.MENU_ICON_RADIUS);
         imageView.setLayoutX(-imageView.getBoundsInLocal().getWidth() / 2);
