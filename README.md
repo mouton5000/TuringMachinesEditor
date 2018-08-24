@@ -25,6 +25,10 @@ In order to run this application, you need
 * a JDK/JRE with Java8 and JavaFX8
 * the external library org.json (https://github.com/stleary/JSON-java)
 
+### Run with the jar file
+
+A compiled jar file (including the external library org.json) can be found in the folder *outjar*. You can run it like any other jar file (if you previously installed Java8 and JavaFX8).
+
 ### Install and run from sources
 
 The projet uses a resource folder, which means that compiling the source code does not consist in trivially using javac. 
