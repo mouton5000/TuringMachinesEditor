@@ -2368,7 +2368,7 @@ public class TuringMachineDrawer extends Application {
                 new FileChooser.ExtensionFilter("TuringMachine files", "*.tm")
         );
 
-        File file = fileChooser.showOpenDialog(stage);
+        File file = fileChooser.showSaveDialog(stage);
         if(file != null) {
             String filename = file.getAbsolutePath();
             if(!filename.endsWith(".tm"))
