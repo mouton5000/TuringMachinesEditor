@@ -113,22 +113,48 @@ public class Transition {
         return output;
     }
 
+    /**
+     * Add the given tape to the transition
+     * @param tape
+     */
     void addTape(Tape tape){
         this.readSymbols.put(tape, new LinkedList<>());
     }
 
+    /**
+     * Remove the given tape from this transition
+     * @param tape
+     */
     void removeTape(Tape tape){
         this.readSymbols.remove(tape);
     }
 
+    /**
+     * Add a head of the given tape to this transition.
+     * @param tape
+     */
     void addHead(Tape tape){
         this.readSymbols.get(tape).add(new HashSet<>());
     }
 
+    /**
+     * Remove every read symbol and every action associated with the given head
+     * @param tape
+     * @param head
+     */
     void removeHead(Tape tape, int head){
         this.removeAllReadSymbols(tape, head);
         this.removeAllActions(tape, head);
         this.readSymbols.get(tape).remove(head);
+    }
+
+    /**
+     * Remove every read symbol and every action associated with the given symbol
+     * @param symbol
+     */
+    void removeSymbol(String symbol){
+        this.removeAllReadSymbols(symbol);
+        this.removeAllActions(symbol);
     }
 
 
@@ -178,6 +204,20 @@ public class Transition {
         for(int i = getNbActions() - 1; i >= 0; i--){
             Action action = actions.get(i);
             if(action.tape == tape && action.head == head)
+                removeAction(i);
+        }
+    }
+
+    /**
+     * Remove all the actions associated with the given symbol from the list of actions.
+     * {@link TuringMachine#SUBSCRIBER_MSG_REMOVE_ACTION} messages are broadcast to the class {@link util.Subscriber}
+     * for each removed action.
+     * @param symbol
+     */
+    void removeAllActions(String symbol) {
+        for(int i = getNbActions() - 1; i >= 0; i--){
+            Action action = actions.get(i);
+            if(action.value().equals(symbol))
                 removeAction(i);
         }
     }
@@ -280,6 +320,30 @@ public class Transition {
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
                     this.machine, this, tape, head, s);
         readSymbols.clear();
+    }
+
+    /**
+     * Remove all the read symbols associated with the given symbol.
+     * {@link TuringMachine#SUBSCRIBER_MSG_REMOVE_READ_SYMBOL} messages are broadcast to the class
+     * {@link util.Subscriber} for each removed symbol.
+     * @param symbol
+     */
+    void removeAllReadSymbols(String symbol) {
+        for(Map.Entry<Tape, List<Set<String>>> entry : this.readSymbols.entrySet()){
+            Tape tape = entry.getKey();
+            List<Set<String>> list = entry.getValue();
+
+            if(list == null)
+                continue;
+
+            for(int head = 0; head < tape.getNbHeads(); head++){
+                Set<String> readSymbols = list.get(head);
+                if(readSymbols.remove(symbol))
+                    Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
+                            this.machine, this, tape, head, symbol);
+            }
+
+        }
     }
 
     /**

@@ -31,9 +31,12 @@ import java.util.Iterator;
  * cell at a time.
  *
  * The widget is divided into two parts:
- * - a part containing the heads of the tape and allowing to add a new head to the tape or to move an existing head
- * into the current cell
- * - a part containing the symbols of the machine and allowing to change the input symbol written in the current cell
+ * <ul>
+ * <li> a part containing the heads of the tape and allowing to add a new head to the tape or to move an existing head
+ * into the current cell </li>
+ * <li> a part containing the symbols of the machine and allowing to change the input symbol written in the current
+ * cell </li>
+ * </ul>
  */
 class CellSettingsRectangle extends SettingsRectangle {
 
@@ -414,8 +417,10 @@ class CellSettingsRectangleHeadOptionsGroup extends HBox implements MouseListene
             dx = offsetX;
 
         int nbHeads = this.getChildren().size() - 1;
-        if(dx < offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING))
-            dx = offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING);
+        if(dx < offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING
+                + TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE))
+            dx = offsetX - (nbHeads - 1) * (TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SPACING
+            + TuringMachineDrawer.SETTINGS_RECTANGLE_HEAD_SIZE);
 
         if(dx == 0)
             return;

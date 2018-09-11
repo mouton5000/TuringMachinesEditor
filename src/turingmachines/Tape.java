@@ -195,7 +195,7 @@ public class Tape{
             return;
         if(tapeTopBound != null && line > tapeTopBound)
             return;
-        
+
         nbHeads++;
         initialHeadsColumn.add(column);
         initialHeadsLine.add(line);
@@ -505,6 +505,20 @@ public class Tape{
             return null;
         return columnCells.get(line);
 
+    }
+
+    /**
+     * Erase every cell from the tape containing the given symbol.
+     * @param symbol
+     */
+    void removeSymbol(String symbol){
+        for (Map.Entry<Integer, Map<Integer, String>> entry1 : new HashSet<>(inputCells.entrySet())) {
+            for (Map.Entry<Integer, String> entry2 : new HashSet<>(entry1.getValue().entrySet())) {
+                if (entry2.getValue().equals(symbol)) {
+                    this.writeInput(entry2.getKey(), entry1.getKey(), null);
+                }
+            }
+        }
     }
 
     /**

@@ -1099,22 +1099,22 @@ class TapePane extends Pane implements MouseListener{
     void removeSymbol(int index, String symbol) {
         cellSettingsRectangle.removeSymbol(index);
 
-        Iterator<Map.Entry<Integer, Map<Integer, Label>>> itColumns = cellLabels.entrySet().iterator();
-
-        while (itColumns.hasNext()){
-            Map.Entry<Integer, Map<Integer, Label>> entry = itColumns.next();
-            Iterator<Map.Entry<Integer, Label>> itLines = entry.getValue().entrySet().iterator();
-            while(itLines.hasNext()){
-                Map.Entry<Integer, Label> entry2 = itLines.next();
-                if((entry2.getValue().getText() == symbol) || (entry2.getValue().getText() != null &&
-                        entry2.getValue().getText().equals(symbol)  )) {
-                    tapeLinesGroup.getChildren().remove(entry2.getValue());
-                    itLines.remove();
-                }
-            }
-            if(entry.getValue().isEmpty())
-                itColumns.remove();
-        }
+//        Iterator<Map.Entry<Integer, Map<Integer, Label>>> itColumns = cellLabels.entrySet().iterator();
+//
+//        while (itColumns.hasNext()){
+//            Map.Entry<Integer, Map<Integer, Label>> entry = itColumns.next();
+//            Iterator<Map.Entry<Integer, Label>> itLines = entry.getValue().entrySet().iterator();
+//            while(itLines.hasNext()){
+//                Map.Entry<Integer, Label> entry2 = itLines.next();
+//                if((entry2.getValue().getText() == symbol) || (entry2.getValue().getText() != null &&
+//                        entry2.getValue().getText().equals(symbol)  )) {
+//                    tapeLinesGroup.getChildren().remove(entry2.getValue());
+//                    itLines.remove();
+//                }
+//            }
+//            if(entry.getValue().isEmpty())
+//                itColumns.remove();
+//        }
 
     }
 

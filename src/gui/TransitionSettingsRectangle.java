@@ -26,14 +26,14 @@ import util.Ressources;
 import java.util.*;
 
 /**
- * Widget containing the settings of a state of the machine.
+ * Widget containing the settings of a transition of the machine.
  * It allows the user to
  * <ul>
  *     <li>change the read symbols and the actions of the transition</li>
  *     <li>delete the transition.</li>
  * </ul>
- * In order to choose a read symbol or an action, the user must firstly choose a head. The rectangle is then
- * separated in four parts, from top to bottom:
+ *
+ * The rectangle is separated in four parts, from top to bottom:
  * <ul>
  *     <li>A menu to select either the read symbols submenu or the actions submenu. This line contains also the
  *     delete icon.</li>
@@ -44,6 +44,9 @@ import java.util.*;
  *     <li>A line where all the read symbols or all the actions of the transitions are displayed.
  *     </li>
  * </ul>
+ *
+ * The widget is unique for all the transitions of the machine: it displays the settings of one
+ * transition at a time.
  */
 class TransitionSettingsRectangle extends SettingsRectangle {
 
@@ -116,12 +119,16 @@ class TransitionSettingsRectangle extends SettingsRectangle {
      */
     int currentHead;
 
+    /**
+     * Build a settings rectangle displaying the settings of the transitions of the machine.
+     */
     TransitionSettingsRectangle() {
         super();
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
         vbox = new VBox();
 
+        // Set the icons for the two submenus (read symbols/icons) and the icon to delete the transition.
         HBox iconsHBox = new HBox();
         iconsHBox.setMinWidth(getMaximizedWidth());
         iconsHBox.setMaxWidth(getMaximizedWidth());
@@ -138,6 +145,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
 
         iconsHBox.getChildren().addAll(readIcon, actionsIcon, removeTransitionIcon);
 
+        // Other groups contained in this widget
         headOptionsGroup = new HeadOptionsGroup(this);
         readSymbolsMenu = new ReadSymbolsMenu(this);
         readSymbolsDisplay = new ReadSymbolsDisplay( this);
@@ -153,6 +161,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         vbox.setLayoutY(TuringMachineDrawer.SETTINGS_RECTANGLE_MINIMIZED_HEIGHT / 2
                 - getMaximizedHeight());
 
+        // Set the first submenu selected
         readMenuSelected = true;
         readIcon.setSelected(true);
         actionsIcon.setSelected(false);
@@ -163,6 +172,7 @@ class TransitionSettingsRectangle extends SettingsRectangle {
 
     @Override
     double getMaximizedHeight(){
+        // The height of this rectangle is bigger than the default height
         return TuringMachineDrawer.TRANSITION_SETTINGS_RECTANGLE_MAXIMIZED_HEIGHT;
     }
 
@@ -226,16 +236,34 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         vbox.getChildren().add(6, actionsDisplay);
     }
 
+    /**
+     * Add the given tape the the list of tapes of this widgets. This affects two subwidgets: the list of heads and the
+     * field displaying the read symbols of the current transition.
+     * @param tape
+     */
     void addTape(Tape tape){
         headOptionsGroup.addTape(tape);
         readSymbolsDisplay.addTape(tape);
     }
 
+    /**
+     * Remove the given tape from the list of tapes of this widgets. This affects two subwidgets: the list of heads and
+     * the field displaying the read symbols of the current transition.
+     * @param tape
+     */
     void removeTape(Tape tape){
         headOptionsGroup.removeTape(tape);
         readSymbolsDisplay.removeTape(tape);
     }
 
+    /**
+     * Add a head of the given tape to the list of heads of the widget with the given color. This affects two
+     * subwidgets: the list of heads and the field displaying the read symbols of the current transition.
+     *
+     * If no head is currently selected by the widget, this new head is selected.
+     * @param tape
+     * @param color
+     */
     void addHead(Tape tape, Color color) {
         headOptionsGroup.addHead(tape, color);
         readSymbolsDisplay.addHead(tape, color);
@@ -244,6 +272,37 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         }
     }
 
+    /**
+     * Change the color of the given head (identified by its index in the list of heads of the given tape)
+     * to the given color. This affects three subwidgets: the list of heads and the two fields displaying the read
+     * symbols and the actions of the current transition.
+     *
+     * If the current head is the edited head, the subwidget allowing to select a read symbol or an action is
+     * also updated.
+     * @param tape
+     * @param head
+     * @param color
+     */
+    void editHeadColor(Tape tape, int head, Color color) {
+        headOptionsGroup.editHeadColor(tape, head, color);
+        if(tape == currentTape && head == currentHead)
+            chooseHead(tape, head);
+        readSymbolsDisplay.editHeadColor(tape, head, color);
+        actionsDisplay.editHeadColor(tape, head, color);
+    }
+
+    /**
+     * Remove the given head (identified by its index in the list of heads of the given tape) from the list
+     * of heads of the widget. This affects two subwidgets: the list of heads and the field displaying the read
+     * symbols of the current transition.
+     *
+     * If the head was selected, an arbitrary head is selected instead.
+     *
+     * This method does not remove the read symbols and actions associated with this head as this method should not
+     * be called if such symbols or actions exist.
+     * @param tape
+     * @param head
+     */
     void removeHead(Tape tape, int head){
         Color color = headOptionsGroup.removeHead(tape, head);
         readSymbolsDisplay.removeHead(tape, head);
@@ -255,23 +314,24 @@ class TransitionSettingsRectangle extends SettingsRectangle {
                 chooseHead(null, 0);
         }
         else
+            // The index of all the heads with a higher index is decreased by one.
+            // Update the index of the current head is such a head.
             if(currentTape == tape && currentHead > head)
                 currentHead--;
     }
 
-    void editHeadColor(Tape tape, int head, Color color) {
-        headOptionsGroup.editHeadColor(tape, head, color);
-        if(tape == currentTape && head == currentHead)
-            chooseHead(tape, head);
-        readSymbolsDisplay.editHeadColor(tape, head, color);
-        actionsDisplay.editHeadColor(tape, head, color);
-    }
-
+    /**
+     * Select the given head (identified by its index in the list of heads of the given tape) as the current head of
+     * the widget. The user can then change the read symbols and actions associated with that head.
+     * @param tape
+     * @param head
+     */
     void chooseHead(Tape tape, int head){
-
         currentTape = tape;
         currentHead = head;
 
+        // If the machine does not contain anymore head, the given tape is null.
+        // In that case, remove the subwidgets from the screen.
         if(tape == null){
             readSymbolsMenu.setVisible(false);
             actionsMenu.setVisible(false);
@@ -282,26 +342,46 @@ class TransitionSettingsRectangle extends SettingsRectangle {
         headOptionsGroup.chooseHead(tape, head);
         Color color = headOptionsGroup.getColor(tape, head);
 
+        // If no head was previously selected
         if(currentColor == null){
             readSymbolsMenu.setVisible(true);
             actionsMenu.setVisible(true);
         }
         currentColor = color;
+
+        // Update the colors of the subwidget used to add a read symbol or an action to the transition.
         readSymbolsMenu.changeColor(tape, head, color);
         actionsMenu.changeColor(color);
     }
 
+    /**
+     * Add the given symbol to the list of symbols of this widget.
+     * @param symbol
+     */
     void addSymbol(String symbol) {
         readSymbolsMenu.addSymbol(symbol);
         actionsMenu.addSymbol(symbol);
     }
 
+    /**
+     * Change the given symbol (identified by the given index in the list of symbols of the machine and by its
+     * given previous name) to the given name.
+     * @param index
+     * @param previousSymbol
+     * @param symbol
+     */
     void editSymbol(int index, String previousSymbol, String symbol){
         readSymbolsMenu.editSymbol(index, symbol);
         actionsMenu.editSymbol(index, symbol);
         actionsDisplay.editSymbol(previousSymbol, symbol);
     }
 
+    /**
+     * Remove the given symbol (identified by the given index in the list of symbols of the machine and by its
+     *      * given previous name)
+     * @param index
+     * @param symbol
+     */
     void removeSymbol(int index, String symbol) {
         readSymbolsMenu.removeSymbol(index);
         actionsMenu.removeSymbol(index);

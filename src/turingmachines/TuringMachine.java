@@ -680,7 +680,7 @@ public class TuringMachine {
      */
     public void removeTape(Tape tape){
         for(int head = tape.getNbHeads() - 1; head >= 0; head--)
-            tape.removeHead(head);
+            this.removeHead(tape, head);
 
         for(int state = 0; state < this.getNbStates(); state++)
             for(Transition transition : this.outputTransitions.get(state))
@@ -798,7 +798,18 @@ public class TuringMachine {
     public void removeSymbol(int i){
         if(i < 0 || i >= symbols.size())
             return;
+
         String symbol = symbols.remove(i);
+
+        for(int state = 0; state < this.getNbStates(); state++)
+            for(Transition transition : this.outputTransitions.get(state)) {
+                transition.removeSymbol(symbol);
+            }
+
+        for(Tape tape: tapes){
+            tape.removeSymbol(symbol);
+        }
+
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_SYMBOL, this, i, symbol);
     }
 
