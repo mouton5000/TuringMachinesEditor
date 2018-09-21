@@ -339,8 +339,11 @@ class TransitionDisplaySymbolsByHeadLabel extends Label {
 
     JSONArray getJSON() {
         JSONArray jsonArray = new JSONArray();
-        for(String symbol: symbols)
+        for(String symbol: symbols) {
+            if(symbol.equals(TuringMachineDrawer.BLANK_SYMBOL))
+                symbol = "BLANK_SYMBOL";
             jsonArray.put(symbol);
+        }
         return jsonArray;
     }
 }
@@ -424,8 +427,28 @@ class TransitionDisplayActionsHBox extends HBox{
     JSONArray getJSON() {
         JSONArray jsonArray = new JSONArray();
         for(Pair<String, Color> pair : getActionsDisplay()){
+
+            String symbol = pair.first;
+            switch (pair.first) {
+                case TuringMachineDrawer.RIGHT_SYMBOL:
+                    symbol = "RIGHT_SYMBOL";
+                    break;
+                case TuringMachineDrawer.LEFT_SYMBOL:
+                    symbol = "LEFT_SYMBOL";
+                    break;
+                case TuringMachineDrawer.UP_SYMBOL:
+                    symbol = "UP_SYMBOL";
+                    break;
+                case TuringMachineDrawer.DOWN_SYMBOL:
+                    symbol = "DOWN_SYMBOL";
+                    break;
+                case TuringMachineDrawer.BLANK_SYMBOL:
+                    symbol = "BLANK_SYMBOL";
+                    break;
+            }
+
             jsonArray.put(new JSONObject()
-                    .put("actionSymbol", pair.first)
+                    .put("actionSymbol", symbol)
             .put("color", pair.second)
             );
         }

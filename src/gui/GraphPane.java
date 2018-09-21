@@ -893,8 +893,11 @@ class GraphPane extends Pane implements MouseListener {
                 Tape tape = TuringMachineDrawer.getInstance().machine.getTape(tapeId);
                 for(int head = 0; head < jsonReadSymbolsOfTape.length(); head++){
                     JSONArray jsonReadSymbolsOfHead = jsonReadSymbolsOfTape.getJSONArray(head);
-                    for(Object symbol : jsonReadSymbolsOfHead)
-                        this.addReadSymbol(transitionGroup, tape, head, (String)symbol);
+                    for(Object symbol : jsonReadSymbolsOfHead) {
+                        if(symbol.equals("BLANK_SYMBOL"))
+                            symbol = TuringMachineDrawer.BLANK_SYMBOL;
+                        this.addReadSymbol(transitionGroup, tape, head, (String) symbol);
+                    }
                 }
             }
 
@@ -908,6 +911,24 @@ class GraphPane extends Pane implements MouseListener {
                 Integer head = pair.second;
 
                 String actionSymbol = jsonAction.getString("actionSymbol");
+                switch (actionSymbol) {
+                    case "RIGHT_SYMBOL":
+                        actionSymbol = TuringMachineDrawer.RIGHT_SYMBOL;
+                        break;
+                    case "LEFT_SYMBOL":
+                        actionSymbol = TuringMachineDrawer.LEFT_SYMBOL;
+                        break;
+                    case "UP_SYMBOL":
+                        actionSymbol = TuringMachineDrawer.UP_SYMBOL;
+                        break;
+                    case "DOWN_SYMBOL":
+                        actionSymbol = TuringMachineDrawer.DOWN_SYMBOL;
+                        break;
+                    case "BLANK_SYMBOL":
+                        actionSymbol = TuringMachineDrawer.BLANK_SYMBOL;
+                        break;
+                }
+
                 this.addAction(transitionGroup, tape, head, actionSymbol);
             }
 
