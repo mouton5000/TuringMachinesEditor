@@ -365,7 +365,8 @@ public class Transition {
 
     /**
      * Fire the transition, meaning that all the actions of the list of actions of the transition are executed in the
-     * order given by the list.
+     * order given by the list. Note that the current state of the machine is not changed with this method.
+     *
      * If log is true, a {@link TuringMachine#SUBSCRIBER_MSG_FIRED_TRANSITION} message is broadcast to the class
      * {@link util.Subscriber} and every action may broadcast messages to tell that a head has moved and that a
      * symbol is written on a tape.
@@ -375,7 +376,6 @@ public class Transition {
     void fire(boolean log){
         if(log)
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_FIRED_TRANSITION, this.machine, this);
-
         Iterator<Action> actionsIt = getActions();
         while(actionsIt.hasNext())
             actionsIt.next().doAction(log);

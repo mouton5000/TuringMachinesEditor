@@ -372,7 +372,7 @@ public class TuringMachine {
      * @see #build()
      * @see #buildManual()
      */
-    private Pair<List<Configuration>, List<Transition>> builtPath;
+    private Pair<List<HardConfiguration>, List<Transition>> builtPath;
 
     /**
      * List of indexes used to explore manually the list of configurations that was previously built.
@@ -382,7 +382,7 @@ public class TuringMachine {
     /**
      * Initial configuration of the manual mode.
      */
-    private Configuration manualInitialConfiguration;
+    private HardConfiguration manualInitialConfiguration;
 
     /**
      * Construction of the machine.
@@ -969,24 +969,32 @@ public class TuringMachine {
     /**
      * @return the current configuration of the machine
      */
-    private Configuration saveConfiguration(){
+    private HardConfiguration saveConfiguration(){
 
         // Save the configurations of all the tapes.
         Map<Tape, TapeConfiguration> tapeConfigurations = new HashMap<>();
-        for(Tape tape: tapes)
+        for (Tape tape : tapes)
             tapeConfigurations.put(tape, tape.saveConfiguration());
 
         // Associate those configurations to the current state.
-        return new Configuration(currentState, tapeConfigurations);
+        return new HardConfiguration(currentState, tapeConfigurations);
     }
 
     /**
      * Put the machine in the given configuration.
      * @param configuration
-     * @see #loadConfiguration(Configuration, boolean)
+     * @see #loadConfiguration(HardConfiguration, boolean)
      */
     private void loadConfiguration(Configuration configuration){
-        loadConfiguration(configuration, false);
+            Pair<HardConfiguration, List<Transition>> pair = configuration.transitionsFromHard();
+
+            loadConfiguration(pair.first, false);
+
+            // If the configuration is a hard configuration, pair.second is empty.
+            for(Transition transition: pair.second) {
+                transition.fire(false);
+                setCurrentState(transition.getOutput(), false);
+            }
     }
 
     /**
@@ -995,8 +1003,8 @@ public class TuringMachine {
      * @param configuration
      * @param log
      */
-    private void loadConfiguration(Configuration configuration, boolean log){
-        for(Map.Entry<Tape, TapeConfiguration> entry: configuration.tapeConfigurations.entrySet())
+    private void loadConfiguration(HardConfiguration configuration, boolean log){
+        for(Map.Entry<Tape, TapeConfiguration> entry: configuration.tapesConfigurations.entrySet())
             entry.getKey().loadConfiguration(entry.getValue(), log);
         this.setCurrentState(configuration.state, log);
     }
@@ -1006,7 +1014,7 @@ public class TuringMachine {
      * @return true if and only if the current state if the given configuration is final.
      */
     private boolean isFinalConfiguration(Configuration configuration){
-        return isFinal(configuration.state);
+        return isFinal(configuration.getState());
     }
 
     /**
@@ -1014,7 +1022,7 @@ public class TuringMachine {
      * @return true if and only if the current state if the given configuration is accepting.
      */
     private boolean isAcceptingConfiguration(Configuration configuration){
-        return isAccepting(configuration.state);
+        return isAccepting(configuration.getState());
     }
 
     /**
@@ -1022,12 +1030,12 @@ public class TuringMachine {
      * @return the set of all configuration that can be reached from the current configuration by firing one valid
      * transition.
      */
-    private Map<Configuration, Transition> explore(Configuration configuration){
+    private Set<Configuration> explore(Configuration configuration){
 
         // Set the machine in the given configuration
         this.loadConfiguration(configuration);
 
-        Map<Configuration, Transition> children = new HashMap<>();
+        Set<Configuration> children = new HashSet<>();
         List<Transition> outputs = outputTransitions.get(currentState);
 
         Configuration childConfiguration;
@@ -1035,12 +1043,13 @@ public class TuringMachine {
         // List all the transtitions that can be fired and build new configurations by firing them
         for(Transition transition : outputs)
             if(transition.isCurrentlyValid()) {
-                // No log is  is done : the exploration is not broadcast.
+                // No log is done : the exploration is not broadcasted.
                 transition.fire(false);
                 setCurrentState(transition.getOutput(), false);
-                childConfiguration = this.saveConfiguration();
-                children.put(childConfiguration, transition);
-
+                childConfiguration = new Configuration();
+                childConfiguration.transitionFromParent = transition;
+                childConfiguration.parent = configuration;
+                children.add(childConfiguration);
                 // Reload the given configuration before firing the next transition.
                 this.loadConfiguration(configuration);
             }
@@ -1061,14 +1070,12 @@ public class TuringMachine {
      * @return a list of configurations corresponding to an execution of the machine.
      * @see util.Subscriber
      */
-    private Pair<List<Configuration>, List<Transition>> exploreNonDeterministic(
-            Set<Configuration> initialConfigurations){
+    private Pair<List<HardConfiguration>, List<Transition>> exploreNonDeterministic(
+            Set<HardConfiguration> initialConfigurations){
 
         // List of configurations that should be explored later.
         // The exploration builds an exploration tree. A BFS algorithm is used to explore the (possibly infinite) tree.
         LinkedList<Configuration> toExplore = new LinkedList<>();
-        Map<Configuration, Configuration> fathers = new HashMap<>();
-        Map<Configuration, Transition> arcFathers = new HashMap<>();
 
         toExplore.addAll(initialConfigurations);
         Configuration configuration = null;
@@ -1081,8 +1088,15 @@ public class TuringMachine {
         // Count the number of iterations of the exploration, should not be greater than a maximum in order to avoid
         // infinite exploration.
         int iteration = 0;
+        long time = System.currentTimeMillis();
         while(!toExplore.isEmpty() && iteration < maximumNonDeterministicSearch){
             iteration++;
+            if(iteration % 10000 == 0){
+                long time2 = System.currentTimeMillis();
+                System.out.println(iteration + " " + ((double)(10000000) / (time2 - time)));
+                time = time2;
+            }
+
             configuration = toExplore.pollFirst();
 
             // Check if the configuration is accepting, in that case we end the exploration
@@ -1098,14 +1112,10 @@ public class TuringMachine {
             }
 
             // Explore the children and add them to the list.
-            Map<Configuration, Transition> children = this.explore(configuration);
-            for(Map.Entry<Configuration, Transition> entry: children.entrySet()){
-                fathers.put(entry.getKey(), configuration);
-                toExplore.add(entry.getKey());
-            }
-            arcFathers.putAll(children);
+            toExplore.addAll(this.explore(configuration));
 
         }
+
         System.out.println(iteration);
 
         // If the maximum number of iterations is reached, an error message is broadcase.
@@ -1122,16 +1132,20 @@ public class TuringMachine {
                 configuration = firstFinalConfiguration;
         }
 
-        //  Build the associated transitions.
-        LinkedList<Configuration> toReturnC = new LinkedList<>();
-        LinkedList<Transition> toReturnT = new LinkedList<>();
-        while(!initialConfigurations.contains(configuration)){
-            toReturnC.addFirst(configuration);
-            toReturnT.addFirst(arcFathers.get(configuration));
-            configuration = fathers.get(configuration);
+        //  Build the transitions from the initial configuration to the final configuration.
+        ArrayList<HardConfiguration> toReturnC = new ArrayList<>();
+        Pair<HardConfiguration, List<Transition>> pair = configuration.transitionsFromRoot();
+        loadConfiguration(pair.first);
+
+        // Build a hard copy of all the configurations from the initial to the final configuration.
+        toReturnC.add(pair.first);
+        for(Transition transition : pair.second){
+            transition.fire(false);
+            setCurrentState(transition.getOutput(), false);
+            toReturnC.add(saveConfiguration());
         }
-        toReturnC.addFirst(configuration);
-        return new Pair<>(new ArrayList<>(toReturnC), new ArrayList<>(toReturnT));
+
+        return new Pair<>(toReturnC, new ArrayList<>(pair.second));
 
     }
 
@@ -1163,7 +1177,7 @@ public class TuringMachine {
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_START, this);
 
-        HashSet<Configuration> initialConfigurations = new HashSet<>();
+        HashSet<HardConfiguration> initialConfigurations = new HashSet<>();
 
         for (int state = 0; state < this.getNbStates(); state++) {
             if(this.isInitial(state)) {
@@ -1332,7 +1346,7 @@ public class TuringMachine {
      */
     public void manualSetCurrentState(Integer state) {
         this.setCurrentState(state, false);
-        Configuration configuration = this.saveConfiguration();
+        HardConfiguration configuration = this.saveConfiguration();
         builtPath = new Pair<>(new ArrayList<>(), new ArrayList<>());
         builtPath.first.add(configuration);
         builtIndex = new Pair<>(0, 0);
@@ -1363,7 +1377,7 @@ public class TuringMachine {
         transition.fire(true);
         setCurrentState(transition.getOutput(), true);
 
-        Configuration configuration = this.saveConfiguration();
+        HardConfiguration configuration = this.saveConfiguration();
         
         if(builtIndex.first != builtPath.first.size() - 1) {
             builtPath.first = builtPath.first.subList(0, builtIndex.first + 1);
@@ -1712,14 +1726,124 @@ public class TuringMachine {
  *     <li>Where are the heads.</li>
  *     <li>What is written on the tapes.</li>
  * </ul>
+ *
+ * There are two implementations of configurations
+ * - hard configuration, an absolute configuration, copying all the data in the object
+ * - soft configuration, a relative configuration, which is deduced from its parent and a transition fired from that
+ * parent configuration to get this configuration.
+ * The hard and the soft configurations always get a pointer to their parent configuration and the linking transition
+ * except if the configuration is an initial configuration (with no parent).
+ *
+ * By default configuration is a soft configuration.
+ * If the configuration is an initial configuration, it is necessarily a hard configuration.
+ *
+ * @see HardConfiguration
  */
-class Configuration {
-    int state;
-    Map<Tape, TapeConfiguration> tapeConfigurations;
 
-    Configuration(int state, Map<Tape, TapeConfiguration> tapeConfigurations) {
+class Configuration{
+
+    /**
+     * The configuration from which this configuration is get after firing the transition {@link #transitionFromParent}.
+     * The parent configuration is null if this configuration is an initial configuration of the machine.
+     *
+     * @see #transitionFromParent
+     */
+    Configuration parent;
+
+    /**
+     * The transition that should be fired from the configuration {@link #parent} in order to get this configuration.
+     * This transition is null if the configuration is an initial configuration of the machine.
+     *
+     * @see #parent
+     */
+    Transition transitionFromParent;
+
+    /**
+     * @return the state of the machine in the current configuration.
+     */
+    int getState(){
+        return transitionFromParent.getOutput();
+    }
+
+    /**
+     * @return true if this configuration is a hard configuration.
+     */
+    boolean isHard(){
+        return false;
+    }
+
+    /**
+     * @return a pair containing the least ancestor of this configuration that is a hard configuration and all the
+     * transitions linking that ancestor to this configuration.
+     */
+    Pair<HardConfiguration, List<Transition>> transitionsFromHard(){
+        LinkedList<Transition> transitions = new LinkedList<>();
+        Configuration current = this;
+
+        while(!current.isHard()){
+            transitions.addFirst(current.transitionFromParent);
+            current = current.parent;
+        }
+
+        return new Pair<>((HardConfiguration)current, transitions);
+    }
+
+
+    /**
+     * @return a pair containing the highest ancestor of this configuration (the initial ancestor) and all the
+     * transitions linking that ancestor to this configuration.
+     */
+    Pair<HardConfiguration, List<Transition>> transitionsFromRoot(){
+        LinkedList<Transition> transitions = new LinkedList<>();
+        Configuration current = this;
+
+        while(current.parent != null){
+            transitions.addFirst(current.transitionFromParent);
+            current = current.parent;
+        }
+
+        return new Pair<>((HardConfiguration)current, transitions);
+    }
+}
+
+/**
+ * Represent a configuration of a Turing machine, consisting in a snapshot of the state of the machine:
+ * <ul>
+ *     <li>The current state of the graph.</li>
+ *     <li>Where are the heads.</li>
+ *     <li>What is written on the tapes.</li>
+ * </ul>
+ *
+ * Contrary to the class Configuration, which is a soft configuraiton, a hard configuration contains a copy of the state
+ * and the tapes of the machine.
+ **
+ * @see Configuration
+ */
+
+class HardConfiguration extends Configuration {
+    /**
+     * Current state of the machine
+     */
+    int state;
+
+    /**
+     * Copy of the tapes of the machine, containing the position of the heads and the word written on the tape.
+     */
+    Map<Tape, TapeConfiguration> tapesConfigurations;
+
+    HardConfiguration(int state, Map<Tape, TapeConfiguration> tapeConfigurations) {
         this.state = state;
-        this.tapeConfigurations = tapeConfigurations;
+        this.tapesConfigurations = tapeConfigurations;
+    }
+
+    @Override
+    public int getState() {
+        return state;
+    }
+
+    @Override
+    boolean isHard() {
+        return true;
     }
 
     @Override
@@ -1727,12 +1851,10 @@ class Configuration {
         StringBuilder sb = new StringBuilder();
         sb.append(state);
         sb.append("\n");
-        for(Tape tape : tapeConfigurations.keySet()){
-            sb.append(tapeConfigurations.get(tape));
+        for(Tape tape : tapesConfigurations.keySet()){
+            sb.append(tapesConfigurations.get(tape));
             sb.append("\n");
         }
         return sb.toString();
     }
 }
-
-
