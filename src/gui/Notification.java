@@ -8,6 +8,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
@@ -69,7 +70,7 @@ class Notification extends Group {
     void notifyMsg(String msg){
         if(animating)
             this.timeline.stop();
-        label.setText(msg);
+        Platform.runLater(() -> label.setText(msg));
         this.setOpacity(1);
 
         timeline.getKeyFrames().clear();

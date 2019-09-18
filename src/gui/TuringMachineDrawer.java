@@ -29,6 +29,7 @@ import util.Subscriber;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Main class of the GUI.
@@ -419,10 +420,12 @@ public class TuringMachineDrawer extends Application {
      */
     boolean buildMode;
 
+    boolean building;
+
     /**
      * True if the GUI is currently executing a machine.
      */
-    boolean playing;
+    private boolean playing;
 
     private Stage stage;
 
@@ -2059,7 +2062,7 @@ public class TuringMachineDrawer extends Application {
     void manualSelectCurrentState(StateGroup stateGroup) {
         if(!manualMode)
             return;
-        if(this.playing)
+        if(this.isOccupied())
             return;
         machine.manualSetCurrentState(stateGroup.state);
         this.goToFirstConfiguration();
@@ -2075,7 +2078,7 @@ public class TuringMachineDrawer extends Application {
     void manualFireTransition(TransitionGroup transitionGroup) {
         if(!manualMode)
             return;
-        if(this.playing)
+        if(this.isOccupied())
             return;
         machine.manualFireTransition(transitionGroup.transition);
 
@@ -2093,15 +2096,28 @@ public class TuringMachineDrawer extends Application {
      * @see #unbuild()
      */
     void build() {
+        if(this.isOccupied())
+            return;
         notification.notifyMsg("Enter \"Automatic firing \" mode");
         menu.setBuild();
         buildMode = true;
+        this.building = true;
         this.playing = false;
         closeAllSettingsRectangle();
         graphPane.unselect();
 
-        this.machine.build();
-        this.goToFirstConfiguration();
+        this.machine.buildAsync(() -> {
+            this.building = false;
+            this.goToFirstConfiguration();
+        });
+
+    }
+
+    void cancelBuild(){
+        if(!isBuilding())
+            return;
+
+        this.machine.cancelBuild();
     }
 
     /**
@@ -2110,7 +2126,7 @@ public class TuringMachineDrawer extends Application {
      */
     void unbuild(){
         notification.notifyMsg("Quit \"Automatic firing \" mode");
-        if(this.playing)
+        if(this.isOccupied())
             return;
         menu.setNotBuild();
         buildMode = false;
@@ -2131,7 +2147,7 @@ public class TuringMachineDrawer extends Application {
      * machine.
      */
     void goToPreviousConfiguration(){
-        if(this.playing)
+        if(this.isOccupied())
             return;
         this.directTimeline.setOnFinished(actionEvent -> this.playing = false);
         this.playing = true;
@@ -2150,7 +2166,7 @@ public class TuringMachineDrawer extends Application {
      * machine.
      */
     void goToFirstConfiguration() {
-        if(this.playing)
+        if(this.isOccupied())
             return;
         this.directTimeline.setOnFinished(actionEvent -> this.playing = false);
         this.playing = true;
@@ -2164,7 +2180,7 @@ public class TuringMachineDrawer extends Application {
      * machine.
      */
     void goToLastConfiguration() {
-        if(this.playing)
+        if(this.isOccupied())
             return;
         this.directTimeline.setOnFinished(actionEvent -> this.playing = false);
         this.playing = true;
@@ -2179,7 +2195,7 @@ public class TuringMachineDrawer extends Application {
      * adequately updated.
      */
     void tick(){
-        if(this.playing)
+        if(this.isOccupied())
             return;
         this.playing = true;
         this.machineTimeLine.setOnFinished(actionEvent -> this.playing = false);
@@ -2198,6 +2214,9 @@ public class TuringMachineDrawer extends Application {
      * the current (manual or automatic) execution of the machine.
      */
     void play(){
+        if(this.isOccupied())
+            return;
+
         this.menu.setPlay();
         this.machineTimeLine.setOnFinished(actionEvent -> {
             if(this.playing)
@@ -2218,6 +2237,8 @@ public class TuringMachineDrawer extends Application {
      * Pause the current animation started with the {@link #play()} method.
      */
     void pause(){
+        if(this.isBuilding())
+            return;
         if(!this.playing)
             return;
         this.menu.setPause();
@@ -2244,6 +2265,18 @@ public class TuringMachineDrawer extends Application {
         toPlay.clear();
 
         this.directTimeline.play();
+    }
+
+    public boolean isPlaying() {
+        return playing;
+    }
+
+    public boolean isBuilding() {
+        return building;
+    }
+
+    public boolean isOccupied(){
+        return isPlaying() || isBuilding();
     }
 
     /**

@@ -14,6 +14,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import turingmachines.TuringMachine;
 import util.MouseListener;
 import util.Ressources;
 
@@ -339,7 +340,7 @@ class EditGraphIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
 
         if(TuringMachineDrawer.getInstance().editGraphMode)
@@ -365,7 +366,7 @@ class NewFileIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().newMachine();
         return true;
@@ -387,7 +388,7 @@ class OpenFileIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().loadMachine();
         return true;
@@ -409,7 +410,7 @@ class SaveFileIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().saveMachine();
         return true;
@@ -431,7 +432,7 @@ class SaveAsFileIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().saveAsMachine();
         return true;
@@ -453,7 +454,7 @@ class ManualIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
 
         if(TuringMachineDrawer.getInstance().manualMode)
@@ -485,7 +486,7 @@ class ParametersIcon extends PlayerIcon {
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().openParameters();
         return true;
@@ -532,11 +533,14 @@ class BuildIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isPlaying())
             return false;
 
         if(TuringMachineDrawer.getInstance().buildMode)
-            TuringMachineDrawer.getInstance().unbuild();
+            if(TuringMachineDrawer.getInstance().isBuilding())
+                TuringMachineDrawer.getInstance().cancelBuild();
+            else
+                TuringMachineDrawer.getInstance().unbuild();
         else
             TuringMachineDrawer.getInstance().build();
 
@@ -564,7 +568,7 @@ class StopIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
 
         TuringMachineDrawer.getInstance().goToFirstConfiguration();
@@ -592,7 +596,7 @@ class PlayIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
 
         TuringMachineDrawer.getInstance().menu.setPause();
@@ -629,6 +633,9 @@ class PauseIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().isBuilding())
+            return false;
+
         TuringMachineDrawer.getInstance().menu.setPlay();
         TuringMachineDrawer.getInstance().pause();
         return true;
@@ -665,7 +672,7 @@ class PreviousFrameIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
 
         TuringMachineDrawer.getInstance().goToPreviousConfiguration();
@@ -703,7 +710,7 @@ class NextFrameIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().tick();
         return true;
@@ -747,7 +754,7 @@ class LastFrameIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().goToLastConfiguration();
         return true;
@@ -830,7 +837,7 @@ class HelpIcon extends PlayerIcon{
 
     @Override
     public boolean onMouseClicked(MouseEvent mouseEvent) {
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().help.setVisible(true);
         return true;

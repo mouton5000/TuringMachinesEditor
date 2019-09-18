@@ -23,7 +23,7 @@ class TuringMenuKeyHandler implements EventHandler<KeyEvent> {
             return;
         if(TuringMachineDrawer.getInstance().manualMode)
             return;
-        if(TuringMachineDrawer.getInstance().playing)
+        if(TuringMachineDrawer.getInstance().isOccupied())
             return;
         if(!keyEvent.isControlDown())
             return;

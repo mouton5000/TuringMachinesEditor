@@ -8,6 +8,9 @@ import util.Pair;
 import util.Subscriber;
 
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 /**
  * This class represents a Turing machine.
@@ -374,6 +377,12 @@ public class TuringMachine {
      */
     private Pair<List<HardConfiguration>, List<Transition>> builtPath;
 
+    private Semaphore stopExplorationSemaphore;
+
+    private boolean stopExploration;
+
+    private Executor buildExecutor;
+
     /**
      * List of indexes used to explore manually the list of configurations that was previously built.
      */
@@ -406,6 +415,8 @@ public class TuringMachine {
         symbols = new ArrayList<>();
 
         builtPath = null;
+        stopExploration = false;
+        stopExplorationSemaphore = new Semaphore(1);
     }
 
     /**
@@ -1088,7 +1099,18 @@ public class TuringMachine {
         // Count the number of iterations of the exploration, should not be greater than a maximum in order to avoid
         // infinite exploration.
         int iteration = 0;
+        boolean stop = false;
         while(!toExplore.isEmpty() && iteration < maximumNonDeterministicSearch){
+            try {
+                stopExplorationSemaphore.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            stop = stopExploration;
+            stopExplorationSemaphore.release();
+            if(stop)
+                break;
+
             iteration++;
             configuration = toExplore.pollFirst();
 
@@ -1113,6 +1135,10 @@ public class TuringMachine {
         // If the maximum number of iterations is reached, an error message is broadcase.
         if(iteration == maximumNonDeterministicSearch){
             Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Reached maximum number of iterations.");
+        }
+
+        if(stop){
+            Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ERROR, this, "Computation was stopped.");
         }
 
         // If it is not accepting, return the first final non accepting configuration or null if such a configuration
@@ -1177,6 +1203,8 @@ public class TuringMachine {
                 initialConfigurations.add(saveConfiguration());
             }
         }
+
+
         builtPath = this.exploreNonDeterministic(initialConfigurations);
         builtIndex = new Pair<>(0, 0);
 
@@ -1185,6 +1213,29 @@ public class TuringMachine {
 
         Subscriber.broadcast(SUBSCRIBER_MSG_NON_DETERMINISTIC_EXPLORE_END, this);
 
+    }
+
+    public void buildAsync(Runnable callback){
+        if(buildExecutor != null)
+            return;
+
+        buildExecutor = Executors.newSingleThreadExecutor();
+        buildExecutor.execute(() -> {
+            this.build();
+            callback.run();
+            stopExploration = false;
+            buildExecutor = null;
+        });
+    }
+
+    public void cancelBuild(){
+        try {
+            stopExplorationSemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        stopExploration = true;
+        stopExplorationSemaphore.release();
     }
 
     /**
