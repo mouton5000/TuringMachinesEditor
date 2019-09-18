@@ -42,6 +42,7 @@ class TuringMenu extends Group {
     private PauseIcon pauseIcon;
     private NextFrameIcon nextFrameIcon;
     private LastFrameIcon lastFrameIcon;
+    private LastDeterministicFrameIcon lastDeterministicFrameIcon;
 
     private ParametersIcon parametersIcon;
     private BuildIcon buildIcon;
@@ -69,6 +70,7 @@ class TuringMenu extends Group {
         pauseIcon = new PauseIcon();
         nextFrameIcon = new NextFrameIcon();
         lastFrameIcon = new LastFrameIcon();
+        lastDeterministicFrameIcon = new LastDeterministicFrameIcon();
 
         buildIcon = new BuildIcon();
         manualIcon = new ManualIcon();
@@ -80,7 +82,8 @@ class TuringMenu extends Group {
 
 
         nonPlayerMenu = Arrays.asList(editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, parametersIcon);
-        playerMenu = Arrays.asList(stopIcon, previousFrameIcon, pauseIcon, playIcon, nextFrameIcon, lastFrameIcon);
+        playerMenu = Arrays.asList(stopIcon, previousFrameIcon, pauseIcon, playIcon, nextFrameIcon, lastFrameIcon,
+                lastDeterministicFrameIcon);
         allMenu = Arrays.asList(manualIcon, buildIcon, helpIcon);
 
         int menuSize = getMenuSize();
@@ -119,6 +122,7 @@ class TuringMenu extends Group {
         pauseIcon.setNonClickable();
         nextFrameIcon.setNonClickable();
         lastFrameIcon.setNonClickable();
+        lastDeterministicFrameIcon.setNonClickable();
 
         buildIcon.setClickable();
 
@@ -134,7 +138,7 @@ class TuringMenu extends Group {
         this.getChildren().addAll(rectangle,
                 editGraphIcon, newFileIcon, openFileIcon, saveFileIcon, saveAsFileIcon, manualIcon, parametersIcon,
                 stopIcon, previousFrameIcon, playIcon, pauseIcon, nextFrameIcon, lastFrameIcon,
-                buildIcon, helpIcon, showIcon, hideIcon);
+                lastDeterministicFrameIcon, buildIcon, helpIcon, showIcon, hideIcon);
 
 
     }
@@ -191,12 +195,14 @@ class TuringMenu extends Group {
     void setManual() {
         manualIcon.setSelected();
         buildIcon.setNonClickable();
+        lastDeterministicFrameIcon.setClickable();
         showPlayer();
     }
 
     void setNotManual() {
         manualIcon.setUnselected();
         buildIcon.setClickable();
+        lastDeterministicFrameIcon.setNonClickable();
         hidePlayer();
     }
 
@@ -757,6 +763,53 @@ class LastFrameIcon extends PlayerIcon{
         if(TuringMachineDrawer.getInstance().isOccupied())
             return false;
         TuringMachineDrawer.getInstance().goToLastConfiguration();
+        return true;
+    }
+}
+
+class LastDeterministicFrameIcon extends PlayerIcon{
+    LastDeterministicFrameIcon() {
+
+        double playEdgeLength = TuringMachineDrawer.MENU_ICON_RADIUS * 7.0 / 8;
+        double height = Math.sqrt(3) * playEdgeLength / 2;
+
+        double leftX = - height * 11.0 / 12;
+
+        Polygon triangle1 = new Polygon(
+                leftX , playEdgeLength / 2 - 2,
+                leftX + height ,  - 2,
+                leftX , -playEdgeLength / 2 - 2
+        );
+
+        Polygon triangle2 = new Polygon(
+                leftX + height * 5.0 / 6 , playEdgeLength / 2 - 2,
+                leftX + height * 11.0 / 6 , - 2,
+                leftX + height * 5.0 / 6 , -playEdgeLength / 2  - 2
+        );
+
+        Rectangle rectangle = new Rectangle(
+                leftX + height * 10.0 / 6, - playEdgeLength / 2 - 2,
+                height / 6, playEdgeLength);
+        rectangle.setArcHeight(3);
+        rectangle.setArcWidth(3);
+
+        Label deterministicLabel = new Label("D");
+        deterministicLabel.setLayoutX(-5);
+        deterministicLabel.setLayoutY(5);
+
+        rectangle.setFill(Color.WHITE);
+        triangle1.setFill(Color.WHITE);
+        triangle2.setFill(Color.WHITE);
+        deterministicLabel.setTextFill(Color.WHITE);
+
+        this.getChildren().addAll(triangle1, triangle2, rectangle, deterministicLabel);
+    }
+
+    @Override
+    public boolean onMouseClicked(MouseEvent mouseEvent) {
+        if(TuringMachineDrawer.getInstance().isOccupied())
+            return false;
+        TuringMachineDrawer.getInstance().goToLastDeterministicConfiguration();
         return true;
     }
 }

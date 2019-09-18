@@ -20,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.json.JSONException;
 import org.json.JSONObject;
 import turingmachines.*;
 import util.BidirMap;
@@ -29,7 +30,6 @@ import util.Subscriber;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 /**
  * Main class of the GUI.
@@ -2189,6 +2189,15 @@ public class TuringMachineDrawer extends Application {
         this.menu.setLastFrame();
     }
 
+    void goToLastDeterministicConfiguration(){
+        if(this.isOccupied())
+            return;
+        this.building = true;
+        this.machine.manualExploreDeterministic();
+        this.building = false;
+        goToLastConfiguration();
+    }
+
     /**
      * Animate the GUI to display the next configuration of the current (manual or automatic) execution of the
      * machine. The fired transition is animated too. If the current configuration has no successor, the GUI is
@@ -2492,13 +2501,15 @@ public class TuringMachineDrawer extends Application {
         Dialog<Settings> dialog = Settings.getDialog(
                 TuringMachineDrawer.ANIMATION_DURATION,
                 machine.getMaximumNonDeterministicSearch(),
+                machine.getMaximumManualDeterministicExploration(),
                 tapesPane.getTapesString());
         Optional<Settings> result = dialog.showAndWait();
 
         if(result.isPresent()){
             Settings settings = result.get();
             ANIMATION_DURATION = settings.duration;
-            machine.setMaximumNonDeterministicSearch(settings.nbIterations);
+            machine.setMaximumNonDeterministicSearch(settings.maximumNbIterationsAuto);
+            machine.setMaximumManualDeterministicExploration(settings.maximumNbIterationsManual);
 
             if(settings.changeTapesCells)
                 tapesPane.eraseTapes(settings.tapesCellsDescription);
@@ -2516,6 +2527,7 @@ public class TuringMachineDrawer extends Application {
         JSONObject jsonOptions = new JSONObject();
         jsonOptions.put("animationDuration", ANIMATION_DURATION);
         jsonOptions.put("maximumNonDeterministicSearch", machine.getMaximumNonDeterministicSearch());
+        jsonOptions.put("maximumManualDeterministicExploration", machine.getMaximumManualDeterministicExploration());
 
         JSONObject jsonGraph = graphPane.getJSON();
         JSONObject jsonTape = tapesPane.getJSON();
@@ -2537,6 +2549,11 @@ public class TuringMachineDrawer extends Application {
         JSONObject jsonOptions = jsonObject.getJSONObject("options");
         ANIMATION_DURATION = jsonOptions.getLong("animationDuration");
         machine.setMaximumNonDeterministicSearch(jsonOptions.getInt("maximumNonDeterministicSearch"));
+
+        try {
+            machine.setMaximumManualDeterministicExploration(jsonOptions.getInt("maximumManualNonDeterministicExploration"));
+        }
+        catch (JSONException ignored){ }
 
         JSONObject jsonTapes = jsonObject.getJSONObject("tapes");
         tapesPane.loadJSON(jsonTapes);

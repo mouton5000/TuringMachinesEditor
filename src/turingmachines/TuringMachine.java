@@ -305,7 +305,14 @@ public class TuringMachine {
     private static final int INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH = 100000;
 
     /**
-     * The maximum number of iterations before the machine stops its execution.
+     * The initial value of the variable {@link #maximumManualDeterministicExploration}
+     * @see #maximumManualDeterministicExploration
+     */
+    private static final int INITIAL_MANUAL_DETERMINISTIC_EXPLORATION = 1000;
+
+    /**
+     * The maximum number of iterations before the machine stops its execution when using the function 
+     * {@link #exploreNonDeterministic(Set)}.
      *
      * Each detemrinistic/non deterministic machine search for an accepting path. If the search uses more iterations
      * than this value, it stops. In that case, if no accepting path is found, a non accepting path is returned. If
@@ -317,6 +324,19 @@ public class TuringMachine {
      * @see #INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH
      */
     private int maximumNonDeterministicSearch;
+
+    /**
+     * The maximum number of iterations before the machine stops its execution when using the function
+     * {@link #manualExploreDeterministic()}.
+     *
+     * Each detemrinistic machine search for a path reaching a terminal state. If the search uses more iterations
+     * than this value, it stops. If no such path was found, an error is returned. For a deterministic machine, this 
+     * number of iterations equals the number of iterations of the computation of the machine. 
+     *
+     * Its initial value is given by {@link #INITIAL_MANUAL_DETERMINISTIC_EXPLORATION}.
+     * @see #INITIAL_MANUAL_DETERMINISTIC_EXPLORATION
+     */
+    private int maximumManualDeterministicExploration;
 
     /**
      * Number of states of the graph of the machine.
@@ -401,6 +421,7 @@ public class TuringMachine {
     public TuringMachine(){
         nbStates = 0;
         maximumNonDeterministicSearch = INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH;
+        maximumManualDeterministicExploration = INITIAL_MANUAL_DETERMINISTIC_EXPLORATION;
 
         outputTransitions = new ArrayList<>();
         statesNames = new ArrayList<>();
@@ -420,20 +441,41 @@ public class TuringMachine {
     }
 
     /**
-     * @return the maximum number of iterations the machine searches for an accepting path when it is executed.
-     * @see #maximumNonDeterministicSearch
+     * @return the maximum number of iterations the machine searches for an accepting path when it is executed with 
+     * the function {@link #build()}.
+     * @see #build()
      */
     public int getMaximumNonDeterministicSearch() {
         return maximumNonDeterministicSearch;
     }
 
     /**
+     * @return the maximum number of iterations the machine searches to reach a terminal state when it is executed with
+     * the function {@link #manualExploreDeterministic()}.
+     * @see #manualExploreDeterministic()
+     */
+    public int getMaximumManualDeterministicExploration() {
+        return maximumManualDeterministicExploration;
+    }
+
+    /**
      * @param maximumNonDeterministicSearch the maximum number of iterations the machine searches for an accepting
-     *                                       path when it is executed.
+     * path when it is executed with the function {@link #build()}.
      * @see #maximumNonDeterministicSearch
+     * @see #build()
      */
     public void setMaximumNonDeterministicSearch(int maximumNonDeterministicSearch) {
         this.maximumNonDeterministicSearch = maximumNonDeterministicSearch;
+    }
+
+    /**
+     * @param maximumManualDeterministicExploration the maximum number of iterations the machine searches to reach
+     * a terminal state when it is executed with the function {@link #manualExploreDeterministic()}.
+     * @see #maximumNonDeterministicSearch
+     * @see #manualExploreDeterministic()
+     */
+    public void setMaximumManualDeterministicExploration(int maximumManualDeterministicExploration) {
+        this.maximumManualDeterministicExploration = maximumManualDeterministicExploration;
     }
 
     /**
@@ -1167,6 +1209,7 @@ public class TuringMachine {
 
     }
 
+
     /**
      * Explore the machine configurations with {@link #exploreNonDeterministic(Set)} and build, if
      * such a path exists, the list of configuration and transition needed to reach an accepting state. Otherwise, if
@@ -1433,6 +1476,47 @@ public class TuringMachine {
 
     }
 
+    public void manualExploreDeterministic(){
+        if(this.currentState == null)
+            return;
+
+        boolean explored;
+        int iteration = 0;
+
+        while(this.isDeterministic(currentState) && iteration < maximumManualDeterministicExploration){
+            iteration++;
+            explored = false;
+            if(isFinal(currentState))
+                break;
+            for(Transition transition: outputTransitions.get(currentState)){
+
+                if(!transition.isCurrentlyValid())
+                    continue;
+
+                transition.fire(false);
+                setCurrentState(transition.getOutput(), false);
+                HardConfiguration configuration = this.saveConfiguration();
+
+                if(builtIndex.first != builtPath.first.size() - 1) {
+                    builtPath.first = builtPath.first.subList(0, builtIndex.first + 1);
+                    builtPath.second = builtPath.second.subList(0, builtIndex.second);
+                }
+                builtPath.first.add(configuration);
+                builtPath.second.add(transition);
+                builtIndex.first++;
+                builtIndex.second++;
+
+                explored = true;
+                break;
+            }
+            if(!explored)
+                break;
+        }
+
+
+
+    }
+
     /**
      * Cancel the exploration done with the {@link #buildManual()} method.
      */
@@ -1463,8 +1547,9 @@ public class TuringMachine {
 
                 int head = 0;
                 for(Set<String> symbols : readSymbol.getValue()){
-                    if(symbols.isEmpty())
-                        continue;
+                    if(symbols.isEmpty()) {
+                        symbols = new HashSet<>(this.symbols);
+                    }
                     List<List<Object>> readSymbolList = new LinkedList<>();
                     for(String symbol : symbols) {
                         List<Object> l = new LinkedList<>();
@@ -1493,6 +1578,7 @@ public class TuringMachine {
                 }
 
                 currentIndex = allSymbolsOfTransition.size() - 1;
+
                 allSymbolsOfTransitionIndexes.set(currentIndex, allSymbolsOfTransitionIndexes.get(currentIndex) + 1);
                 int size = allSymbolsOfTransition.get(currentIndex).size();
                 while(size == allSymbolsOfTransitionIndexes.get(currentIndex)){

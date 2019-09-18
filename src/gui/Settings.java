@@ -16,19 +16,22 @@ import java.util.List;
 
 class Settings {
     long duration;
-    int nbIterations;
+    int maximumNbIterationsAuto;
+    int maximumNbIterationsManual;
 
     boolean changeTapesCells;
     String tapesCellsDescription;
 
-    Settings(long duration, int nbIterations) {
+    Settings(long duration, int maximumNbIterationsAuto, int maximumNbIterationsManual) {
         this.duration = duration;
-        this.nbIterations = nbIterations;
+        this.maximumNbIterationsAuto = maximumNbIterationsAuto;
+        this.maximumNbIterationsManual = maximumNbIterationsManual;
     }
 
     static Dialog<Settings> getDialog(
             long duration,
-            int nbIterations,
+            int nbIterationsAuto,
+            int nbIterationsManual,
             String tapesCellsDescription) {
         Dialog<Settings> dialog = new Dialog<Settings>();
 
@@ -54,16 +57,29 @@ class Settings {
 
         HBox hbox3 = new HBox();
 
-        Label nbIterationsLabel = new Label("Build max nb iteration : ");
-        nbIterationsLabel.setAlignment(Pos.CENTER_LEFT);
-        TextField nbIterationsTextField = new TextField(String.valueOf(nbIterations));
+        Label nbIterationsAutoLabel = new Label("Max iterations (auto) : ");
+        nbIterationsAutoLabel.setAlignment(Pos.CENTER_LEFT);
+        TextField nbIterationsAutoTextField = new TextField(String.valueOf(nbIterationsAuto));
 
-        nbIterationsTextField.textProperty().addListener((observableValue, old, value) -> {
+        nbIterationsAutoTextField.textProperty().addListener((observableValue, old, value) -> {
             if(!value.matches("\\d*"))
                 durationTextField.setText(old);
             }
         );
-        hbox3.getChildren().addAll(nbIterationsLabel, nbIterationsTextField);
+        hbox3.getChildren().addAll(nbIterationsAutoLabel, nbIterationsAutoTextField);
+
+        HBox hbox4 = new HBox();
+
+        Label nbIterationsManualLabel = new Label("Max iterations (manual) : ");
+        nbIterationsManualLabel.setAlignment(Pos.CENTER_LEFT);
+        TextField nbIterationsManualTextField = new TextField(String.valueOf(nbIterationsManual));
+
+        nbIterationsManualTextField.textProperty().addListener((observableValue, old, value) -> {
+                    if(!value.matches("\\d*"))
+                        durationTextField.setText(old);
+                }
+        );
+        hbox4.getChildren().addAll(nbIterationsManualLabel, nbIterationsManualTextField);
 
 
         VBox vbox2 = new VBox();
@@ -87,7 +103,7 @@ class Settings {
         errorLabel.setMinHeight(TuringMachineDrawer.SETTINGS_ERROR_LABEL_HEIGHT);
 
         vbox2.getChildren().addAll(hbox2, tapeEditTextArea, errorLabel);
-        vbox.getChildren().addAll(hbox, hbox3, vbox2);
+        vbox.getChildren().addAll(hbox, hbox3, hbox4, vbox2);
 
         dialogPane.setContent(vbox);
 
@@ -188,13 +204,19 @@ class Settings {
                 if(!durationTextField.getText().equals(""))
                     nduration = Integer.valueOf(durationTextField.getText());
 
-                int nnbIterations = 1;
+                int nnbIterationsAuto = 1;
                 if(!durationTextField.getText().equals(""))
-                    nnbIterations = Integer.valueOf(nbIterationsTextField.getText());
-                if(nnbIterations == 0)
-                    nnbIterations++;
+                    nnbIterationsAuto = Integer.valueOf(nbIterationsAutoTextField.getText());
+                if(nnbIterationsAuto == 0)
+                    nnbIterationsAuto++;
 
-                Settings settings = new Settings(nduration, nnbIterations);
+                int nnbIterationsManual = 1;
+                if(!durationTextField.getText().equals(""))
+                    nnbIterationsManual = Integer.valueOf(nbIterationsManualTextField.getText());
+                if(nnbIterationsManual == 0)
+                    nnbIterationsManual++;
+
+                Settings settings = new Settings(nduration, nnbIterationsAuto, nnbIterationsManual);
                 settings.changeTapesCells = tapeEditCheckBox.isSelected();
                 settings.tapesCellsDescription = tapeEditTextArea.getText();
                 return settings;
