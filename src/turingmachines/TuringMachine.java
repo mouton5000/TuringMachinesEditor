@@ -1088,15 +1088,8 @@ public class TuringMachine {
         // Count the number of iterations of the exploration, should not be greater than a maximum in order to avoid
         // infinite exploration.
         int iteration = 0;
-        long time = System.currentTimeMillis();
         while(!toExplore.isEmpty() && iteration < maximumNonDeterministicSearch){
             iteration++;
-            if(iteration % 10000 == 0){
-                long time2 = System.currentTimeMillis();
-                System.out.println(iteration + " " + ((double)(10000000) / (time2 - time)));
-                time = time2;
-            }
-
             configuration = toExplore.pollFirst();
 
             // Check if the configuration is accepting, in that case we end the exploration
@@ -1115,7 +1108,6 @@ public class TuringMachine {
             toExplore.addAll(this.explore(configuration));
 
         }
-
         System.out.println(iteration);
 
         // If the maximum number of iterations is reached, an error message is broadcase.
