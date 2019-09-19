@@ -433,6 +433,13 @@ public class TuringMachine {
     private HardConfiguration manualInitialConfiguration;
 
     /**
+     * If this flag is true, each time the graph of the machine is modified, function {@link #isDeterministic(int)} is
+     * called to check if a state is terministic or not. By setting this boolean to false, the function is not called
+     * anymore.
+     */
+    private boolean checkDeterministic;
+
+    /**
      * Construction of the machine.
      *
      * A new machine is empty. It has no state, no transition, no tape and no symbol except for the BLANK symbol.
@@ -458,6 +465,8 @@ public class TuringMachine {
         builtPath = null;
         stopExploration = false;
         stopExplorationSemaphore = new Semaphore(1);
+
+        checkDeterministic = true;
     }
 
     /**
@@ -499,6 +508,51 @@ public class TuringMachine {
     }
 
     /**
+     * @return true if, each time the graph of the machine is modified, function {@link #isDeterministic(int)} is
+     * called to check if a state is deterministic or not. Otherwise the returned boolean is false and the function
+     * is never called.
+     */
+    public boolean isCheckDeterministic() {
+        return checkDeterministic;
+    }
+
+    /**
+     *
+     * If checkDeterministic is true, each time the graph of the machine is modified, function {@link #isDeterministic(int)} is
+     * called to check if a state is deterministic or not. Otherwise the function
+     * is never called.
+     * @param checkDeterministic
+     */
+    public void setCheckDeterministic(boolean checkDeterministic) {
+        this.checkDeterministic = checkDeterministic;
+    }
+
+    /**
+     * Check, for every state, if the state is deterministic. Do nothing if {@link #setCheckDeterministic(boolean)} was
+     * called with false as an argument.
+     */
+    public void checkDeterministic(){
+        if(!checkDeterministic)
+            return;
+
+        for(int state = 0; state < nbStates ; state++)
+            checkDeterministic(state);
+    }
+
+    /**
+     * Check, for the given state, if the state is deterministic. Do nothing if {@link #setCheckDeterministic(boolean)} was
+     * called with false as an argument.
+     */
+    void checkDeterministic(int state){
+        if(!checkDeterministic)
+            return;
+
+        Subscriber.broadcast(isDeterministic(state) ?
+                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, state);
+    }
+
+    /**
      * Add a new transition from the state input to the state ouput.
      *
      * A {@link #SUBSCRIBER_MSG_ADD_TRANSITION} message is broadcast to the class {@link util.Subscriber}.
@@ -523,9 +577,9 @@ public class TuringMachine {
         }
 
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION, this, a);
-        Subscriber.broadcast(isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, input);
+
+        checkDeterministic(input);
+
 
         return a;
     }
@@ -549,9 +603,7 @@ public class TuringMachine {
 
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION, this, a);
 
-        Subscriber.broadcast(isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, input);
+        checkDeterministic(input);
     }
 
     /**
@@ -684,9 +736,7 @@ public class TuringMachine {
 
         for(int s = 0; s < getNbStates() ; s++)
             if(isInitial(s))
-                Subscriber.broadcast(isDeterministic(s) ?
-                        TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                        TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, s);
+                checkDeterministic(s);
     }
 
     /**
@@ -703,16 +753,11 @@ public class TuringMachine {
         initialStates.set(state, false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE, this, state);
 
-
-        Subscriber.broadcast(isDeterministic(state) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, state);
+        checkDeterministic(state);
 
         for(int s = 0; s < getNbStates() ; s++)
             if(isInitial(s))
-                Subscriber.broadcast(isDeterministic(s) ?
-                        TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                        TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, s);
+                checkDeterministic(s);
     }
 
     /**

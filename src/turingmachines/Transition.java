@@ -272,9 +272,7 @@ public class Transition {
                 Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_READ_SYMBOL,
                         this.machine, this, tape, head, s);
 
-        Subscriber.broadcast(machine.isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this.machine, input);
+        this.machine.checkDeterministic(input);
     }
 
     /**
@@ -303,9 +301,7 @@ public class Transition {
                 Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_READ_SYMBOL,
                         this.machine, this, tape, head, s);
 
-        Subscriber.broadcast(machine.isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this.machine, input);
+        this.machine.checkDeterministic(input);
     }
 
     /**
@@ -329,9 +325,7 @@ public class Transition {
                     this.machine, this, tape, head, s);
         readSymbols.clear();
 
-        Subscriber.broadcast(machine.isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this.machine, input);
+        this.machine.checkDeterministic(input);
     }
 
     /**
@@ -357,10 +351,7 @@ public class Transition {
 
         }
 
-
-        Subscriber.broadcast(machine.isDeterministic(input) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this.machine, input);
+        this.machine.checkDeterministic(input);
     }
 
     /**

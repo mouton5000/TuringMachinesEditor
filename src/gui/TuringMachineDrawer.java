@@ -2508,7 +2508,10 @@ public class TuringMachineDrawer extends Application {
 
             JSONObject jsonObject = new JSONObject(sb.toString());
 
+            this.machine.setCheckDeterministic(false);
             loadJSON(jsonObject);
+            this.machine.setCheckDeterministic(true);
+            this.machine.checkDeterministic();
 
             br.close();
             lastSaveFilename = filename;
