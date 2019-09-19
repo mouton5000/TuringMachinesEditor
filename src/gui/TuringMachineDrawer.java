@@ -181,9 +181,14 @@ public class TuringMachineDrawer extends Application {
     static final Color SELECTED_STATE_COLOR = Color.GRAY;
 
     /**
-     * Inner color of the unselected states.
+     * Inner color of the unselected deterministic states.
      */
-    static final Color UNSELECTED_STATE_COLOR = Color.WHITE;
+    static final Color UNSELECTED_DETERMINISTIC_STATE_COLOR = Color.WHITE;
+
+    /**
+     * Inner color of the unselected nondeterministic states.
+     */
+    static final Color UNSELECTED_NONDETERMINISTIC_STATE_COLOR = Color.LIGHTPINK;
 
     /**
      * Inner color of the state when the user press the mouse over it.
@@ -767,6 +772,16 @@ public class TuringMachineDrawer extends Application {
                         setInitialStateFromMachine(state, false);
                     }
                     break;
+                    case TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setDeterministicStateFromMachine(state, true);
+                    }
+                    break;
+                    case TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE:{
+                        Integer state = (Integer) parameters[1];
+                        setDeterministicStateFromMachine(state, false);
+                    }
+                    break;
                     case TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED: {
                         Tape tape = (Tape) parameters[1];
                         Integer head = (Integer) parameters[2];
@@ -841,6 +856,8 @@ public class TuringMachineDrawer extends Application {
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE);
+        s.subscribe(TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE);
 
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_HEAD_INITIAL_POSITION_CHANGED);
         s.subscribe(TuringMachine.SUBSCRIBER_MSG_INPUT_CHANGED);
@@ -1755,6 +1772,16 @@ public class TuringMachineDrawer extends Application {
     private void setInitialStateFromMachine(Integer state, boolean isInitial){
         graphPane.setInitialState(state, isInitial);
         setEnableToSave();
+    }
+
+    /**
+     * Message from the machine. The given state was declared as deterministic if isDeterministic is true
+     * and the GUI must be updated.
+     * @param state
+     * @param isDeterministic
+     */
+    private void setDeterministicStateFromMachine(Integer state, boolean isDeterministic){
+        graphPane.setDeterministicState(state, isDeterministic);
     }
 
     /**

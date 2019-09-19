@@ -14,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
@@ -79,6 +80,16 @@ class StateGroup extends Group implements MouseListener {
     private Timeline timeline;
 
     /**
+     * True if and only if the state is deterministic.
+     */
+    private boolean deterministic;
+
+    /**
+     * True if and only if the state is selected.
+     */
+    private boolean selected;
+
+    /**
      * Build a new widget corresponding to a state with the given name.
      * @param state
      */
@@ -89,18 +100,20 @@ class StateGroup extends Group implements MouseListener {
         this.timeline = new Timeline();
         this.timeline.setOnFinished(actionEvent -> animating = false);
 
+        this.deterministic = true;
+
         this.setOnMousePressed(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
         this.setOnMouseDragged(TuringMachineDrawer.getInstance().mouseHandler);
 
         outerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         outerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        outerCircle.setFill(getUnselectedFillColor());
 
         innerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS *
                 TuringMachineDrawer.FINAL_STATE_RADIUS_RATIO);
         innerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        innerCircle.setFill(getUnselectedFillColor());
         innerCircle.setVisible(false);
         
         acceptIcon = new ImageView(Ressources.getRessource("Accept-icon.png"));
@@ -144,12 +157,32 @@ class StateGroup extends Group implements MouseListener {
     }
 
     /**
+     * Reset the color of the node, depending if it is selected or not.
+     */
+    private void resetFillColor(){
+        if(selected)
+            setSelectedFillColor();
+        else
+            setUnSelectedFillColor();
+    }
+
+    /**
      * Draw the state as selected (used when the user click on the state)
      * @see #setUnselected()
      */
     void setSelected(){
-        outerCircle.setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
-        innerCircle.setFill(TuringMachineDrawer.SELECTED_STATE_COLOR);
+        selected = true;
+        resetFillColor();
+    }
+
+    private void setSelectedFillColor(){
+        Color color = this.getSelectedFillColor();
+        outerCircle.setFill(color);
+        innerCircle.setFill(color);
+    }
+
+    private Color getSelectedFillColor(){
+        return TuringMachineDrawer.SELECTED_STATE_COLOR;
     }
 
     /**
@@ -157,8 +190,19 @@ class StateGroup extends Group implements MouseListener {
      * @see #setSelected()
      */
     void setUnselected(){
-        outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
-        innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        selected = false;
+        resetFillColor();
+    }
+
+    private void setUnSelectedFillColor(){
+        Color color = getUnselectedFillColor();
+        outerCircle.setFill(color);
+        innerCircle.setFill(color);
+    }
+
+    private Color getUnselectedFillColor(){
+        return deterministic ? TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR :
+                TuringMachineDrawer.UNSELECTED_NONDETERMINISTIC_STATE_COLOR;
     }
 
     /**
@@ -175,6 +219,11 @@ class StateGroup extends Group implements MouseListener {
      */
     void setAccepting(boolean isAccepting){
         acceptIcon.setVisible(isAccepting);
+    }
+
+    public void setDeterministic(boolean deterministic) {
+        this.deterministic = deterministic;
+        resetFillColor();
     }
 
     /**
@@ -211,8 +260,7 @@ class StateGroup extends Group implements MouseListener {
                         kOuterFill, kInnerfill)
         );
 
-        this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
-        this.innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        this.setUnselected();
         timeline.play();
     }
 
@@ -222,8 +270,7 @@ class StateGroup extends Group implements MouseListener {
      */
     void stopTimeline(){
         timeline.stop();
-        this.outerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
-        this.innerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        this.setUnselected();
         this.animating = false;
     }
 
@@ -243,7 +290,7 @@ class StateGroup extends Group implements MouseListener {
      */
     KeyValue getNotCurrentStateKeyValue() {
         return new KeyValue(this.outerCircle.fillProperty(),
-                TuringMachineDrawer.UNSELECTED_STATE_COLOR,
+                this.getUnselectedFillColor(),
                 Interpolator.EASE_BOTH);
     }
 

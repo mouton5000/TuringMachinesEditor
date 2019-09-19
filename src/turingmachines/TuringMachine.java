@@ -153,6 +153,20 @@ public class TuringMachine {
     public static final String SUBSCRIBER_MSG_UNSET_ACCEPTING_STATE = "TMUnsetAcceptingState";
 
     /**
+     * Message sent when a state becomes nondeterministic, when an output transition is added or edited.
+     * The parameters are the machine and the state.
+     * @see util.Subscriber
+     */
+    public static final String SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE = "TMSetNonDeterministicState";
+
+    /**
+     * Message sent when a state becomes deterministic, when an output transition is added or edited.
+     * The parameters are the machine and the state.
+     * @see util.Subscriber
+     */
+    public static final String SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE = "TMSetDeterministicState";
+
+    /**
      * Message sent when a transition is added. The parameters are the machine and the transition.
      * @see util.Subscriber
      */
@@ -344,6 +358,11 @@ public class TuringMachine {
     private int nbStates;
 
     /**
+     * Number of initial states of the graph of the machine.
+     */
+    private int nbInitialStates;
+
+    /**
      * For each state i, this list contains, at index i, the list of output transitions of the state.
      */
     private List<List<Transition>> outputTransitions;
@@ -420,6 +439,7 @@ public class TuringMachine {
      */
     public TuringMachine(){
         nbStates = 0;
+        nbInitialStates = 0;
         maximumNonDeterministicSearch = INITIAL_MAXIMUM_NON_DETERMINISTIC_SEARCH;
         maximumManualDeterministicExploration = INITIAL_MANUAL_DETERMINISTIC_EXPLORATION;
 
@@ -503,6 +523,10 @@ public class TuringMachine {
         }
 
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_ADD_TRANSITION, this, a);
+        Subscriber.broadcast(isDeterministic(input) ?
+                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, input);
+
         return a;
     }
 
@@ -524,6 +548,10 @@ public class TuringMachine {
             return;
 
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_REMOVE_TRANSITION, this, a);
+
+        Subscriber.broadcast(isDeterministic(input) ?
+                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, input);
     }
 
     /**
@@ -531,6 +559,13 @@ public class TuringMachine {
      */
     public int getNbStates() {
         return nbStates;
+    }
+
+    /**
+     * @return the number of initial states of the graph.
+     */
+    public int getNbInitialStates() {
+        return nbInitialStates;
     }
 
     /**
@@ -622,6 +657,8 @@ public class TuringMachine {
         outputTransitions.remove(state);
         nbStates--;
 
+        if(isInitial(state))
+            nbInitialStates--;
         initialStates.remove(state);
         statesNames.remove(state);
         finalStates.remove(state);
@@ -638,8 +675,18 @@ public class TuringMachine {
      * @see util.Subscriber
      */
     public void setInitialState(int state) {
+        if(isInitial(state))
+            return;
+        nbInitialStates++;
         initialStates.set(state, true);
+
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_SET_INITIAL_STATE, this, state);
+
+        for(int s = 0; s < getNbStates() ; s++)
+            if(isInitial(s))
+                Subscriber.broadcast(isDeterministic(s) ?
+                        TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                        TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, s);
     }
 
     /**
@@ -650,8 +697,22 @@ public class TuringMachine {
      * @see util.Subscriber
      */
     public void unsetInitialState(int state) {
+        if(!isInitial(state))
+            return;
+        nbInitialStates--;
         initialStates.set(state, false);
         Subscriber.broadcast(TuringMachine.SUBSCRIBER_MSG_UNSET_INITIAL_STATE, this, state);
+
+
+        Subscriber.broadcast(isDeterministic(state) ?
+                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, state);
+
+        for(int s = 0; s < getNbStates() ; s++)
+            if(isInitial(s))
+                Subscriber.broadcast(isDeterministic(s) ?
+                        TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+                        TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, s);
     }
 
     /**
@@ -1531,9 +1592,14 @@ public class TuringMachine {
 
     /**
      * @param state
-     * @return true if the set of output transition of the given state is deterministic.
+     * @return true if the set of output transition of the given state is deterministic and if the state is not initial
+     * or if it is the only initial state.
      */
-    private boolean isDeterministic(int state){
+    boolean isDeterministic(int state){
+
+        if(isInitial(state) && this.getNbInitialStates() >= 2)
+            return false;
+
         HashSet<List<List<Object>>> allSymbols = new HashSet<>();
         List<Transition> transitions = outputTransitions.get(state);
 
@@ -1549,6 +1615,7 @@ public class TuringMachine {
                 for(Set<String> symbols : readSymbol.getValue()){
                     if(symbols.isEmpty()) {
                         symbols = new HashSet<>(this.symbols);
+                        symbols.add(null);
                     }
                     List<List<Object>> readSymbolList = new LinkedList<>();
                     for(String symbol : symbols) {

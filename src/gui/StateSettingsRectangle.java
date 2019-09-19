@@ -149,12 +149,12 @@ class FinalStateOption extends Group implements MouseListener {
 
         Circle finalStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         finalStateOptionOuterCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        finalStateOptionOuterCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        finalStateOptionOuterCircle.setFill(TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR);
 
         Circle finalStateOptionInnerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS *
                 TuringMachineDrawer.FINAL_STATE_RADIUS_RATIO);
         finalStateOptionInnerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        finalStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        finalStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR);
 
         this.setOnMouseClicked(TuringMachineDrawer.getInstance().mouseHandler);
 
@@ -191,12 +191,12 @@ class AcceptingStateOption extends Group implements MouseListener {
         this.settingsRectangle = settingsRectangle;
         Circle acceptingStateOptionOuterCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         acceptingStateOptionOuterCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        acceptingStateOptionOuterCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        acceptingStateOptionOuterCircle.setFill(TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR);
 
         Circle acceptingStateOptionInnerCircle = new Circle(TuringMachineDrawer.STATE_RADIUS *
                 TuringMachineDrawer.FINAL_STATE_RADIUS_RATIO);
         acceptingStateOptionInnerCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        acceptingStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        acceptingStateOptionInnerCircle.setFill(TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR);
 
         ImageView acceptingStateOptionIcon = new ImageView(Ressources.getRessource("Accept-icon.png"));
 
@@ -245,7 +245,7 @@ class InitialStateOption extends Group implements MouseListener {
 
         Circle initialStateOptionCircle = new Circle(TuringMachineDrawer.STATE_RADIUS);
         initialStateOptionCircle.setStroke(TuringMachineDrawer.STATE_OUTER_COLOR);
-        initialStateOptionCircle.setFill(TuringMachineDrawer.UNSELECTED_STATE_COLOR);
+        initialStateOptionCircle.setFill(TuringMachineDrawer.UNSELECTED_DETERMINISTIC_STATE_COLOR);
 
         Line initialStateOptionLine1 = new Line();
         Line initialStateOptionLine2 = new Line();

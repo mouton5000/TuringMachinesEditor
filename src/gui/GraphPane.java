@@ -404,6 +404,18 @@ class GraphPane extends Pane implements MouseListener {
     }
 
     /**
+     * Draw the widget associated with the given state as a deterministic state if isDeterministic is true and as a
+     * non deterministic state otherwise.
+     *
+     * @param state
+     * @param isDeterministic
+     */
+    void setDeterministicState(int state, boolean isDeterministic){
+        StateGroup stateGroup = stateGroups.get(state);
+        stateGroup.setDeterministic(isDeterministic);
+    }
+
+    /**
      * Request the machine to add a read symbol to the transition associated with the given widget. The read symbol
      * consists in the triplet containing the given tape, the given head (identified with the index of the head in
      * the list of heads of the tape) and the given symbol.
