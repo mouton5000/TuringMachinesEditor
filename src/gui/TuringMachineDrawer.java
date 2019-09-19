@@ -2108,7 +2108,7 @@ public class TuringMachineDrawer extends Application {
 
         this.machine.buildAsync(() -> {
             this.building = false;
-            this.goToFirstConfiguration();
+            Platform.runLater(this::goToFirstConfiguration);
         });
 
     }
