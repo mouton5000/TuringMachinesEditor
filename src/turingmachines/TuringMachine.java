@@ -1544,7 +1544,13 @@ public class TuringMachine {
         boolean explored;
         int iteration = 0;
 
-        while(this.isDeterministic(currentState) && iteration < maximumManualDeterministicExploration){
+        HashSet<Integer> deterministics = new HashSet<>();
+        for(int state = 0; state < this.getNbStates(); state++){
+            if(isDeterministic(state))
+                deterministics.add(state);
+        }
+
+        while(deterministics.contains(currentState) && iteration < maximumManualDeterministicExploration){
             iteration++;
             explored = false;
             if(isFinal(currentState))
