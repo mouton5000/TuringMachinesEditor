@@ -355,8 +355,15 @@ class TapeBorderPane extends BorderPane implements MouseListener {
             verticalCoordinates.setMinHeight(height);
             verticalCoordinates.setMaxHeight(height);
 
+            double farwidth =
+                    Math.max(Math.abs(-2 * offsetX - width),
+                            Math.abs(-2 * offsetX + width));
+            double farheight =
+                    Math.max(Math.abs(-2 * offsetY - height),
+                            Math.abs(-2 * offsetY + height));
 
-            this.checkLinesAndColumns(width, height, false);
+
+            this.checkLinesAndColumns(farwidth, farheight, false);
         });
 
         this.setTop(horizontalCoordinates);
@@ -936,7 +943,6 @@ class TapePane extends Pane implements MouseListener{
 
         double bottomHeight = (tapeBorderPane.bottom == null) ? height : TuringMachineDrawer.TAPE_CELL_WIDTH * (-tapeBorderPane.bottom + 0.5);
         double topHeight = (tapeBorderPane.top == null) ? -height : TuringMachineDrawer.TAPE_CELL_WIDTH * (- tapeBorderPane.top - 0.5);
-
 
         if (forceChange || tapeBorderPane.maxHeight != height) {
             for (Line column : columns) {
