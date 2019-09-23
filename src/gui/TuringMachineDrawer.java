@@ -2250,7 +2250,7 @@ public class TuringMachineDrawer extends Application {
      * the current (manual or automatic) execution of the machine.
      */
     void play(){
-        if(this.isOccupied())
+        if(this.isBuilding())
             return;
 
         this.menu.setPlay();
