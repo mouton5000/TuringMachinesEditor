@@ -237,6 +237,13 @@ public class Transition {
     }
 
     /**
+     * @return an iterator to the list of read symbols for the heads of the given tape.
+     */
+    List<Set<String>> getReadSymbols(Tape tape){
+        return readSymbols.get(tape);
+    }
+
+    /**
      * @param tape
      * @param head index of the head in the list of heads of the given tape.
      * @return an iterator to all the strings of the read symbol associated with the given tape and the given head.

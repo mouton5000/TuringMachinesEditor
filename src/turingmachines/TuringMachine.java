@@ -1648,69 +1648,81 @@ public class TuringMachine {
      */
     boolean isDeterministic(int state){
 
+        // If there are multiple initial states, all those states are non-deterministic.
         if(isInitial(state) && this.getNbInitialStates() >= 2)
             return false;
 
-        HashSet<List<List<Object>>> allSymbols = new HashSet<>();
         List<Transition> transitions = outputTransitions.get(state);
 
-        for(Transition transition : transitions){
-            List<List<List<Object>>> allSymbolsOfTransition = new ArrayList<>();
+        // Check for every couple of transitions, if there exists one head for which the two transitions have no common
+        // accepted symbols.
+        // If so, the state is deterministic.
+        for(int i = 0; i < transitions.size(); i++) {
+            Transition t1 = transitions.get(i);
 
-            Iterator<Map.Entry<Tape, List<Set<String>>>> readSymbolIt = transition.getReadSymbols();
-            while(readSymbolIt.hasNext()){
-                Map.Entry<Tape, List<Set<String>>> readSymbol = readSymbolIt.next();
-                Tape tape = readSymbol.getKey();
+            loop2 : for (int j = i + 1; j < transitions.size(); j++) {
 
-                int head = 0;
-                for(Set<String> symbols : readSymbol.getValue()){
-                    if(symbols.isEmpty()) {
-                        symbols = new HashSet<>(this.symbols);
-                        symbols.add(null);
+                Transition t2 = transitions.get(j);
+                Iterator<Map.Entry<Tape, List<Set<String>>>> readSymbolIt2 = t2.getReadSymbols();
+
+                // Check if there exists one head for which the two transitions have no common accepted symbols.
+                // If not, the state is not deterministic.
+                while(readSymbolIt2.hasNext()){
+                    Map.Entry<Tape, List<Set<String>>> readSymbol2 = readSymbolIt2.next();
+                    Tape tape = readSymbol2.getKey();
+
+                    List<Set<String>> symbolsByHead1 = t1.getReadSymbols(tape);
+
+                    // Check if at least one symbol is specified for at least one head of the tape.
+                    // If not, it means all the heads of the tape accepts all the symbols.
+                    if(symbolsByHead1 == null)
+                        continue;
+
+                    List<Set<String>> symbolsByHead2 = readSymbol2.getValue();
+
+                    // Check if there exists one head of the tape for which the two transitions have no common accepted
+                    // symbols.
+                    for(int head = 0; head < symbolsByHead2.size(); head++){
+                        Set<String> symbols1 = symbolsByHead1.get(head);
+
+                        System.out.println("----------------------------------------");
+                        System.out.println(state + " " + t1 + " " + t2 + " " + head );
+
+                        System.out.println(1);
+                        // Check if the first transition accepts all the symbols for that head
+                        if(symbols1.isEmpty())
+                            continue;
+
+
+                        System.out.println(2);
+
+                        Set<String> symbols2 = symbolsByHead2.get(head);
+
+                        // Check if the second transition accepts all the symbols for that head
+                        if(symbols2.isEmpty())
+                            continue;
+
+                        System.out.println(3);
+
+                        // Check if at least one symbol accepted by the first transition is also accepted by the
+                        // second transition for that head
+                        if(symbols1.stream().anyMatch(symbols2::contains))
+                            continue;
+
+                        System.out.println(4);
+
+                        // There exists a head for which the sets of symbols in the two transitions have not any common
+                        // accepted symbol.
+                        // We can check the next couple of transitions.
+                        continue loop2;
                     }
-                    List<List<Object>> readSymbolList = new LinkedList<>();
-                    for(String symbol : symbols) {
-                        List<Object> l = new LinkedList<>();
-                        l.add(tape);
-                        l.add(head);
-                        l.add(symbol);
-                        readSymbolList.add(l);
-                    }
-                    allSymbolsOfTransition.add(readSymbolList);
-                    head++;
                 }
+                return false;
             }
-
-            List<Integer> allSymbolsOfTransitionIndexes = new ArrayList<>();
-            for(int i = 0; i < allSymbolsOfTransition.size(); i++)
-                allSymbolsOfTransitionIndexes.add(0);
-
-            int currentIndex;
-            outer: while(true){
-                List<List<Object>> current = new LinkedList<>();
-                for(int i = 0; i < allSymbolsOfTransition.size(); i++){
-                    current.add(allSymbolsOfTransition.get(i).get(allSymbolsOfTransitionIndexes.get(i)));
-                }
-                if(!allSymbols.add(current)) {
-                    return false;
-                }
-
-                currentIndex = allSymbolsOfTransition.size() - 1;
-
-                allSymbolsOfTransitionIndexes.set(currentIndex, allSymbolsOfTransitionIndexes.get(currentIndex) + 1);
-                int size = allSymbolsOfTransition.get(currentIndex).size();
-                while(size == allSymbolsOfTransitionIndexes.get(currentIndex)){
-                    allSymbolsOfTransitionIndexes.set(currentIndex, 0);
-                    currentIndex--;
-                    if(currentIndex == -1)
-                        break outer;
-                    allSymbolsOfTransitionIndexes.set(currentIndex, allSymbolsOfTransitionIndexes.get(currentIndex) + 1);
-                    size = allSymbolsOfTransition.get(currentIndex).size();
-
-                }
-            }
-
         }
+
+        // For every couple of transition, there exists one state such taht the two transitions have not any common
+        // accepted symbol for that head.
         return true;
     }
 
