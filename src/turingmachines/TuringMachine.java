@@ -547,9 +547,9 @@ public class TuringMachine {
         if(!checkDeterministic)
             return;
 
-        Subscriber.broadcast(isDeterministic(state) ?
-                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
-                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, state);
+//        Subscriber.broadcast(isDeterministic(state) ?
+//                TuringMachine.SUBSCRIBER_MSG_SET_DETERMINISTIC_STATE :
+//                TuringMachine.SUBSCRIBER_MSG_SET_NONDETERMINISTIC_STATE, this, state);
     }
 
     /**
@@ -1648,28 +1648,54 @@ public class TuringMachine {
      */
     boolean isDeterministic(int state){
 
+        // If the state is initial and if there are multiple states, the state is not deterministic
         if(isInitial(state) && this.getNbInitialStates() >= 2)
             return false;
 
         HashSet<List<List<Object>>> allSymbols = new HashSet<>();
         List<Transition> transitions = outputTransitions.get(state);
 
+        // We want to build the list of all possible accepted combinations of symbols that can fire a output transition
+        // of the node. This list is the cross product of each symbol list for each head.
+        //
+        // A possible accepted combination is a list L represented by a List<List<Object>> : for each head and each
+        // symbol accepted by the head, we add a tuple (tape of the head / head / symbol) to L.
+        // For each transition, we then build a List<List<List<Object>>> allSymbolsOfTransition containing all those
+        // possible combinations.
+        //
+        // For each list in allSymbolsOfTransition, we add the list to a set Set<List<List<Object>> allSymbols.
+        // If the list is already in the set, it means that there exists two transitions that accepts the same
+        // combination of symbols and that the state is non deterministic.
+
         for(Transition transition : transitions){
+
+            // This list contains, for each head
+            // --- a list containing, for each symbol accepted by the head
+            // --- a tuple Tape of the head / the head / the symbol
             List<List<List<Object>>> allSymbolsOfTransition = new ArrayList<>();
 
             Iterator<Map.Entry<Tape, List<Set<String>>>> readSymbolIt = transition.getReadSymbols();
-            while(readSymbolIt.hasNext()){
+            while(readSymbolIt.hasNext()) {
                 Map.Entry<Tape, List<Set<String>>> readSymbol = readSymbolIt.next();
                 Tape tape = readSymbol.getKey();
+                System.out.println(state + " " + transition + " " + tape + " " + readSymbol.getValue().size() + " " + this.getNbSymbols());
 
                 int head = 0;
-                for(Set<String> symbols : readSymbol.getValue()){
-                    if(symbols.isEmpty()) {
+
+                // Each set of symbols corresponds to a distinct head : those are the symbols that should be read by
+                // the head in order to fire the transition.
+                for (Set<String> symbols : readSymbol.getValue()) {
+
+                    // If the set is empty, it means that the head accepts all the symbols.
+                    if (symbols.isEmpty()) {
                         symbols = new HashSet<>(this.symbols);
-                        symbols.add(null);
+                        symbols.add(null); // null is the blank symbol
                     }
-                    List<List<Object>> readSymbolList = new LinkedList<>();
-                    for(String symbol : symbols) {
+
+                    // For each symbol, we create a tuple containing the tape, the head (index of the head in the tape)
+                    // and the symbol
+                    List<List<Object>> readSymbolList = new ArrayList<>();
+                    for (String symbol : symbols) {
                         List<Object> l = new LinkedList<>();
                         l.add(tape);
                         l.add(head);
@@ -1681,22 +1707,34 @@ public class TuringMachine {
                 }
             }
 
+            // For each head, we have an iterator, represented by an index
+            // Using this we can iterate over all the possible combinations of symbols accepted by the transition.
             List<Integer> allSymbolsOfTransitionIndexes = new ArrayList<>();
             for(int i = 0; i < allSymbolsOfTransition.size(); i++)
                 allSymbolsOfTransitionIndexes.add(0);
 
             int currentIndex;
+
             outer: while(true){
+                // Current is one possible combinations of symbols accepted by the transition
                 List<List<Object>> current = new LinkedList<>();
+
+                // Fill current
                 for(int i = 0; i < allSymbolsOfTransition.size(); i++){
-                    current.add(allSymbolsOfTransition.get(i).get(allSymbolsOfTransitionIndexes.get(i)));
+                    current.add(
+                            allSymbolsOfTransition.get(i).get(allSymbolsOfTransitionIndexes.get(i))
+                    );
                 }
+
+                // Check if current is not already in the set allSymbols, meaning that another transition accepts
+                // the same combinations of symbols.
                 if(!allSymbols.add(current)) {
                     return false;
                 }
 
-                currentIndex = allSymbolsOfTransition.size() - 1;
+                // Increments the indexes so that, at the next iteration, current will be the next possible combination.
 
+                currentIndex = allSymbolsOfTransition.size() - 1;
                 allSymbolsOfTransitionIndexes.set(currentIndex, allSymbolsOfTransitionIndexes.get(currentIndex) + 1);
                 int size = allSymbolsOfTransition.get(currentIndex).size();
                 while(size == allSymbolsOfTransitionIndexes.get(currentIndex)){
@@ -1709,6 +1747,7 @@ public class TuringMachine {
 
                 }
             }
+
 
         }
         return true;
