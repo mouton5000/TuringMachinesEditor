@@ -1590,10 +1590,12 @@ public class TuringMachine {
         int iteration = 0;
 
         HashSet<Integer> deterministics = new HashSet<>();
-        for(int state = 0; state < this.getNbStates(); state++){
-            if(isDeterministic(state))
+        for(int state = 0; state < this.getNbStates(); state++) {
+            if (isDeterministic(state))
                 deterministics.add(state);
         }
+
+        HardConfiguration currentConfiguration = this.saveConfiguration();
 
         while(deterministics.contains(currentState) && iteration < maximumManualDeterministicExploration){
             iteration++;
@@ -1624,6 +1626,8 @@ public class TuringMachine {
             if(!explored)
                 break;
         }
+
+        this.loadConfiguration(currentConfiguration, false);
 
 
 
@@ -1684,17 +1688,9 @@ public class TuringMachine {
                     // symbols.
                     for(int head = 0; head < symbolsByHead2.size(); head++){
                         Set<String> symbols1 = symbolsByHead1.get(head);
-
-                        System.out.println("----------------------------------------");
-                        System.out.println(state + " " + t1 + " " + t2 + " " + head );
-
-                        System.out.println(1);
                         // Check if the first transition accepts all the symbols for that head
                         if(symbols1.isEmpty())
                             continue;
-
-
-                        System.out.println(2);
 
                         Set<String> symbols2 = symbolsByHead2.get(head);
 
@@ -1702,14 +1698,10 @@ public class TuringMachine {
                         if(symbols2.isEmpty())
                             continue;
 
-                        System.out.println(3);
-
                         // Check if at least one symbol accepted by the first transition is also accepted by the
                         // second transition for that head
                         if(symbols1.stream().anyMatch(symbols2::contains))
                             continue;
-
-                        System.out.println(4);
 
                         // There exists a head for which the sets of symbols in the two transitions have not any common
                         // accepted symbol.
